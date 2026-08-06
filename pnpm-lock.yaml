@@ -253,6 +253,9 @@ importers:
       '@types/node':
         specifier: ^26.1.2
         version: 26.1.2
+      '@types/pg':
+        specifier: ^8.20.4
+        version: 8.20.4
       husky:
         specifier: ^9.1.7
         version: 9.1.7

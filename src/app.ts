@@ -21,6 +21,7 @@ app.use(httpLogger);
 app.get(ROUTES.HEALTH , (req,res) => {
 
     return res.status(STATUS.SUCCESS.OK).json({ status: "healthy" });
+    
 });
 
 export default app;
