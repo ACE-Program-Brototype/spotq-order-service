@@ -11,6 +11,6 @@ const STATUS={
         FORBIDDEN:403
     }
 
-}
+} as const
 
 export default STATUS;
