@@ -3,3 +3,4 @@ dist
 .env
 .infisical
 coverage
+/src/generated/prisma
