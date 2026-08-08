@@ -5,23 +5,20 @@ import logger from "./infrastructure/logger/pino.js";
 import redisConnection from "./infrastructure/redis/redis.js";
 
 async function startServer() {
-    try {
+	try {
+		await prisma.$connect();
+		logger.info("Connected to PostgreSQL Aiven");
 
-        await prisma.$connect();
-        logger.info("Connected to PostgreSQL Aiven");
+		await redisConnection.ping();
+		logger.info("Connected to Redis Cloud");
 
-        await redisConnection.ping();
-        logger.info("Connected to Redis Cloud");
-
-        app.listen(env.PORT, () => {
-            logger.info(`Server running on port ${env.PORT}`);
-        });
-
-    } catch (error) {
-
-        logger.fatal(error, "Failed to start Order Service");
-        process.exit(1);
-    }
+		app.listen(env.PORT, () => {
+			logger.info(`Server running on port ${env.PORT}`);
+		});
+	} catch (error) {
+		logger.fatal(error, "Failed to start Order Service");
+		process.exit(1);
+	}
 }
 
 startServer();

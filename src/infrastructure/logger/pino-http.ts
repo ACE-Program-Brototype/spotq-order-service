@@ -2,7 +2,7 @@ import { pinoHttp } from "pino-http";
 import logger from "./pino.js";
 
 const httpLogger = pinoHttp({
-    logger
+	logger,
 });
 
 export default httpLogger;

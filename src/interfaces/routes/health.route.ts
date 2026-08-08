@@ -1,7 +1,7 @@
-import express ,{type Router} from "express";
+import express, { type Router } from "express";
 import STATUS from "../../common/constants/http-status.js";
 
-const healthRouter : Router = express.Router();
+const healthRouter: Router = express.Router();
 
 /**
  * @openapi
@@ -15,10 +15,8 @@ const healthRouter : Router = express.Router();
  *         description: Service is healthy
  */
 
-healthRouter.get("/" , (req,res) => {
-
-    return res.status(STATUS.SUCCESS.OK).json({ status: "healthy" });
-    
+healthRouter.get("/", (_req, res) => {
+	return res.status(STATUS.SUCCESS.OK).json({ status: "healthy" });
 });
 
-export default healthRouter; 
+export default healthRouter;

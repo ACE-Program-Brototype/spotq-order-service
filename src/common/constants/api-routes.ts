@@ -1,8 +1,5 @@
 const ROUTES = {
-
-  HEALTH: "/health"
-
+	HEALTH: "/health",
 } as const;
-
 
 export default ROUTES;
