@@ -8,17 +8,17 @@ async function startServer() {
     try {
 
         await prisma.$connect();
-        logger.info("Connected to PostgreSQL");
+        logger.info("Connected to PostgreSQL Aiven");
 
         await redisConnection.ping();
-        logger.info("Connected to Redis");
+        logger.info("Connected to Redis Cloud");
 
         app.listen(env.PORT, () => {
             logger.info(`Server running on port ${env.PORT}`);
         });
 
     } catch (error) {
-      
+
         logger.fatal(error, "Failed to start Order Service");
         process.exit(1);
     }
