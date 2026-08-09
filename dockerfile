@@ -9,11 +9,6 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# Dummy environment variables so build-time validation passes
-ENV NODE_ENV=production \
-    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/dummy" \
-    REDIS_URL="redis://localhost:6379"
-
 RUN pnpm exec prisma generate --schema=prisma/schema.prisma && \
     pnpm build && \
     pnpm prune --prod --ignore-scripts
