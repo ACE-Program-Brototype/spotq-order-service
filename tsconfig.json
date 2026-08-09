@@ -1,37 +1,37 @@
 {
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "nodenext",
-    "target": "esnext",
-    "types": ["node"],
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"module": "nodenext",
+		"target": "esnext",
+		"types": ["node"],
 
-    "baseUrl": ".",
-    "paths": {
-      "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@interfaces/*": ["src/interfaces/*"],
-      "@config/*": ["src/config/*"],
-      "@common/*": ["src/common/*"],
-	  "@generated/*": ["src/generated/*"]
-    },
+		"baseUrl": ".",
+		"paths": {
+			"@domain/*": ["src/domain/*"],
+			"@application/*": ["src/application/*"],
+			"@infrastructure/*": ["src/infrastructure/*"],
+			"@interfaces/*": ["src/interfaces/*"],
+			"@config/*": ["src/config/*"],
+			"@common/*": ["src/common/*"],
+			"@generated/*": ["src/generated/*"]
+		},
 
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
+		"sourceMap": true,
+		"declaration": true,
+		"declarationMap": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"strict": true,
+		"jsx": "react-jsx",
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"noUncheckedSideEffectImports": true,
+		"moduleDetection": "force",
+		"skipLibCheck": true,
 
-    "ignoreDeprecations": "6.0"
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "prisma.config.ts"]
+		"ignoreDeprecations": "6.0"
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "dist", "prisma.config.ts"]
 }

@@ -1,5 +1,5 @@
-import express, { type Router } from "express";
 import STATUS from "@common/constants/http-status.js";
+import express, { type Router } from "express";
 
 const healthRouter: Router = express.Router();
 
