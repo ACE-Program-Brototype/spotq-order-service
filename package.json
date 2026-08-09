@@ -7,9 +7,9 @@
 	"scripts": {
 		"dev": "tsx watch src/server.ts",
 		"start": "node dist/server.js",
-		"build": "tsc",
+		"build": "tsc && tsc-alias",
 		"lint": "biome check .",
-		"format": "biome check --write",
+		"format": "biome check . --write",
 		"prepare": "husky"
 	},
 	"keywords": [],
@@ -52,6 +52,7 @@
 		"husky": "^9.1.7",
 		"lint-staged": "^17.3.0",
 		"prisma": "^7.9.1",
+		"tsc-alias": "^1.9.1",
 		"tsx": "^4.23.5",
 		"typescript": "^7.0.2"
 	}
