@@ -1,8 +1,8 @@
 import app from "./app.js";
-import env from "./config/env.js";
-import prisma from "./infrastructure/database/prisma.js";
-import logger from "./infrastructure/logger/pino.js";
-import redisConnection from "./infrastructure/redis/redis.js";
+import env from "@config/env.js";
+import prisma from "@infrastructure/database/prisma.js";
+import logger from "@infrastructure/logger/pino.js";
+import redisConnection from "@infrastructure/redis/redis.js";
 
 async function startServer() {
 	try {
