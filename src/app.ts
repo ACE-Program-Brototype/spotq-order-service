@@ -25,6 +25,6 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(ROUTES.HEALTH, healthRouter);
 
-app.use(ROUTES.METRICS,metricsRouter);
+app.use(ROUTES.METRICS, metricsRouter);
 
 export default app;
