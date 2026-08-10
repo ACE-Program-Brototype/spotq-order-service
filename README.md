@@ -1,6 +1,6 @@
 # SpotQ Order Service
 
-Order Service is a backend microservice responsible for managing the complete order lifecycle within the SpotQ platform. It is built using **Node.js**, **TypeScript**, and **Express.js**, following **Clean Architecture** principles to ensure scalability, maintainability, and testability.
+The **Order Service** is a backend microservice responsible for managing the complete order lifecycle within the SpotQ platform. It is built using **Node.js**, **TypeScript**, and **Express.js**, following **Clean Architecture** principles to ensure scalability, maintainability, and testability.
 
 ---
 
@@ -35,11 +35,15 @@ src/
 ├── domain/
 ├── infrastructure/
 ├── interfaces/
-└── main.ts
+├── app.ts
+└── server.ts
 
 prisma/
-docker/
+├── migrations/
+└── schema.prisma
+
 .github/
+└── workflows/
 ```
 
 ---
@@ -48,19 +52,21 @@ docker/
 
 | Technology     | Purpose                   |
 | -------------- | ------------------------- |
-| Node.js        | Runtime                   |
+| Node.js 22     | Runtime                   |
 | TypeScript     | Programming Language      |
 | Express.js     | HTTP Server               |
 | Prisma         | ORM                       |
 | PostgreSQL     | Database                  |
 | Redis          | Caching & Queue Backend   |
 | BullMQ         | Background Job Processing |
-| Pino           | Logging                   |
+| Pino           | Structured Logging        |
 | Swagger        | API Documentation         |
 | Docker         | Containerization          |
 | GitHub Actions | Continuous Integration    |
+| pnpm           | Package Manager           |
 | Biome          | Formatting & Linting      |
 | Husky          | Git Hooks                 |
+| Infisical      | Secret Management         |
 
 ---
 
@@ -68,12 +74,16 @@ docker/
 
 Ensure the following tools are installed before running the project:
 
-* Node.js (LTS)
-* npm
+* Node.js 22+
+* pnpm
 * Docker Desktop
+* Git
+* Infisical
+
+The service uses managed external infrastructure for:
+
 * PostgreSQL
 * Redis
-* Git
 
 ---
 
@@ -94,38 +104,26 @@ cd spotq-order-service
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 ---
 
 ## Environment Variables
 
-Create a `.env` file by copying the example file.
+Environment variables are managed using **Infisical**.
 
-```bash
-cp .env.example .env
-```
+The application validates the following environment variables:
 
-Example configuration:
+| Variable       | Description                        | Required |
+| -------------- | ---------------------------------- | -------- |
+| `NODE_ENV`     | Application environment            | Yes      |
+| `PORT`         | Port on which the service runs     | No       |
+| `DATABASE_URL` | PostgreSQL database connection URL | Yes      |
 
-```env
-NODE_ENV=development
+The application uses port **3004** by default when `PORT` is not explicitly provided.
 
-PORT=3000
-
-DATABASE_URL=
-
-REDIS_HOST=
-
-REDIS_PORT=
-
-JWT_SECRET=
-
-DOPPLER_TOKEN=
-```
-
-> Populate the values according to your local development environment or Doppler configuration.
+> Do not commit secrets or `.env` files to the repository. Use Infisical for environment and secret management.
 
 ---
 
@@ -133,27 +131,39 @@ DOPPLER_TOKEN=
 
 ### Development
 
+Run the service in development mode:
+
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ### Build
 
+Build the TypeScript application:
+
 ```bash
-npm run build
+pnpm build
 ```
 
 ### Production
 
+Run the compiled application:
+
 ```bash
-npm start
+pnpm start
 ```
 
 ---
 
 ## Running with Docker
 
-Build and start the service:
+Build the Docker image:
+
+```bash
+docker build -t spotq-order-service:dev .
+```
+
+Start the service using Docker Compose:
 
 ```bash
 docker compose up --build
@@ -165,27 +175,35 @@ Run in detached mode:
 docker compose up -d
 ```
 
-Stop the containers:
+Stop the service:
 
 ```bash
 docker compose down
+```
+
+The application is exposed on port:
+
+```text
+3004
 ```
 
 ---
 
 ## API Documentation
 
-Once the application is running, Swagger documentation will be available at:
+Once the application is running, Swagger documentation is available at:
 
 ```text
-http://localhost:3000/api/docs
+http://localhost:3004/api/docs
 ```
+
+Swagger provides an interactive interface for exploring and testing the available APIs.
 
 ---
 
 ## Health Check
 
-Verify the service status:
+Verify the service status using:
 
 ```http
 GET /health
@@ -203,30 +221,35 @@ Example response:
 
 ## Available Scripts
 
-| Script                    | Description                  |
-| ------------------------- | ---------------------------- |
-| `npm run dev`             | Start development server     |
-| `npm run build`           | Compile TypeScript           |
-| `npm start`               | Run compiled application     |
-| `npm run lint`            | Run Biome linting            |
-| `npm run format`          | Format source code           |
-| `npm run check`           | Run formatting and linting   |
-| `npm run typecheck`       | Run TypeScript type checking |
-| `npm run prisma:generate` | Generate Prisma Client       |
-| `npm run prisma:migrate`  | Run Prisma migrations        |
+| Script                 | Description              |
+| ---------------------- | ------------------------ |
+| `pnpm dev`             | Start development server |
+| `pnpm build`           | Compile TypeScript       |
+| `pnpm start`           | Run compiled application |
+| `pnpm lint`            | Run Biome checks         |
+| `pnpm format`          | Format source code       |
+| `pnpm test`            | Run tests                |
+| `pnpm test:watch`      | Run tests in watch mode  |
+| `pnpm test:cov`        | Run tests with coverage  |
+| `pnpm prisma:generate` | Generate Prisma Client   |
+| `pnpm prisma:migrate`  | Run Prisma migrations    |
+| `pnpm prisma:studio`   | Open Prisma Studio       |
 
 ---
 
 ## Continuous Integration
 
-The GitHub Actions pipeline performs the following checks:
+The GitHub Actions CI pipeline verifies the application before changes are merged.
 
-* Install dependencies
-* Run Biome linting
-* Run TypeScript type checking
+The current pipeline performs:
+
+* Install dependencies using pnpm
+* Generate Prisma Client
+* Run Biome checks
 * Build the application
+* Build the Docker image
 
-All pull requests must pass the CI pipeline before they can be merged.
+Pull requests targeting the protected branches must pass the required CI checks before they can be merged.
 
 ---
 
@@ -237,13 +260,16 @@ This service follows the **Clean Architecture** pattern.
 ```text
 src/
 ├── domain/            # Enterprise business rules
-├── application/       # Use cases
-├── infrastructure/    # Database, queues, external services
-├── interfaces/        # Controllers, routes, DTOs
+├── application/       # Application use cases
+├── infrastructure/    # Database, queues, logging and external services
+├── interfaces/        # Controllers, routes and API interfaces
 ├── config/            # Application configuration
 ├── common/            # Shared utilities
-└── main.ts            # Application entry point
+├── app.ts             # Express application configuration
+└── server.ts          # Application startup
 ```
+
+The architecture separates business logic from infrastructure concerns, making the service easier to maintain, test, and extend.
 
 ---
 
@@ -251,11 +277,47 @@ src/
 
 1. Create a feature branch from `development`.
 2. Implement the assigned Jira story.
-3. Commit changes using conventional commit messages.
-4. Push the feature branch.
-5. Create a Pull Request targeting the `development` branch.
-6. Resolve review comments.
-7. Merge after approval and successful CI.
+3. Run local linting and build checks.
+4. Commit changes using Conventional Commits.
+5. Push the feature branch.
+6. Create a Pull Request targeting `development`.
+7. Ensure the CI pipeline passes.
+8. Address review feedback and resolve conversations.
+9. Complete cross review and final review.
+10. Merge using the repository's protected branch workflow.
+
+---
+
+## Branching Strategy
+
+The repository follows the following branch flow:
+
+```text
+feature/*
+    │
+    ▼
+development
+    │
+    ▼
+staging
+    │
+    ▼
+main
+```
+
+### Development
+
+Integration branch for active feature development and team collaboration.
+
+### Staging
+
+Pre-production environment used for integration and validation.
+
+### Main
+
+Production branch containing stable and approved code.
+
+Protected branches require Pull Requests, code reviews, successful CI checks, and resolved review conversations before merging.
 
 ---
 
