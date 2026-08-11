@@ -8,5 +8,5 @@ services:
       - "3002:3002"
     environment:
       
-      - INFISICAL_TOKEN= ${INFISICAL_TOKEN}
+      - INFISICAL_TOKEN=${INFISICAL_TOKEN}
     restart: unless-stopped
