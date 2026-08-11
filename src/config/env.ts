@@ -5,7 +5,7 @@ const envSchema = z.object({
 	NODE_ENV: z.enum(["development", "staging", "production"]),
 	DATABASE_URL: z.url(),
 	REDIS_URL: z.url(),
-	LOG_LEVEL: z.string()
+	LOG_LEVEL: z.string(),
 });
 
 const env = envSchema.parse(process.env);
