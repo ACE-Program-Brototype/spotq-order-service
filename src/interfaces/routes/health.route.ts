@@ -16,10 +16,9 @@ const healthRouter: Router = express.Router();
  */
 
 healthRouter.get("/", (_req, res) => {
-	
-	return res.status(STATUS.SUCCESS.OK).json({ 
-		success:true, 
-		status: "healthy" 
+	return res.status(STATUS.SUCCESS.OK).json({
+		success: true,
+		status: "healthy",
 	});
 });
 
