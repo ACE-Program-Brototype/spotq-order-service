@@ -1,4 +1,4 @@
-import ROUTES from "@common/constants/api-routes.js";
+import ROUTES from "@common/constants/routes.constant.js";
 import swaggerSpec from "@config/swagger.js";
 import httpLogger from "@infrastructure/logger/pino-http.js";
 import healthRouter from "@interfaces/routes/health.route.js";
