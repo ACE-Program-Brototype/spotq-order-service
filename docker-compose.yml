@@ -8,5 +8,5 @@ services:
       - "3002:3002"
     environment:
       
-      - INFISICAL_TOKEN=st.324ea470-86f6-450d-a21b-145dcf27ed25.f2790d711946ee5fb010f847b9802106.3eb0246d280618912e617ce686b04ad7
+      - INFISICAL_TOKEN= ${INFISICAL_TOKEN}
     restart: unless-stopped
