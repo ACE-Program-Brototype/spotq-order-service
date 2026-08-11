@@ -1,24 +1,51 @@
 import env from "@config/env.js";
-import prisma from "@infrastructure/database/prisma.js";
 import logger from "@infrastructure/logger/pino.js";
-import redisConnection from "@infrastructure/redis/redis.js";
 import app from "./app.js";
+import { connectRedis, disconnectRedis } from "@infrastructure/redis/redis.connect.js";
+import { connectDatabase, disconnectDatabase } from "@infrastructure/database/prisma.connect.js";
 
 async function startServer() {
-	try {
-		await prisma.$connect();
-		logger.info("Connected to PostgreSQL Aiven");
 
-		await redisConnection.ping();
-		logger.info("Connected to Redis Cloud");
+  try {
+    
+    await connectDatabase();
+    
+    await connectRedis();
+    
+    const server = app.listen(env.PORT, () => {
+      logger.info(`Order Service running on port ${env.PORT}`);
+    });
 
-		app.listen(env.PORT, () => {
-			logger.info(`Server running on port ${env.PORT}`);
-		});
-	} catch (error) {
-		logger.fatal(error, "Failed to start Order Service");
-		process.exit(1);
-	}
+   
+    const shutdown = async (signal: string) => {
+
+      logger.info(`${signal} received. Starting graceful shutdown...`);
+
+      server.close(async () => {
+        try {
+          
+          await disconnectDatabase();
+		  await disconnectRedis();
+
+          logger.info("Graceful shutdown completed");
+          process.exit(0);
+
+        } catch (error) {
+
+          logger.error(error, "Error during graceful shutdown");
+          process.exit(1);
+        }
+      });
+    };
+
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+  } catch (error) {
+
+    logger.fatal(error, "Failed to start Order Service");
+    process.exit(1);
+  }
 }
 
 startServer();
