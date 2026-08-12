@@ -184,7 +184,7 @@ docker compose down
 The application is exposed on port:
 
 ```text
-3004
+3002
 ```
 
 ---
