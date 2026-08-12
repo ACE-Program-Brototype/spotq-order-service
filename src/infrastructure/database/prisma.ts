@@ -1,5 +1,5 @@
-import env from "@config/env.js";
-import { PrismaClient } from "@generated/prisma/client.js";
+import env from "@config/env.ts";
+import { PrismaClient } from "@generated/prisma/client.ts";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 

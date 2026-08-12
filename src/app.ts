@@ -1,8 +1,8 @@
-import ROUTES from "@common/constants/routes.constant.js";
-import swaggerSpec from "@config/swagger.js";
-import httpLogger from "@infrastructure/logger/pino-http.js";
-import healthRouter from "@interfaces/routes/health.route.js";
-import metricsRouter from "@interfaces/routes/metrics.route.js";
+import ROUTES from "@common/constants/routes.constant.ts";
+import swaggerSpec from "@config/swagger.ts";
+import httpLogger from "@infrastructure/logger/pino-http.ts";
+import healthRouter from "@interfaces/routes/health.route.ts";
+import metricsRouter from "@interfaces/routes/metrics.route.ts";
 import compression from "compression";
 import cors from "cors";
 import express, { type Express } from "express";

@@ -1,13 +1,13 @@
-import env from "@config/env.js";
+import env from "@config/env.ts";
 import {
 	connectDatabase,
 	disconnectDatabase,
-} from "@infrastructure/database/prisma.connect.js";
-import logger from "@infrastructure/logger/pino.js";
+} from "@infrastructure/database/prisma.connect.ts";
+import logger from "@infrastructure/logger/pino.ts";
 import {
 	connectRedis,
 	disconnectRedis,
-} from "@infrastructure/redis/redis.connect.js";
+} from "@infrastructure/redis/redis.connect.ts";
 import app from "./app.js";
 
 async function startServer() {

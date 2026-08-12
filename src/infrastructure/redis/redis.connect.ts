@@ -1,5 +1,5 @@
-import logger from "@infrastructure/logger/pino.js";
-import redisConnection from "./redis.js";
+import logger from "@infrastructure/logger/pino.ts";
+import redisConnection from "./redis.ts";
 
 export const connectRedis = async (): Promise<void> => {
 	await redisConnection.ping();

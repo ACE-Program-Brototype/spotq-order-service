@@ -1,5 +1,5 @@
-import logger from "@infrastructure/logger/pino.js";
-import prisma from "./prisma.js";
+import logger from "@infrastructure/logger/pino.ts";
+import prisma from "./prisma.ts";
 
 export const connectDatabase = async (): Promise<void> => {
 	await prisma.$connect();
