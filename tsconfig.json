@@ -1,36 +1,39 @@
 {
-	"compilerOptions": {
-		"rootDir": "./src",
-		"outDir": "./dist",
-		"module": "nodenext",
-		"target": "esnext",
-		"types": ["node"],
-		"allowImportingTsExtensions": true,
-		"noEmit": true,
+  "compilerOptions": {
+    "rootDir": "./src",
 
-		"paths": {
-			"@domain/*": ["./src/domain/*"],
-			"@application/*": ["./src/application/*"],
-			"@infrastructure/*": ["./src/infrastructure/*"],
-			"@interfaces/*": ["./src/interfaces/*"],
-			"@config/*": ["./src/config/*"],
-			"@common/*": ["./src/common/*"],
-			"@generated/*": ["./src/generated/*"]
-		},
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
 
-		"sourceMap": true,
-		"declaration": true,
-		"declarationMap": true,
-		"noUncheckedIndexedAccess": true,
-		"exactOptionalPropertyTypes": true,
-		"strict": true,
-		"jsx": "react-jsx",
-		"verbatimModuleSyntax": true,
-		"isolatedModules": true,
-		"noUncheckedSideEffectImports": true,
-		"moduleDetection": "force",
-		"skipLibCheck": true
-	},
-	"include": ["src"],
-	"exclude": ["node_modules", "dist", "prisma.config.ts"]
+    "types": ["node"],
+
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    "paths": {
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@interfaces/*": ["./src/interfaces/*"],
+      "@config/*": ["./src/config/*"],
+      "@common/*": ["./src/common/*"],
+      "@generated/*": ["./src/generated/*"]
+    },
+
+    "sourceMap": true,
+
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true
+  },
+
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "prisma.config.ts"]
 }
