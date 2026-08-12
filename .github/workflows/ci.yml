@@ -1,0 +1,59 @@
+name: Order Service CI
+
+on:
+  push:
+    branches:
+      - development
+      - staging
+      - main
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - development
+      - staging
+      - main
+
+jobs:
+  build:
+    name: Build & Verify
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Install Dependencies
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Generate Prisma Client
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+
+      # Lint
+      - name: Run Biome
+        run: pnpm lint
+
+      # Build Application
+      - name: Build Application
+        run: pnpm build
+
+      # Build Docker Image
+      - name: Build Docker Image
+        run: docker build -t spotq-order-service:ci .
