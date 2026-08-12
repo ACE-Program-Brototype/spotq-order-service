@@ -6,7 +6,7 @@
 		"target": "esnext",
 		"types": ["node"],
 		"allowImportingTsExtensions": true,
-    	"noEmit": true,
+		"noEmit": true,
 
 		"paths": {
 			"@domain/*": ["./src/domain/*"],

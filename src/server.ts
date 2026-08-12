@@ -13,17 +13,30 @@ import app from "./app.js";
 async function startServer() {
 	try {
 		await connectDatabase();
-
 		await connectRedis();
 
 		const server = app.listen(env.PORT, () => {
 			logger.info(`Order Service running on port ${env.PORT}`);
 		});
 
+		let isShuttingDown = false;
+
 		const shutdown = async (signal: string) => {
+			if (isShuttingDown) {
+				logger.warn("Shutdown already in progress");
+				return;
+			}
+
+			isShuttingDown = true;
+
 			logger.info(`${signal} received. Starting graceful shutdown...`);
 
-			server.close(async () => {
+			server.close(async (error) => {
+				if (error) {
+					logger.error(error, "Error while closing HTTP server");
+					process.exitCode = 1;
+				}
+
 				try {
 					await disconnectDatabase();
 					await disconnectRedis();
@@ -37,12 +50,17 @@ async function startServer() {
 			});
 		};
 
-		process.on("SIGINT", () => shutdown("SIGINT"));
-		process.on("SIGTERM", () => shutdown("SIGTERM"));
+		process.on("SIGINT", () => {
+			void shutdown("SIGINT");
+		});
+
+		process.on("SIGTERM", () => {
+			void shutdown("SIGTERM");
+		});
 	} catch (error) {
 		logger.fatal(error, "Failed to start Order Service");
 		process.exit(1);
 	}
 }
 
-startServer();
+void startServer();
