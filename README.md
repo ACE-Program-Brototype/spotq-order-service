@@ -229,11 +229,6 @@ Example response:
 | `pnpm lint`            | Run Biome checks         |
 | `pnpm format`          | Format source code       |
 | `pnpm test`            | Run tests                |
-| `pnpm test:watch`      | Run tests in watch mode  |
-| `pnpm test:cov`        | Run tests with coverage  |
-| `pnpm prisma:generate` | Generate Prisma Client   |
-| `pnpm prisma:migrate`  | Run Prisma migrations    |
-| `pnpm prisma:studio`   | Open Prisma Studio       |
 
 ---
 
