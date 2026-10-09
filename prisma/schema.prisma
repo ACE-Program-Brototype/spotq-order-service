@@ -54,6 +54,7 @@ model Cart {
 
   @@unique([userId, restaurantId])
   @@index([restaurantId])
+  @@index([expiresAt])
   @@map("carts")
 }
 
@@ -81,6 +82,7 @@ model CartItemAddon {
 
   cartItem CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
 
+  @@unique([cartItemId, addonId])
   @@index([cartItemId])
   @@map("cart_item_addons")
 }
@@ -96,6 +98,7 @@ model Order {
   tableNumber         Int?          @map("table_number")
   queueEntryId        String?       @map("queue_entry_id") @db.Uuid
   paymentId           String?       @map("payment_id") @db.Uuid
+  priority            Int           @default(3) @db.SmallInt
   orderType           OrderType     @default(PRE_ORDER) @map("order_type")
   paymentMode         PaymentMode   @default(ONLINE) @map("payment_mode")
   paymentStatus       PaymentStatus @default(PENDING) @map("payment_status")
@@ -115,21 +118,26 @@ model Order {
   statusHistory OrderStatusHistory[]
 
   @@index([restaurantId, orderStatus])
+  @@index([restaurantId, orderStatus, priority])
+  @@index([restaurantId, createdAt])
   @@index([userId])
+  @@index([tableId])
+  @@index([paymentId])
   @@map("orders")
 }
 
 model OrderItem {
-  id                  String  @id @default(uuid()) @db.Uuid
-  orderId             String  @map("order_id") @db.Uuid
-  menuItemId          String  @map("menu_item_id") @db.Uuid
-  itemName            String  @map("item_name") @db.VarChar(255)
-  variantId           String? @map("variant_id") @db.Uuid
-  variantName         String? @map("variant_name") @db.VarChar(100)
-  quantity            Int     @default(1)
-  unitPrice           Decimal @map("unit_price") @db.Decimal(10, 2)
-  totalPrice          Decimal @map("total_price") @db.Decimal(10, 2)
-  specialInstructions String? @map("special_instructions")
+  id                  String   @id @default(uuid()) @db.Uuid
+  orderId             String   @map("order_id") @db.Uuid
+  menuItemId          String   @map("menu_item_id") @db.Uuid
+  itemName            String   @map("item_name") @db.VarChar(255)
+  variantId           String?  @map("variant_id") @db.Uuid
+  variantName         String?  @map("variant_name") @db.VarChar(100)
+  quantity            Int      @default(1)
+  unitPrice           Decimal  @map("unit_price") @db.Decimal(10, 2)
+  totalPrice          Decimal  @map("total_price") @db.Decimal(10, 2)
+  specialInstructions String?  @map("special_instructions")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   order  Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
   addons OrderItemAddon[]
@@ -147,6 +155,7 @@ model OrderItemAddon {
 
   orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 
+  @@unique([orderItemId, addonId])
   @@index([orderItemId])
   @@map("order_item_addons")
 }
