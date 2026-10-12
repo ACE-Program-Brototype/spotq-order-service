@@ -108,9 +108,11 @@ async function seedCart() {
 		console.log(`Expires At    : ${targetCart.expiresAt.toISOString()}`);
 		console.log(`Items Count   : ${targetCart.items.length}`);
 		console.log(`Addons Count  : ${targetCart.items[0]?.addons.length ?? 0}`);
-		console.log("------------------------------------------");
 		console.log(
-			`Test URL      : http://localhost:3002/api/v1/carts/${targetCart.id}`,
+			`Gateway URL   : http://localhost:10000/api/v1/carts/${targetCart.id}`,
+		);
+		console.log(
+			`Direct URL    : http://localhost:3002/api/v1/carts/${targetCart.id}`,
 		);
 		console.log(`Header 1      : x-user-id: ${targetCart.userId}`);
 		console.log(`Header 2      : Authorization: Bearer ${token}`);
