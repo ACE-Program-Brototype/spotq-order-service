@@ -4,3 +4,6 @@ allowBuilds:
   esbuild: false
   msgpackr-extract: true
   prisma: true
+
+overrides:
+  brace-expansion: 2.1.4
