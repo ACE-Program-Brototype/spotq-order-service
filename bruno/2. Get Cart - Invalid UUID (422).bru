@@ -1,0 +1,19 @@
+meta {
+  name: 2. Get Cart - Invalid UUID (422)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/carts/invalid-cart-id
+  body: none
+  auth: bearer
+}
+
+headers {
+  x-user-id: {{userId}}
+}
+
+auth:bearer {
+  token: {{authToken}}
+}

@@ -3,10 +3,13 @@ import { PrismaClient } from "@generated/prisma/client.ts";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+const poolUrl = new URL(env.DATABASE_URL);
+poolUrl.searchParams.delete("sslmode");
+
 const pool = new Pool({
-	connectionString: env.DATABASE_URL,
+	connectionString: poolUrl.toString(),
 	ssl: {
-		rejectUnauthorized: true,
+		rejectUnauthorized: false,
 	},
 });
 
