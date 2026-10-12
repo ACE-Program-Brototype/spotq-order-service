@@ -1,3 +1,12 @@
+/**
+ * PostgreSQL Database Connection & Prisma Client Configuration
+ *
+ * Configures the pg connection pool adapter for Prisma with:
+ * - UTC timestamp parsing for PostgreSQL TIMESTAMP (OID 1114) and TIMESTAMPTZ (OID 1184).
+ * - Dynamic SSL configuration supporting custom CA certificates when available,
+ *   with TLS wire encryption for cloud-hosted database environments.
+ */
+
 import fs from "node:fs";
 import path from "node:path";
 import env from "@config/env.ts";
@@ -6,12 +15,6 @@ import logger from "@infrastructure/logger/pino.ts";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg, { type PoolConfig } from "pg";
 
-/**
- * PostgreSQL Timestamp Type Parsers
- * Standardize timestamp parsing to UTC Date objects:
- * - OID 1114: TIMESTAMP (without time zone) -> parse as UTC ISO
- * - OID 1184: TIMESTAMPTZ (with time zone) -> parse directly into Date
- */
 pg.types.setTypeParser(
 	1114,
 	(stringValue: string) => new Date(`${stringValue}Z`),
@@ -54,9 +57,7 @@ if (isSslRequested) {
 			if (fs.existsSync(defaultCertPath)) {
 				caContent = fs.readFileSync(defaultCertPath, "utf8");
 			}
-		} catch (_error) {
-			// No local cert file present
-		}
+		} catch (_error) {}
 	}
 
 	if (caContent) {
@@ -65,9 +66,6 @@ if (isSslRequested) {
 			ca: caContent,
 		};
 	} else {
-		// Aiven and cloud PostgreSQL providers use custom/self-signed Root CAs.
-		// Without a local CA certificate installed, rejectUnauthorized: false allows
-		// TLS wire encryption while avoiding certificate verification rejection.
 		ssl = {
 			rejectUnauthorized: false,
 		};

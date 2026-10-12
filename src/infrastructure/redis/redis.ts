@@ -1,3 +1,10 @@
+/**
+ * Redis Connection Configuration
+ *
+ * Configures ioredis client with environment fallback resolution
+ * for local development and containerized networks.
+ */
+
 import env from "@config/env.ts";
 import { Redis } from "ioredis";
 
@@ -8,9 +15,7 @@ function resolveRedisUrl(rawUrl: string): string {
 			parsed.hostname = "localhost";
 			return parsed.toString();
 		}
-	} catch {
-		// keep raw url
-	}
+	} catch {}
 	return rawUrl;
 }
 

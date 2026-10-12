@@ -1,3 +1,11 @@
+/**
+ * Database Seed Script - Test Active Cart
+ *
+ * Verifies if an active cart exists in PostgreSQL.
+ * If none exists, seeds an active Cart with CartItem and CartItemAddon relations,
+ * then displays test connection parameters and credentials for Bruno testing.
+ */
+
 import jwt from "jsonwebtoken";
 import prisma from "../src/infrastructure/database/prisma.ts";
 
@@ -11,7 +19,6 @@ async function seedCart() {
 	try {
 		console.log("Checking for active carts in database...");
 
-		// Check for an existing active cart with items
 		const existingCart = await prisma.cart.findFirst({
 			where: {
 				expiresAt: {
@@ -35,7 +42,6 @@ async function seedCart() {
 		if (!targetCart) {
 			console.log("No active cart with items found. Seeding new test cart...");
 
-			// Remove any previous expired/empty cart for the test user + restaurant combination
 			await prisma.cart.deleteMany({
 				where: {
 					userId: TEST_USER_ID,
@@ -43,7 +49,7 @@ async function seedCart() {
 				},
 			});
 
-			const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+			const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
 			targetCart = await prisma.cart.create({
 				data: {
@@ -82,7 +88,6 @@ async function seedCart() {
 			console.log("Existing active cart found in database.");
 		}
 
-		// Generate a sample JWT for Bruno
 		const token = jwt.sign(
 			{
 				sub: targetCart.userId,
