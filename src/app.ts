@@ -1,4 +1,4 @@
-import ROUTES from "@common/constants/routes.constant.ts";
+import ROUTES from "@common/constants/routes.constants.ts";
 import swaggerSpec from "@config/swagger.ts";
 import httpLogger from "@infrastructure/logger/pino-http.ts";
 import errorHandler from "@interfaces/middleware/error.middleware.ts";
