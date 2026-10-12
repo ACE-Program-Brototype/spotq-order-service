@@ -4,3 +4,4 @@ dist
 .infisical
 coverage
 /src/generated/prisma
+bruno/
