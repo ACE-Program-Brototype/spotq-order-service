@@ -2,7 +2,10 @@ import {
 	HTTP_STATUS,
 	type HttpStatusCode,
 } from "@common/constants/http.constants.ts";
-import { messages } from "@common/constants/message.constants.ts";
+import {
+	CART_ERROR_CODES,
+	messages,
+} from "@common/constants/message.constants.ts";
 import type { Response } from "express";
 
 export interface ApiResponseSuccess<T = unknown> {
@@ -36,7 +39,7 @@ export const ApiResponse = {
 
 	error(
 		message: string,
-		code = "INTERNAL_SERVER_ERROR",
+		code = CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
 		statusCode: HttpStatusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR,
 		error?: unknown,
 	): ApiResponseError {
@@ -62,7 +65,7 @@ export function sendSuccessResponse<T>(
 export function sendErrorResponse(
 	res: Response,
 	message: string,
-	code = "INTERNAL_SERVER_ERROR",
+	code = CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
 	statusCode: HttpStatusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR,
 	error?: unknown,
 ): Response {

@@ -1,3 +1,7 @@
+import {
+	AUTH_CONSTANTS,
+	AUTH_HEADERS,
+} from "@common/constants/auth.constants.ts";
 import { HTTP_STATUS } from "@common/constants/http.constants.ts";
 import {
 	CART_ERROR_CODES,
@@ -35,18 +39,20 @@ export function customerAuthMiddleware(
 	res: Response,
 	next: NextFunction,
 ): void {
-	const headerUserId = getHeaderValue(req.headers["x-user-id"]);
-	const headerRole = getHeaderValue(req.headers["x-user-role"]);
-	const headerEmail = getHeaderValue(req.headers["x-user-email"]);
+	const headerUserId = getHeaderValue(req.headers[AUTH_HEADERS.USER_ID]);
+	const headerRole = getHeaderValue(req.headers[AUTH_HEADERS.USER_ROLE]);
+	const headerEmail = getHeaderValue(req.headers[AUTH_HEADERS.USER_EMAIL]);
 
 	let userId = headerUserId;
 	let role = headerRole;
 	let email = headerEmail;
 
-	if (!userId && req.headers.authorization) {
-		const authHeader = getHeaderValue(req.headers.authorization);
-		if (authHeader?.startsWith("Bearer ")) {
-			const token = authHeader.substring(7).trim();
+	if (!userId && req.headers[AUTH_HEADERS.AUTHORIZATION]) {
+		const authHeader = getHeaderValue(req.headers[AUTH_HEADERS.AUTHORIZATION]);
+		if (authHeader?.startsWith(AUTH_CONSTANTS.BEARER_PREFIX)) {
+			const token = authHeader
+				.substring(AUTH_CONSTANTS.BEARER_PREFIX_LENGTH)
+				.trim();
 			try {
 				const decoded = jwt.decode(token) as {
 					sub?: string;

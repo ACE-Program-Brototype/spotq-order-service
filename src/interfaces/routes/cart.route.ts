@@ -1,3 +1,4 @@
+import { CART_ROUTES } from "@common/constants/routes.constants.ts";
 import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";
@@ -13,7 +14,7 @@ const getCartController = container.get<GetCartController>(
 );
 
 cartRouter.get(
-	"/:cartId",
+	CART_ROUTES.BY_ID,
 	customerAuthMiddleware,
 	validateRequestParams(cartIdParamSchema),
 	(req, res, next) => getCartController.handle(req, res, next),
