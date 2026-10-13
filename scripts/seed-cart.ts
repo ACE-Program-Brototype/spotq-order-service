@@ -19,8 +19,10 @@ async function seedCart() {
 	try {
 		console.log("Checking for active carts in database...");
 
-		const existingCart = await prisma.cart.findFirst({
+		let cart = await prisma.cart.findFirst({
 			where: {
+				userId: TEST_USER_ID,
+				restaurantId: TEST_RESTAURANT_ID,
 				expiresAt: {
 					gt: new Date(),
 				},
@@ -37,9 +39,7 @@ async function seedCart() {
 			},
 		});
 
-		let targetCart = existingCart;
-
-		if (!targetCart) {
+		if (!cart) {
 			console.log("No active cart with items found. Seeding new test cart...");
 
 			await prisma.cart.deleteMany({
@@ -51,7 +51,7 @@ async function seedCart() {
 
 			const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-			targetCart = await prisma.cart.create({
+			cart = await prisma.cart.create({
 				data: {
 					userId: TEST_USER_ID,
 					restaurantId: TEST_RESTAURANT_ID,
@@ -90,8 +90,8 @@ async function seedCart() {
 
 		const token = jwt.sign(
 			{
-				sub: targetCart.userId,
-				userId: targetCart.userId,
+				sub: cart.userId,
+				userId: cart.userId,
 				role: "CUSTOMER",
 				email: "customer@spotq.com",
 			},
@@ -102,23 +102,23 @@ async function seedCart() {
 		console.log("\n==========================================");
 		console.log("CART DETAILS FOR BRUNO TESTING");
 		console.log("==========================================");
-		console.log(`Cart ID       : ${targetCart.id}`);
-		console.log(`User ID       : ${targetCart.userId}`);
-		console.log(`Restaurant ID : ${targetCart.restaurantId}`);
-		console.log(`Expires At    : ${targetCart.expiresAt.toISOString()}`);
-		console.log(`Items Count   : ${targetCart.items.length}`);
-		console.log(`Addons Count  : ${targetCart.items[0]?.addons.length ?? 0}`);
+		console.log(`Cart ID       : ${cart.id}`);
+		console.log(`User ID       : ${cart.userId}`);
+		console.log(`Restaurant ID : ${cart.restaurantId}`);
+		console.log(`Expires At    : ${cart.expiresAt.toISOString()}`);
+		console.log(`Items Count   : ${cart.items.length}`);
+		console.log(`Addons Count  : ${cart.items[0]?.addons.length ?? 0}`);
 		console.log(
-			`Gateway URL   : http://localhost:10000/api/v1/carts/${targetCart.id}`,
+			`Gateway URL   : http://localhost:10000/api/v1/carts/${cart.id}`,
 		);
 		console.log(
-			`Direct URL    : http://localhost:3002/api/v1/carts/${targetCart.id}`,
+			`Direct URL    : http://localhost:3002/api/v1/carts/${cart.id}`,
 		);
-		console.log(`Header 1      : x-user-id: ${targetCart.userId}`);
+		console.log(`Header 1      : x-user-id: ${cart.userId}`);
 		console.log(`Header 2      : Authorization: Bearer ${token}`);
 		console.log("==========================================\n");
 
-		return targetCart;
+		return cart;
 	} catch (error) {
 		console.error("Error seeding cart:", error);
 		process.exit(1);
