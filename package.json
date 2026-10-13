@@ -10,8 +10,9 @@
 		"start": "node dist/server.js",
 		"lint": "biome check .",
 		"format": "biome format --write .",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "prisma generate && tsc --noEmit",
 		"test": "tsx --test 'tests/**/*.spec.ts'",
+		"postinstall": "prisma generate",
 		"prisma:generate": "prisma generate",
 		"prisma:migrate": "prisma migrate dev",
 		"prisma:studio": "prisma studio"
