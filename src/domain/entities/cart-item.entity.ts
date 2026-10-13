@@ -37,8 +37,7 @@ export class CartItem {
 			(sum, addon) => sum + addon.price,
 			0,
 		);
-		const basePriceWithAddons = this.unitPrice + addonsTotal;
-		return Number((basePriceWithAddons * this.quantity).toFixed(2));
+		return Number((this.unitPrice * this.quantity + addonsTotal).toFixed(2));
 	}
 }
 
