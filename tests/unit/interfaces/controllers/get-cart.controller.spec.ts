@@ -9,7 +9,7 @@ import { HttpStatus } from "@common/constants/http.constants.ts";
 import { CART_MESSAGES } from "@common/constants/message.constants.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 
 class MockGetCartUseCase implements IGetCartUseCase {
 	public executedDto: GetCartRequestDto | null = null;
@@ -59,14 +59,8 @@ describe("GetCartController", () => {
 			},
 		} as unknown as Response;
 
-		let nextCalled = false;
-		const next: NextFunction = () => {
-			nextCalled = true;
-		};
+		await controller.getCart(req, res);
 
-		await controller.handle(req, res, next);
-
-		assert.equal(nextCalled, false);
 		assert.equal(respondedStatus, HttpStatus.OK);
 		assert.deepEqual(responseBody, {
 			success: true,
@@ -90,7 +84,7 @@ describe("GetCartController", () => {
 		});
 	});
 
-	it("should forward domain errors to next middleware", async () => {
+	it("should bubble domain errors to error middleware", async () => {
 		const useCase = new MockGetCartUseCase();
 		useCase.shouldThrow = new CartNotFoundError();
 		const controller = new GetCartController(useCase);
@@ -102,13 +96,9 @@ describe("GetCartController", () => {
 
 		const res = {} as unknown as Response;
 
-		let passedError: unknown = null;
-		const next: NextFunction = (err?: unknown) => {
-			passedError = err;
-		};
-
-		await controller.handle(req, res, next);
-
-		assert.ok(passedError instanceof CartNotFoundError);
+		await assert.rejects(
+			async () => controller.getCart(req, res),
+			CartNotFoundError,
+		);
 	});
 });

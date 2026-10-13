@@ -17,7 +17,7 @@ cartRouter.get(
 	CART_ROUTES.BY_ID,
 	customerAuthMiddleware,
 	validateRequestParams(cartIdParamSchema),
-	(req, res, next) => getCartController.handle(req, res, next),
+	(req, res) => getCartController.getCart(req, res),
 );
 
 export default cartRouter;
