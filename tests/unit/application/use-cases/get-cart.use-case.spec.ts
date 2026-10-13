@@ -18,12 +18,18 @@ class MockCartRepository implements ICartRepository {
 		return this.carts.get(cartId) ?? null;
 	}
 
-	public async updateStatus(cartId: string, status: CartStatus): Promise<void> {
-		this.updatedStatuses.set(cartId, status);
-		const existing = this.carts.get(cartId);
-		if (existing) {
-			existing.status = status;
+	public async update(
+		cartId: string,
+		data: { status?: CartStatus; expiresAt?: Date },
+	): Promise<Cart | null> {
+		if (data.status) {
+			this.updatedStatuses.set(cartId, data.status);
 		}
+		const existing = this.carts.get(cartId);
+		if (existing && data.status) {
+			existing.status = data.status;
+		}
+		return existing ?? null;
 	}
 }
 

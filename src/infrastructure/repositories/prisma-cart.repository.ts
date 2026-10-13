@@ -73,15 +73,25 @@ export class PrismaCartRepository
 		});
 	}
 
-	public async updateStatus(cartId: string, status: CartStatus): Promise<void> {
-		if (status === CartStatus.EXPIRED) {
+	public async update(
+		cartId: string,
+		data: { status?: CartStatus; expiresAt?: Date },
+	): Promise<Cart | null> {
+		const updateData: { expiresAt?: Date } = {};
+		if (data.status === CartStatus.EXPIRED) {
+			updateData.expiresAt = data.expiresAt ?? new Date(0);
+		} else if (data.expiresAt) {
+			updateData.expiresAt = data.expiresAt;
+		}
+
+		if (Object.keys(updateData).length > 0) {
 			await this.prisma.cart.update({
 				where: { id: cartId },
-				data: {
-					expiresAt: new Date(0),
-				},
+				data: updateData,
 			});
 		}
+
+		return this.findById(cartId);
 	}
 }
 

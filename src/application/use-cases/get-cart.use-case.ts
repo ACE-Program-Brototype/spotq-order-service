@@ -31,7 +31,9 @@ export class GetCartUseCase implements IGetCartUseCase {
 
 		if (cart.isExpired()) {
 			if (cart.status !== CartStatus.EXPIRED) {
-				await this.cartRepository.updateStatus(cart.id, CartStatus.EXPIRED);
+				await this.cartRepository.update(cart.id, {
+					status: CartStatus.EXPIRED,
+				});
 			}
 			throw new CartExpiredError();
 		}
