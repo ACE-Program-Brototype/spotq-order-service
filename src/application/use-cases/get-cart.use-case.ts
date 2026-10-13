@@ -2,6 +2,7 @@ import type {
 	GetCartRequestDto,
 	GetCartResponseDto,
 } from "@application/dtos/get-cart.dto.ts";
+import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { ICartRepository } from "@application/ports/repositories/cart.repository.port.ts";
 import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -38,36 +39,7 @@ export class GetCartUseCase implements IGetCartUseCase {
 			throw new CartExpiredError();
 		}
 
-		const subtotal = cart.calculateSubtotal();
-		const itemCount = cart.calculateItemCount();
-
-		return {
-			cartId: cart.id,
-			restaurantId: cart.restaurantId,
-			userId: cart.userId,
-			status: cart.status,
-			itemCount,
-			subtotal,
-			createdAt: cart.createdAt.toISOString(),
-			updatedAt: cart.updatedAt.toISOString(),
-			expiresAt: cart.expiresAt.toISOString(),
-			items: cart.items.map((item) => ({
-				id: item.id,
-				menuItemId: item.menuItemId,
-				menuItemName: item.menuItemName ?? "",
-				variantId: item.variantId,
-				variantName: item.variantName ?? null,
-				quantity: item.quantity,
-				unitPrice: item.unitPrice,
-				totalPrice: item.totalPrice,
-				specialInstructions: item.specialInstructions,
-				addons: item.addons.map((addon) => ({
-					addonId: addon.addonId,
-					addonName: addon.addonName ?? "",
-					price: addon.price,
-				})),
-			})),
-		};
+		return CartResponseMapper.toDto(cart);
 	}
 }
 
