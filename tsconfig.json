@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"rootDir": "./src",
+		"rootDir": "./",
 
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
@@ -11,13 +11,18 @@
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
 
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+
 		"paths": {
 			"@domain/*": ["./src/domain/*"],
 			"@application/*": ["./src/application/*"],
 			"@infrastructure/*": ["./src/infrastructure/*"],
 			"@interfaces/*": ["./src/interfaces/*"],
+			"@presentation/*": ["./src/interfaces/*"],
 			"@config/*": ["./src/config/*"],
 			"@common/*": ["./src/common/*"],
+			"@shared/*": ["./src/common/*"],
 			"@generated/*": ["./src/generated/*"]
 		},
 
@@ -27,13 +32,13 @@
 		"exactOptionalPropertyTypes": true,
 
 		"strict": true,
-		"verbatimModuleSyntax": true,
+		"verbatimModuleSyntax": false,
 		"isolatedModules": true,
-		"noUncheckedSideEffectImports": true,
+		"noUncheckedSideEffectImports": false,
 		"moduleDetection": "force",
 		"skipLibCheck": true
 	},
 
-	"include": ["src"],
+	"include": ["src", "tests"],
 	"exclude": ["node_modules", "dist", "prisma.config.ts"]
 }

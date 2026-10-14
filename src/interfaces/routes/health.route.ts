@@ -1,4 +1,5 @@
-import STATUS from "@common/constants/http.constant.ts";
+import { HEALTH_STATUS } from "@common/constants/health-status.constants.ts";
+import { STATUS } from "@common/constants/http.constants.ts";
 import express, { type Router } from "express";
 
 const healthRouter: Router = express.Router();
@@ -18,7 +19,7 @@ const healthRouter: Router = express.Router();
 healthRouter.get("/", (_req, res) => {
 	return res.status(STATUS.SUCCESS.OK).json({
 		success: true,
-		status: "healthy",
+		status: HEALTH_STATUS.HEALTHY,
 	});
 });
 

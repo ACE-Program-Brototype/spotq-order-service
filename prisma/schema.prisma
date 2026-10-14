@@ -62,8 +62,12 @@ model CartItem {
   id                  String   @id @default(uuid()) @db.Uuid
   cartId              String   @map("cart_id") @db.Uuid
   menuItemId          String   @map("menu_item_id") @db.Uuid
+  menuItemName        String   @map("menu_item_name") @db.VarChar(255)
   variantId           String?  @map("variant_id") @db.Uuid
+  variantName         String?  @map("variant_name") @db.VarChar(100)
   quantity            Int      @default(1)
+  unitPrice           Decimal  @map("unit_price") @db.Decimal(10, 2)
+  totalPrice          Decimal  @map("total_price") @db.Decimal(10, 2)
   specialInstructions String?  @map("special_instructions")
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -76,9 +80,11 @@ model CartItem {
 }
 
 model CartItemAddon {
-  id         String @id @default(uuid()) @db.Uuid
-  cartItemId String @map("cart_item_id") @db.Uuid
-  addonId    String @map("addon_id") @db.Uuid
+  id         String  @id @default(uuid()) @db.Uuid
+  cartItemId String  @map("cart_item_id") @db.Uuid
+  addonId    String  @map("addon_id") @db.Uuid
+  addonName  String  @map("addon_name") @db.VarChar(100)
+  price      Decimal @default(0.00) @db.Decimal(10, 2)
 
   cartItem CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
 

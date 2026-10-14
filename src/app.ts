@@ -1,6 +1,8 @@
-import ROUTES from "@common/constants/routes.constant.ts";
+import ROUTES from "@common/constants/routes.constants.ts";
 import swaggerSpec from "@config/swagger.ts";
 import httpLogger from "@infrastructure/logger/pino-http.ts";
+import errorHandler from "@interfaces/middleware/error.middleware.ts";
+import cartRouter from "@interfaces/routes/cart.route.ts";
 import healthRouter from "@interfaces/routes/health.route.ts";
 import metricsRouter from "@interfaces/routes/metrics.route.ts";
 import compression from "compression";
@@ -26,5 +28,9 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(ROUTES.HEALTH, healthRouter);
 
 app.use(ROUTES.METRICS, metricsRouter);
+
+app.use(ROUTES.CARTS, cartRouter);
+
+app.use(errorHandler);
 
 export default app;
