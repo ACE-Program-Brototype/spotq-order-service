@@ -1,9 +1,12 @@
-import type { ICartRepository } from "@application/ports/repositories/cart.repository.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
+import type {
+	ICartRepository,
+	UpdateCartInput,
+} from "@domain/repositories/cart.repository.interface.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
 import { PrismaBaseRepository } from "@infrastructure/repositories/prisma-base.repository.ts";
 import { inject, injectable } from "inversify";
@@ -75,11 +78,11 @@ export class PrismaCartRepository
 
 	public async update(
 		cartId: string,
-		data: { status?: CartStatus; expiresAt?: Date },
+		data: UpdateCartInput,
 	): Promise<Cart | null> {
 		const updateData: { expiresAt?: Date } = {};
 		if (data.status === CartStatus.EXPIRED) {
-			updateData.expiresAt = data.expiresAt ?? new Date(0);
+			updateData.expiresAt = data.expiresAt ?? new Date();
 		} else if (data.expiresAt) {
 			updateData.expiresAt = data.expiresAt;
 		}

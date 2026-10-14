@@ -14,7 +14,7 @@ export const CartResponseMapper = {
 			updatedAt: cart.updatedAt.toISOString(),
 			expiresAt: cart.expiresAt.toISOString(),
 			items: cart.items.map((item) => ({
-				id: item.id,
+				cartItemId: item.id,
 				menuItemId: item.menuItemId,
 				menuItemName: item.menuItemName ?? "",
 				variantId: item.variantId,

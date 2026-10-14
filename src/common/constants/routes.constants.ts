@@ -7,7 +7,7 @@
 export const ROUTES = {
 	HEALTH: "/health",
 	METRICS: "/metrics",
-	CARTS: "/api/v1/carts",
+	CARTS: "/carts",
 } as const;
 
 export const CART_ROUTES = {

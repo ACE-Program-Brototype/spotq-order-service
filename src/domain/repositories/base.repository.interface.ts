@@ -4,9 +4,7 @@ export interface IBaseRepository<
 	TUpdateInput = unknown,
 > {
 	findById(id: string): Promise<T | null>;
+	update(id: string, data: TUpdateInput): Promise<T | null>;
 	create?(data: TCreateInput): Promise<T>;
-	update?(id: string, data: TUpdateInput): Promise<T | null>;
 	delete?(id: string): Promise<boolean>;
 }
-
-export default IBaseRepository;

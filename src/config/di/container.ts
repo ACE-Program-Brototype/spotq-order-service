@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import type { ICartRepository } from "@application/ports/repositories/cart.repository.port.ts";
 import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
 import { GetCartUseCase } from "@application/use-cases/get-cart.use-case.ts";
 import { TYPES } from "@config/di/types.ts";
+import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import prisma from "@infrastructure/database/prisma.ts";
 import { PrismaCartRepository } from "@infrastructure/repositories/prisma-cart.repository.ts";
 import { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";

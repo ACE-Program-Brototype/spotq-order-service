@@ -111,9 +111,7 @@ async function seedCart() {
 		console.log(
 			`Gateway URL   : http://localhost:10000/api/v1/carts/${cart.id}`,
 		);
-		console.log(
-			`Direct URL    : http://localhost:3002/api/v1/carts/${cart.id}`,
-		);
+		console.log(`Direct URL    : http://localhost:3002/carts/${cart.id}`);
 		console.log(`Header 1      : x-user-id: ${cart.userId}`);
 		console.log(`Header 2      : Authorization: Bearer ${token}`);
 		console.log("==========================================\n");

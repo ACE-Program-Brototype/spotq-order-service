@@ -10,7 +10,7 @@ export interface CartItemAddonResponseDto {
 }
 
 export interface CartItemResponseDto {
-	id: string;
+	cartItemId: string;
 	menuItemId: string;
 	menuItemName: string;
 	variantId: string | null;

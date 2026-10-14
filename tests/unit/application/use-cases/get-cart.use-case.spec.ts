@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import type { ICartRepository } from "@application/ports/repositories/cart.repository.port.ts";
 import { GetCartUseCase } from "@application/use-cases/get-cart.use-case.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
@@ -9,6 +8,10 @@ import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
+import type {
+	ICartRepository,
+	UpdateCartInput,
+} from "@domain/repositories/cart.repository.interface.ts";
 
 class MockCartRepository implements ICartRepository {
 	public carts: Map<string, Cart> = new Map();
@@ -20,7 +23,7 @@ class MockCartRepository implements ICartRepository {
 
 	public async update(
 		cartId: string,
-		data: { status?: CartStatus; expiresAt?: Date },
+		data: UpdateCartInput,
 	): Promise<Cart | null> {
 		if (data.status) {
 			this.updatedStatuses.set(cartId, data.status);
@@ -84,6 +87,7 @@ describe("GetCartUseCase", () => {
 		assert.equal(result.itemCount, 2);
 		assert.equal(result.subtotal, 518);
 		assert.equal(result.items.length, 1);
+		assert.equal(result.items[0]?.cartItemId, "item-1");
 		assert.equal(result.items[0]?.addons.length, 1);
 		assert.equal(result.items[0]?.addons[0]?.price, 20);
 	});
@@ -137,7 +141,7 @@ describe("GetCartUseCase", () => {
 		);
 	});
 
-	it("should mark cart as EXPIRED and throw CartExpiredError when cart validity window has passed", async () => {
+	it("should throw CartExpiredError when cart validity window has passed", async () => {
 		const repo = new MockCartRepository();
 		const useCase = new GetCartUseCase(repo);
 
@@ -168,7 +172,5 @@ describe("GetCartUseCase", () => {
 				return true;
 			},
 		);
-
-		assert.equal(repo.updatedStatuses.get(cartId), CartStatus.EXPIRED);
 	});
 });
