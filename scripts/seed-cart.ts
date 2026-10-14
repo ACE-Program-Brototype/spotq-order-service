@@ -60,13 +60,19 @@ async function seedCart() {
 						create: [
 							{
 								menuItemId: TEST_MENU_ITEM_ID,
+								menuItemName: "Crispy Chicken Burger",
 								variantId: TEST_VARIANT_ID,
+								variantName: "Spicy",
 								quantity: 2,
+								unitPrice: 199.0,
+								totalPrice: 438.0,
 								specialInstructions: "Extra crispy, no onions",
 								addons: {
 									create: [
 										{
 											addonId: TEST_ADDON_ID,
+											addonName: "Extra Cheese",
+											price: 20.0,
 										},
 									],
 								},

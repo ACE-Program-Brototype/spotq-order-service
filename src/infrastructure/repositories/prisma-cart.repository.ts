@@ -48,8 +48,12 @@ export class PrismaCartRepository
 					id: item.id,
 					cartId: item.cartId,
 					menuItemId: item.menuItemId,
+					menuItemName: item.menuItemName,
 					variantId: item.variantId,
+					variantName: item.variantName,
 					quantity: item.quantity,
+					unitPrice: Number(item.unitPrice),
+					totalPrice: Number(item.totalPrice),
 					specialInstructions: item.specialInstructions,
 					addons: item.addons.map(
 						(addon) =>
@@ -57,6 +61,8 @@ export class PrismaCartRepository
 								id: addon.id,
 								cartItemId: addon.cartItemId,
 								addonId: addon.addonId,
+								addonName: addon.addonName,
+								price: Number(addon.price),
 							}),
 					),
 					createdAt: item.createdAt,
