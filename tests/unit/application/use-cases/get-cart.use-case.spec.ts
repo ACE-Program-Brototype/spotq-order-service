@@ -34,6 +34,10 @@ class MockCartRepository implements ICartRepository {
 		}
 		return existing ?? null;
 	}
+
+	public async addItem(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
 }
 
 describe("GetCartUseCase", () => {
