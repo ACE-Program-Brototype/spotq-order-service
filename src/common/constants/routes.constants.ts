@@ -12,7 +12,7 @@ export const CART_ROUTES = {
 
 export const RESTAURANT_SERVICE_ENDPOINTS = {
 	CUSTOMER_MENU_ITEM: (restaurantId: string, menuItemId: string) =>
-		`/api/v1/restaurants/customer/${restaurantId}/menu/items/${menuItemId}`,
+		`/customer/${restaurantId}/menu/items/${menuItemId}`,
 } as const;
 
 export default ROUTES;
