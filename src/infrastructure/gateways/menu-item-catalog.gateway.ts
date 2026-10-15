@@ -115,40 +115,8 @@ export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
 				{ error, restaurantId, menuItemId },
 				"Failed to fetch menu item details from restaurant catalog service",
 			);
+			return null;
 		}
-
-		if (
-			process.env.NODE_ENV !== "test" &&
-			env.NODE_ENV !== "production" &&
-			menuItemId === "3f2a1b00-55de-4d39-a9a7-9f6b986e8123"
-		) {
-			logger.warn(
-				{ restaurantId, menuItemId },
-				"Restaurant catalog service unavailable; using local development test fixture",
-			);
-			return {
-				menuItemId,
-				name: "Classic Margherita Pizza",
-				price: 249,
-				isAvailable: true,
-				variant: variantId
-					? {
-							variantId,
-							name: "Medium",
-							price: 249,
-							isAvailable: true,
-						}
-					: null,
-				addons: (addonIds ?? []).map((id) => ({
-					addonId: id,
-					name: "Extra Cheese",
-					price: 40,
-					isAvailable: true,
-				})),
-			};
-		}
-
-		return null;
 	}
 }
 
