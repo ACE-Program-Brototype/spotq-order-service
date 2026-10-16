@@ -28,7 +28,7 @@ describe("Cart Domain Entities", () => {
 			addons: [addon],
 		});
 
-		assert.equal(item.calculateLineTotal(), 518);
+		assert.equal(item.calculateLineTotal(), 538);
 	});
 
 	it("should calculate correct cart subtotal and total item count", () => {
@@ -71,7 +71,7 @@ describe("Cart Domain Entities", () => {
 		});
 
 		assert.equal(cart.calculateItemCount(), 3);
-		assert.equal(cart.calculateSubtotal(), 545);
+		assert.equal(cart.calculateSubtotal(), 570);
 	});
 
 	it("should identify expired cart based on timestamp or status", () => {

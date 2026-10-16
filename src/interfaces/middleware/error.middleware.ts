@@ -6,7 +6,10 @@ import {
 import { sendErrorResponse } from "@common/response/api-response.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
+import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
+import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
+import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
 import type { NextFunction, Request, Response } from "express";
 
 export function errorHandler(
@@ -41,6 +44,36 @@ export function errorHandler(
 			err.message,
 			CART_ERROR_CODES.FORBIDDEN_CART_ACCESS,
 			HTTP_STATUS.FORBIDDEN,
+		);
+		return;
+	}
+
+	if (err instanceof DifferentRestaurantCartError) {
+		sendErrorResponse(
+			res,
+			err.message,
+			CART_ERROR_CODES.DIFFERENT_RESTAURANT_CART,
+			HTTP_STATUS.CONFLICT,
+		);
+		return;
+	}
+
+	if (err instanceof ItemUnavailableError) {
+		sendErrorResponse(
+			res,
+			err.message,
+			CART_ERROR_CODES.ITEM_UNAVAILABLE,
+			HTTP_STATUS.CONFLICT,
+		);
+		return;
+	}
+
+	if (err instanceof MenuItemNotFoundError) {
+		sendErrorResponse(
+			res,
+			err.message,
+			CART_ERROR_CODES.MENU_ITEM_NOT_FOUND,
+			HTTP_STATUS.NOT_FOUND,
 		);
 		return;
 	}

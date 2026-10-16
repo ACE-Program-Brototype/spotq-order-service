@@ -4,6 +4,7 @@ import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import type {
+	AddItemInput,
 	ICartRepository,
 	UpdateCartInput,
 } from "@domain/repositories/cart.repository.interface.ts";
@@ -101,6 +102,154 @@ export class PrismaCartRepository
 		}
 
 		return this.findById(cartId);
+	}
+
+	public async addItem(input: AddItemInput): Promise<Cart> {
+		const cart = await this.prisma.$transaction(async (tx) => {
+			const existingCart = await tx.cart.findUnique({
+				where: { id: input.cartId },
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+				},
+			});
+
+			if (!existingCart) {
+				throw new Error("Cart not found in repository");
+			}
+
+			const targetAddonSignature = [...(input.addonIds ?? [])].sort().join(",");
+			const matchingItem = existingCart.items.find((item) => {
+				if (item.menuItemId !== input.menuItemId) {
+					return false;
+				}
+				if ((item.variantId ?? null) !== (input.variantId ?? null)) {
+					return false;
+				}
+				const existingInstructions = (item.specialInstructions ?? "").trim();
+				const targetInstructions = (input.specialInstructions ?? "").trim();
+				if (existingInstructions !== targetInstructions) {
+					return false;
+				}
+				const existingAddonSignature = item.addons
+					.map((a) => a.addonId)
+					.sort()
+					.join(",");
+				return existingAddonSignature === targetAddonSignature;
+			});
+
+			const addonsTotal = (input.itemAddons ?? []).reduce(
+				(sum, a) => sum + Number(a.price || 0),
+				0,
+			);
+			const unitPrice = Number(input.unitPrice || 0);
+
+			if (matchingItem) {
+				const newQuantity = matchingItem.quantity + input.quantity;
+				const matchingAddonsTotal = matchingItem.addons.reduce(
+					(sum, a) => sum + Number(a.price || 0),
+					0,
+				);
+				const newTotal =
+					(Number(matchingItem.unitPrice) + matchingAddonsTotal) * newQuantity;
+
+				await tx.cartItem.update({
+					where: { id: matchingItem.id },
+					data: {
+						quantity: newQuantity,
+						totalPrice: newTotal,
+					},
+				});
+			} else {
+				const lineTotal = (unitPrice + addonsTotal) * input.quantity;
+				const createdItem = await tx.cartItem.create({
+					data: {
+						cartId: input.cartId,
+						menuItemId: input.menuItemId,
+						menuItemName: input.menuItemName,
+						variantId: input.variantId ?? null,
+						variantName: input.variantName ?? null,
+						unitPrice,
+						totalPrice: lineTotal,
+						quantity: input.quantity,
+						specialInstructions: input.specialInstructions ?? null,
+					},
+				});
+
+				if (input.itemAddons && input.itemAddons.length > 0) {
+					await tx.cartItemAddon.createMany({
+						data: input.itemAddons.map((addon) => ({
+							cartItemId: createdItem.id,
+							addonId: addon.addonId,
+							addonName: addon.name,
+							price: addon.price,
+						})),
+					});
+				}
+			}
+
+			const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+			const reloadedRecord = await tx.cart.update({
+				where: { id: input.cartId },
+				data: {
+					expiresAt: newExpiresAt,
+				},
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+				},
+			});
+
+			const isExpired = Date.now() > reloadedRecord.expiresAt.getTime();
+			const status = isExpired ? CartStatus.EXPIRED : CartStatus.ACTIVE;
+
+			const items = reloadedRecord.items.map(
+				(item) =>
+					new CartItem({
+						id: item.id,
+						cartId: item.cartId,
+						menuItemId: item.menuItemId,
+						menuItemName: item.menuItemName,
+						variantId: item.variantId,
+						variantName: item.variantName,
+						quantity: item.quantity,
+						unitPrice: Number(item.unitPrice),
+						totalPrice: Number(item.totalPrice),
+						specialInstructions: item.specialInstructions,
+						addons: item.addons.map(
+							(addon) =>
+								new CartItemAddon({
+									id: addon.id,
+									cartItemId: addon.cartItemId,
+									addonId: addon.addonId,
+									addonName: addon.addonName,
+									price: Number(addon.price),
+								}),
+						),
+						createdAt: item.createdAt,
+						updatedAt: item.updatedAt,
+					}),
+			);
+
+			return new Cart({
+				id: reloadedRecord.id,
+				restaurantId: reloadedRecord.restaurantId,
+				userId: reloadedRecord.userId,
+				status,
+				expiresAt: reloadedRecord.expiresAt,
+				items,
+				createdAt: reloadedRecord.createdAt,
+				updatedAt: reloadedRecord.updatedAt,
+			});
+		});
+
+		return cart;
 	}
 }
 
