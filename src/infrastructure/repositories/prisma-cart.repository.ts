@@ -209,37 +209,33 @@ export class PrismaCartRepository
 			const isExpired = Date.now() > reloadedRecord.expiresAt.getTime();
 			const status = isExpired ? CartStatus.EXPIRED : CartStatus.ACTIVE;
 
-			const addonPriceMap = new Map(
-				(input.itemAddons ?? []).map((a) => [a.addonId, a.price]),
+			const items = reloadedRecord.items.map(
+				(item) =>
+					new CartItem({
+						id: item.id,
+						cartId: item.cartId,
+						menuItemId: item.menuItemId,
+						menuItemName: item.menuItemName,
+						variantId: item.variantId,
+						variantName: item.variantName,
+						quantity: item.quantity,
+						unitPrice: Number(item.unitPrice),
+						totalPrice: Number(item.totalPrice),
+						specialInstructions: item.specialInstructions,
+						addons: item.addons.map(
+							(addon) =>
+								new CartItemAddon({
+									id: addon.id,
+									cartItemId: addon.cartItemId,
+									addonId: addon.addonId,
+									addonName: addon.addonName,
+									price: Number(addon.price),
+								}),
+						),
+						createdAt: item.createdAt,
+						updatedAt: item.updatedAt,
+					}),
 			);
-
-			const items = reloadedRecord.items.map((item) => {
-				const isTarget =
-					item.menuItemId === input.menuItemId &&
-					(item.variantId ?? null) === (input.variantId ?? null);
-				const unitPrice = isTarget ? input.unitPrice : 0;
-
-				return new CartItem({
-					id: item.id,
-					cartId: item.cartId,
-					menuItemId: item.menuItemId,
-					variantId: item.variantId,
-					quantity: item.quantity,
-					unitPrice,
-					specialInstructions: item.specialInstructions,
-					addons: item.addons.map(
-						(addon) =>
-							new CartItemAddon({
-								id: addon.id,
-								cartItemId: addon.cartItemId,
-								addonId: addon.addonId,
-								price: addonPriceMap.get(addon.addonId) ?? 0,
-							}),
-					),
-					createdAt: item.createdAt,
-					updatedAt: item.updatedAt,
-				});
-			});
 
 			return new Cart({
 				id: reloadedRecord.id,

@@ -118,7 +118,7 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 			subtotal: updatedCart.calculateSubtotal(),
 			updatedAt: updatedCart.updatedAt.toISOString(),
 			items: updatedCart.items.map((item) => ({
-				id: item.id,
+				cartItemId: item.id,
 				menuItemId: item.menuItemId,
 				quantity: item.quantity,
 				unitPrice: item.unitPrice,

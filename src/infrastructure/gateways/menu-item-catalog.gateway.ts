@@ -92,11 +92,13 @@ export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
 			}
 
 			if (!response.ok) {
-				logger.warn(
+				logger.error(
 					{ status: response.status, restaurantId, menuItemId },
 					"Restaurant catalog service returned non-OK response",
 				);
-				return null;
+				throw new Error(
+					"Downstream restaurant catalog service is currently unavailable",
+				);
 			}
 
 			const body = (await response.json()) as ApiResponse<RemoteMenuItem>;
@@ -141,7 +143,9 @@ export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
 				{ error, restaurantId, menuItemId },
 				"Failed to fetch menu item details from restaurant catalog service",
 			);
-			return null;
+			throw error instanceof Error
+				? error
+				: new Error("Failed to communicate with restaurant catalog service");
 		}
 	}
 }

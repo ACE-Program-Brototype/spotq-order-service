@@ -83,7 +83,7 @@ describe("MenuItemCatalogGateway", () => {
 		}
 	});
 
-	it("should return null when network request fails", async () => {
+	it("should throw error when network request fails", async () => {
 		const originalFetch = globalThis.fetch;
 		globalThis.fetch = async () => {
 			throw new Error("Connection refused");
@@ -91,12 +91,12 @@ describe("MenuItemCatalogGateway", () => {
 
 		try {
 			const gateway = new MenuItemCatalogGateway();
-			const result = await gateway.getItemDetails(
-				restaurantId,
-				menuItemId,
-				variantId,
+			await assert.rejects(
+				async () => {
+					await gateway.getItemDetails(restaurantId, menuItemId, variantId);
+				},
+				{ message: "Connection refused" },
 			);
-			assert.equal(result, null);
 		} finally {
 			globalThis.fetch = originalFetch;
 		}

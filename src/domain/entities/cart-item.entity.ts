@@ -37,7 +37,7 @@ export class CartItem {
 			(sum, addon) => sum + addon.price,
 			0,
 		);
-		return Number((this.unitPrice * this.quantity + addonsTotal).toFixed(2));
+		return Number(((this.unitPrice + addonsTotal) * this.quantity).toFixed(2));
 	}
 
 	public matchesConfiguration(

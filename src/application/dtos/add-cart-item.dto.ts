@@ -10,7 +10,7 @@ export interface AddCartItemRequestDto {
 }
 
 export interface AddCartItemResponseItemDto {
-	id: string;
+	cartItemId: string;
 	menuItemId: string;
 	quantity: number;
 	unitPrice: number;

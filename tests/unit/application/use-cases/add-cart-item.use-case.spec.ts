@@ -172,7 +172,7 @@ describe("AddCartItemUseCase", () => {
 		assert.equal(result.cartId, cartId);
 		assert.equal(result.restaurantId, restaurantId);
 		assert.equal(result.itemCount, 2);
-		assert.equal(result.subtotal, 538);
+		assert.equal(result.subtotal, 578);
 		assert.equal(result.items.length, 1);
 		assert.equal(result.items[0]?.quantity, 2);
 	});
