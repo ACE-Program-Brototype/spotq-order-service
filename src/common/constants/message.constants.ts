@@ -13,6 +13,10 @@ export const messages = {
 export const CART_MESSAGES = {
 	FETCHED_SUCCESS: "Cart fetched successfully",
 	ITEM_ADDED_SUCCESS: "Cart item added successfully",
+	ITEM_UPDATED_SUCCESS: "Cart item quantity updated successfully",
+	ITEM_NOT_FOUND: "Cart item not found in this cart",
+	INVALID_CART_ITEM_ID: "Invalid cart item ID format",
+	INVALID_UPDATE_QUANTITY: "Quantity must be an integer between 0 and 20",
 	NOT_FOUND: "Cart with the given ID does not exist",
 	EXPIRED: "Cart session has expired",
 	UNAUTHORIZED_ACCESS: "Access to this cart is unauthorized",
@@ -38,6 +42,7 @@ export const CART_ERROR_CODES = {
 	DIFFERENT_RESTAURANT_CART: "DIFFERENT_RESTAURANT_CART",
 	ITEM_UNAVAILABLE: "ITEM_UNAVAILABLE",
 	MENU_ITEM_NOT_FOUND: "MENU_ITEM_NOT_FOUND",
+	CART_ITEM_NOT_FOUND: "CART_ITEM_NOT_FOUND",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",

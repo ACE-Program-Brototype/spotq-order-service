@@ -6,6 +6,10 @@ export const TYPES = {
 	GetCartController: Symbol.for("GetCartController"),
 	AddCartItemUseCase: Symbol.for("AddCartItemUseCase"),
 	AddCartItemController: Symbol.for("AddCartItemController"),
+	UpdateCartItemQuantityUseCase: Symbol.for("UpdateCartItemQuantityUseCase"),
+	UpdateCartItemQuantityController: Symbol.for(
+		"UpdateCartItemQuantityController",
+	),
 };
 
 export default TYPES;

@@ -8,6 +8,7 @@ export const CART_ROUTES = {
 	ROOT: "/",
 	BY_ID: "/:cartId",
 	ITEMS: "/:cartId/items",
+	ITEM_BY_ID: "/:cartId/items/:cartItemId",
 } as const;
 
 export const RESTAURANT_SERVICE_ENDPOINTS = {

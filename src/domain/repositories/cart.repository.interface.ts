@@ -23,4 +23,9 @@ export interface AddItemInput {
 export interface ICartRepository
 	extends IBaseRepository<Cart, unknown, UpdateCartInput> {
 	addItem(input: AddItemInput): Promise<Cart>;
+	updateItemQuantity(
+		cartId: string,
+		cartItemId: string,
+		quantity: number,
+	): Promise<Cart>;
 }

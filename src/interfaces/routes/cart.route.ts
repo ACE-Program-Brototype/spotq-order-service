@@ -3,6 +3,7 @@ import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { AddCartItemController } from "@interfaces/controllers/add-cart-item.controller.ts";
 import type { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";
+import type { UpdateCartItemQuantityController } from "@interfaces/controllers/update-cart-item-quantity.controller.ts";
 import { customerAuthMiddleware } from "@interfaces/middleware/customer-auth.middleware.ts";
 import {
 	validateRequestBody,
@@ -10,6 +11,10 @@ import {
 } from "@interfaces/middleware/validation.middleware.ts";
 import { addCartItemBodySchema } from "@interfaces/validation/add-cart-item.schema.ts";
 import { cartIdParamSchema } from "@interfaces/validation/cart-param.schema.ts";
+import {
+	updateCartItemQuantityBodySchema,
+	updateCartItemQuantityParamSchema,
+} from "@interfaces/validation/update-cart-quantity.schema.ts";
 import { Router } from "express";
 
 const cartRouter: Router = Router();
@@ -20,6 +25,10 @@ const getCartController = container.get<GetCartController>(
 const addCartItemController = container.get<AddCartItemController>(
 	TYPES.AddCartItemController,
 );
+const updateCartItemQuantityController =
+	container.get<UpdateCartItemQuantityController>(
+		TYPES.UpdateCartItemQuantityController,
+	);
 
 cartRouter.get(
 	CART_ROUTES.BY_ID,
@@ -34,6 +43,14 @@ cartRouter.post(
 	validateRequestParams(cartIdParamSchema),
 	validateRequestBody(addCartItemBodySchema),
 	(req, res) => addCartItemController.addItem(req, res),
+);
+
+cartRouter.patch(
+	CART_ROUTES.ITEM_BY_ID,
+	customerAuthMiddleware,
+	validateRequestParams(updateCartItemQuantityParamSchema),
+	validateRequestBody(updateCartItemQuantityBodySchema),
+	(req, res) => updateCartItemQuantityController.updateQuantity(req, res),
 );
 
 export default cartRouter;

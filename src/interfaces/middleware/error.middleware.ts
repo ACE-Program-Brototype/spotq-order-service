@@ -5,6 +5,7 @@ import {
 } from "@common/constants/message.constants.ts";
 import { sendErrorResponse } from "@common/response/api-response.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
+import { CartItemNotFoundError } from "@domain/errors/cart-item-not-found.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
@@ -23,6 +24,16 @@ export function errorHandler(
 			res,
 			err.message,
 			CART_ERROR_CODES.CART_NOT_FOUND,
+			HTTP_STATUS.NOT_FOUND,
+		);
+		return;
+	}
+
+	if (err instanceof CartItemNotFoundError) {
+		sendErrorResponse(
+			res,
+			err.message,
+			CART_ERROR_CODES.CART_ITEM_NOT_FOUND,
 			HTTP_STATUS.NOT_FOUND,
 		);
 		return;

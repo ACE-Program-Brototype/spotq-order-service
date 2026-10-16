@@ -251,6 +251,119 @@ export class PrismaCartRepository
 
 		return cart;
 	}
+
+	public async updateItemQuantity(
+		cartId: string,
+		cartItemId: string,
+		quantity: number,
+	): Promise<Cart> {
+		const cart = await this.prisma.$transaction(async (tx) => {
+			const existingCart = await tx.cart.findUnique({
+				where: { id: cartId },
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+				},
+			});
+
+			if (!existingCart) {
+				throw new Error("Cart not found in repository");
+			}
+
+			const existingItem = existingCart.items.find(
+				(item) => item.id === cartItemId,
+			);
+			if (!existingItem) {
+				throw new Error("Cart item not found in repository");
+			}
+
+			if (quantity === 0) {
+				await tx.cartItemAddon.deleteMany({
+					where: { cartItemId },
+				});
+				await tx.cartItem.delete({
+					where: { id: cartItemId },
+				});
+			} else {
+				const addonsTotal = existingItem.addons.reduce(
+					(sum, a) => sum + Number(a.price || 0),
+					0,
+				);
+				const newTotalPrice =
+					(Number(existingItem.unitPrice) + addonsTotal) * quantity;
+
+				await tx.cartItem.update({
+					where: { id: cartItemId },
+					data: {
+						quantity,
+						totalPrice: newTotalPrice,
+					},
+				});
+			}
+
+			const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+			const reloadedRecord = await tx.cart.update({
+				where: { id: cartId },
+				data: {
+					expiresAt: newExpiresAt,
+				},
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+				},
+			});
+
+			const isExpired = Date.now() > reloadedRecord.expiresAt.getTime();
+			const status = isExpired ? CartStatus.EXPIRED : CartStatus.ACTIVE;
+
+			const items = reloadedRecord.items.map(
+				(item) =>
+					new CartItem({
+						id: item.id,
+						cartId: item.cartId,
+						menuItemId: item.menuItemId,
+						menuItemName: item.menuItemName,
+						variantId: item.variantId,
+						variantName: item.variantName,
+						quantity: item.quantity,
+						unitPrice: Number(item.unitPrice),
+						totalPrice: Number(item.totalPrice),
+						specialInstructions: item.specialInstructions,
+						addons: item.addons.map(
+							(addon) =>
+								new CartItemAddon({
+									id: addon.id,
+									cartItemId: addon.cartItemId,
+									addonId: addon.addonId,
+									addonName: addon.addonName,
+									price: Number(addon.price),
+								}),
+						),
+						createdAt: item.createdAt,
+						updatedAt: item.updatedAt,
+					}),
+			);
+
+			return new Cart({
+				id: reloadedRecord.id,
+				restaurantId: reloadedRecord.restaurantId,
+				userId: reloadedRecord.userId,
+				status,
+				expiresAt: reloadedRecord.expiresAt,
+				items,
+				createdAt: reloadedRecord.createdAt,
+				updatedAt: reloadedRecord.updatedAt,
+			});
+		});
+
+		return cart;
+	}
 }
 
 export default PrismaCartRepository;
