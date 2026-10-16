@@ -2,6 +2,7 @@ import { CART_ROUTES } from "@common/constants/routes.constants.ts";
 import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { AddCartItemController } from "@interfaces/controllers/add-cart-item.controller.ts";
+import type { ClearCartController } from "@interfaces/controllers/clear-cart.controller.ts";
 import type { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";
 import type { RemoveCartItemController } from "@interfaces/controllers/remove-cart-item.controller.ts";
 import type { UpdateCartItemQuantityController } from "@interfaces/controllers/update-cart-item-quantity.controller.ts";
@@ -34,12 +35,22 @@ const updateCartItemQuantityController =
 const removeCartItemController = container.get<RemoveCartItemController>(
 	TYPES.RemoveCartItemController,
 );
+const clearCartController = container.get<ClearCartController>(
+	TYPES.ClearCartController,
+);
 
 cartRouter.get(
 	CART_ROUTES.BY_ID,
 	customerAuthMiddleware,
 	validateRequestParams(cartIdParamSchema),
 	(req, res) => getCartController.getCart(req, res),
+);
+
+cartRouter.delete(
+	CART_ROUTES.BY_ID,
+	customerAuthMiddleware,
+	validateRequestParams(cartIdParamSchema),
+	(req, res) => clearCartController.clearCart(req, res),
 );
 
 cartRouter.post(

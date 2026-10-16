@@ -368,6 +368,64 @@ export class PrismaCartRepository
 	public async removeItem(cartId: string, cartItemId: string): Promise<Cart> {
 		return this.updateItemQuantity(cartId, cartItemId, 0);
 	}
+
+	public async clearCart(cartId: string): Promise<Cart> {
+		const cart = await this.prisma.$transaction(async (tx) => {
+			const existingCart = await tx.cart.findUnique({
+				where: { id: cartId },
+				include: {
+					items: {
+						select: { id: true },
+					},
+				},
+			});
+
+			if (!existingCart) {
+				throw new Error("Cart not found in repository");
+			}
+
+			const itemIds = existingCart.items.map((item) => item.id);
+			if (itemIds.length > 0) {
+				await tx.cartItemAddon.deleteMany({
+					where: { cartItemId: { in: itemIds } },
+				});
+				await tx.cartItem.deleteMany({
+					where: { cartId },
+				});
+			}
+
+			const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+			const reloadedRecord = await tx.cart.update({
+				where: { id: cartId },
+				data: {
+					expiresAt: newExpiresAt,
+				},
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+				},
+			});
+
+			const isExpired = Date.now() > reloadedRecord.expiresAt.getTime();
+			const status = isExpired ? CartStatus.EXPIRED : CartStatus.ACTIVE;
+
+			return new Cart({
+				id: reloadedRecord.id,
+				restaurantId: reloadedRecord.restaurantId,
+				userId: reloadedRecord.userId,
+				status,
+				expiresAt: reloadedRecord.expiresAt,
+				items: [],
+				createdAt: reloadedRecord.createdAt,
+				updatedAt: reloadedRecord.updatedAt,
+			});
+		});
+
+		return cart;
+	}
 }
 
 export default PrismaCartRepository;

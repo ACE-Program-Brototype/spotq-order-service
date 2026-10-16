@@ -19,8 +19,8 @@ export class Cart {
 		this.status = props.status;
 		this.expiresAt = props.expiresAt;
 		this.items = (props.items ?? []).map((item) => new CartItem(item));
-		this.createdAt = props.createdAt;
-		this.updatedAt = props.updatedAt;
+		this.createdAt = props.createdAt ?? new Date();
+		this.updatedAt = props.updatedAt ?? new Date();
 	}
 
 	public isExpired(now: Date = new Date()): boolean {

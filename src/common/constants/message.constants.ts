@@ -15,6 +15,7 @@ export const CART_MESSAGES = {
 	ITEM_ADDED_SUCCESS: "Cart item added successfully",
 	ITEM_UPDATED_SUCCESS: "Cart item quantity updated successfully",
 	ITEM_REMOVED_SUCCESS: "Cart item removed successfully",
+	CART_CLEARED_SUCCESS: "Cart cleared successfully",
 	ITEM_NOT_FOUND: "Cart item not found in this cart",
 	INVALID_CART_ITEM_ID: "Invalid cart item ID format",
 	INVALID_UPDATE_QUANTITY: "Quantity must be an integer between 0 and 20",

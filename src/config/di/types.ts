@@ -12,6 +12,8 @@ export const TYPES = {
 	),
 	RemoveCartItemUseCase: Symbol.for("RemoveCartItemUseCase"),
 	RemoveCartItemController: Symbol.for("RemoveCartItemController"),
+	ClearCartUseCase: Symbol.for("ClearCartUseCase"),
+	ClearCartController: Symbol.for("ClearCartController"),
 };
 
 export default TYPES;
