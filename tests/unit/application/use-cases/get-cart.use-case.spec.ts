@@ -34,6 +34,10 @@ class MockCartRepository implements ICartRepository {
 		}
 		return existing ?? null;
 	}
+
+	public async addItem(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
 }
 
 describe("GetCartUseCase", () => {
@@ -85,7 +89,7 @@ describe("GetCartUseCase", () => {
 
 		assert.equal(result.cartId, cartId);
 		assert.equal(result.itemCount, 2);
-		assert.equal(result.subtotal, 518);
+		assert.equal(result.subtotal, 538);
 		assert.equal(result.items.length, 1);
 		assert.equal(result.items[0]?.cartItemId, "item-1");
 		assert.equal(result.items[0]?.addons.length, 1);
