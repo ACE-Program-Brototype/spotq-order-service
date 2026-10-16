@@ -37,7 +37,38 @@ export class CartItem {
 			(sum, addon) => sum + addon.price,
 			0,
 		);
-		return Number((this.unitPrice * this.quantity + addonsTotal).toFixed(2));
+		return Number(((this.unitPrice + addonsTotal) * this.quantity).toFixed(2));
+	}
+
+	public matchesConfiguration(
+		menuItemId: string,
+		variantId?: string | null,
+		addonIds?: string[],
+		specialInstructions?: string | null,
+	): boolean {
+		if (this.menuItemId !== menuItemId) {
+			return false;
+		}
+
+		const thisVariant = this.variantId ?? null;
+		const targetVariant = variantId ?? null;
+		if (thisVariant !== targetVariant) {
+			return false;
+		}
+
+		const thisInstructions = (this.specialInstructions ?? "").trim();
+		const targetInstructions = (specialInstructions ?? "").trim();
+		if (thisInstructions !== targetInstructions) {
+			return false;
+		}
+
+		const thisAddonIds = this.addons
+			.map((addon) => addon.addonId)
+			.sort()
+			.join(",");
+		const targetAddonIds = [...(addonIds ?? [])].sort().join(",");
+
+		return thisAddonIds === targetAddonIds;
 	}
 }
 
