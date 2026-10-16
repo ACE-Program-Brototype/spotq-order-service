@@ -101,4 +101,27 @@ describe("MenuItemCatalogGateway", () => {
 			globalThis.fetch = originalFetch;
 		}
 	});
+
+	it("should include x-caller-service header in outgoing request", async () => {
+		let capturedHeaders: Record<string, string> | undefined;
+		const originalFetch = globalThis.fetch;
+		globalThis.fetch = async (
+			_url: string | URL | Request,
+			init?: RequestInit,
+		) => {
+			capturedHeaders = init?.headers as Record<string, string>;
+			return {
+				status: 404,
+				ok: false,
+			} as unknown as Response;
+		};
+
+		try {
+			const gateway = new MenuItemCatalogGateway();
+			await gateway.getItemDetails(restaurantId, menuItemId, variantId);
+			assert.equal(capturedHeaders?.["x-caller-service"], "order-service");
+		} finally {
+			globalThis.fetch = originalFetch;
+		}
+	});
 });

@@ -11,6 +11,8 @@ export const CART_ROUTES = {
 } as const;
 
 export const RESTAURANT_SERVICE_ENDPOINTS = {
+	INTERNAL_MENU_ITEM: (restaurantId: string, menuItemId: string) =>
+		`/api/internal/v1/restaurants/${restaurantId}/menu/items/${menuItemId}`,
 	CUSTOMER_MENU_ITEM: (restaurantId: string, menuItemId: string) =>
 		`/customer/${restaurantId}/menu/items/${menuItemId}`,
 } as const;
