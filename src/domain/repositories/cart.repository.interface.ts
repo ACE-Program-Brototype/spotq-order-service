@@ -28,4 +28,5 @@ export interface ICartRepository
 		cartItemId: string,
 		quantity: number,
 	): Promise<Cart>;
+	removeItem(cartId: string, cartItemId: string): Promise<Cart>;
 }

@@ -10,6 +10,8 @@ export const TYPES = {
 	UpdateCartItemQuantityController: Symbol.for(
 		"UpdateCartItemQuantityController",
 	),
+	RemoveCartItemUseCase: Symbol.for("RemoveCartItemUseCase"),
+	RemoveCartItemController: Symbol.for("RemoveCartItemController"),
 };
 
 export default TYPES;

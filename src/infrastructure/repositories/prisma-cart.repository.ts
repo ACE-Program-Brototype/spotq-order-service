@@ -364,6 +364,10 @@ export class PrismaCartRepository
 
 		return cart;
 	}
+
+	public async removeItem(cartId: string, cartItemId: string): Promise<Cart> {
+		return this.updateItemQuantity(cartId, cartItemId, 0);
+	}
 }
 
 export default PrismaCartRepository;
