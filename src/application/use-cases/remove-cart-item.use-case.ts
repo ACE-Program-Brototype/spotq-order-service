@@ -2,13 +2,13 @@ import type {
 	RemoveCartItemRequestDto,
 	RemoveCartItemResponseDto,
 } from "@application/dtos/remove-cart-item.dto.ts";
+import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/remove-cart-item.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartItemNotFoundError } from "@domain/errors/cart-item-not-found.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -28,9 +28,7 @@ export class RemoveCartItemUseCase implements IRemoveCartItemUseCase {
 			throw new CartNotFoundError();
 		}
 
-		if (cart.userId !== dto.authenticatedUserId) {
-			throw new ForbiddenCartAccessError();
-		}
+		cart.validateAccess(dto.authenticatedUserId);
 
 		if (cart.isExpired()) {
 			if (cart.status !== CartStatus.EXPIRED) {
@@ -51,20 +49,7 @@ export class RemoveCartItemUseCase implements IRemoveCartItemUseCase {
 			dto.cartItemId,
 		);
 
-		return {
-			cartId: updatedCart.id,
-			restaurantId: updatedCart.restaurantId,
-			itemCount: updatedCart.calculateItemCount(),
-			subtotal: updatedCart.calculateSubtotal(),
-			updatedAt: updatedCart.updatedAt.toISOString(),
-			items: updatedCart.items.map((item) => ({
-				cartItemId: item.id,
-				menuItemId: item.menuItemId,
-				quantity: item.quantity,
-				unitPrice: item.unitPrice,
-				totalPrice: item.totalPrice,
-			})),
-		};
+		return CartResponseMapper.toMutationDto(updatedCart);
 	}
 }
 

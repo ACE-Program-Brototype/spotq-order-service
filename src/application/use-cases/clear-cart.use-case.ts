@@ -7,7 +7,6 @@ import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -27,9 +26,7 @@ export class ClearCartUseCase implements IClearCartUseCase {
 			throw new CartNotFoundError();
 		}
 
-		if (cart.userId !== dto.authenticatedUserId) {
-			throw new ForbiddenCartAccessError();
-		}
+		cart.validateAccess(dto.authenticatedUserId);
 
 		if (cart.isExpired()) {
 			if (cart.status !== CartStatus.EXPIRED) {

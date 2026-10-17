@@ -2,6 +2,7 @@ import type {
 	UpdateCartItemQuantityRequestDto,
 	UpdateCartItemQuantityResponseDto,
 } from "@application/dtos/update-cart-item-quantity.dto.ts";
+import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/gateways/menu-item-catalog.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/update-cart-item-quantity.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -9,7 +10,6 @@ import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartItemNotFoundError } from "@domain/errors/cart-item-not-found.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
 import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
 import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
@@ -35,9 +35,7 @@ export class UpdateCartItemQuantityUseCase
 			throw new CartNotFoundError();
 		}
 
-		if (cart.userId !== dto.authenticatedUserId) {
-			throw new ForbiddenCartAccessError();
-		}
+		cart.validateAccess(dto.authenticatedUserId);
 
 		if (cart.isExpired()) {
 			if (cart.status !== CartStatus.EXPIRED) {
@@ -103,20 +101,7 @@ export class UpdateCartItemQuantityUseCase
 			dto.quantity,
 		);
 
-		return {
-			cartId: updatedCart.id,
-			restaurantId: updatedCart.restaurantId,
-			itemCount: updatedCart.calculateItemCount(),
-			subtotal: updatedCart.calculateSubtotal(),
-			updatedAt: updatedCart.updatedAt.toISOString(),
-			items: updatedCart.items.map((item) => ({
-				cartItemId: item.id,
-				menuItemId: item.menuItemId,
-				quantity: item.quantity,
-				unitPrice: item.unitPrice,
-				totalPrice: item.totalPrice,
-			})),
-		};
+		return CartResponseMapper.toMutationDto(updatedCart);
 	}
 }
 
