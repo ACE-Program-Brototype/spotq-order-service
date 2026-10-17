@@ -6,6 +6,12 @@ export interface IEntityMapper<TDomain, TModel> {
 	toPersistence?(entity: TDomain): Record<string, unknown>;
 }
 
+export interface PrismaErrorLike {
+	code?: string;
+	meta?: { target?: string[] | string };
+	message?: string;
+}
+
 @injectable()
 export abstract class PrismaBaseRepository<
 	TDomain extends { id: string },
@@ -25,6 +31,25 @@ export abstract class PrismaBaseRepository<
 		return this.dbModel;
 	}
 
+	public async find(filter: Record<string, unknown> = {}): Promise<TDomain[]> {
+		try {
+			if (!this.delegate?.findMany) {
+				return [];
+			}
+			const records = (await this.delegate.findMany({
+				where: filter,
+			})) as TModel[];
+			return records.map((record) =>
+				this.mapper
+					? this.mapper.toDomain(record)
+					: (record as unknown as TDomain),
+			);
+		} catch (error) {
+			this.handlePrismaError(error, filter);
+			throw error;
+		}
+	}
+
 	public async findById(id: string): Promise<TDomain | null> {
 		try {
 			if (!this.delegate?.findUnique) {
@@ -41,6 +66,23 @@ export abstract class PrismaBaseRepository<
 				: (record as unknown as TDomain);
 		} catch (error) {
 			this.handlePrismaError(error, id);
+			throw error;
+		}
+	}
+
+	public async create(data: TCreateInput): Promise<TDomain> {
+		try {
+			if (!this.delegate?.create) {
+				throw new Error("Delegate does not support create operation");
+			}
+			const record = (await this.delegate.create({
+				data: data as Record<string, unknown>,
+			})) as TModel;
+			return this.mapper
+				? this.mapper.toDomain(record)
+				: (record as unknown as TDomain);
+		} catch (error) {
+			this.handlePrismaError(error, data);
 			throw error;
 		}
 	}
@@ -89,7 +131,28 @@ export abstract class PrismaBaseRepository<
 		}
 	}
 
-	protected handlePrismaError(_error: unknown, _context?: unknown): void {}
+	protected handlePrismaError(error: unknown, context?: unknown): void {
+		const prismaError = error as PrismaErrorLike;
+		const code = prismaError?.code;
+
+		if (code === "P2002") {
+			const target = prismaError?.meta?.target;
+			const targetStr = Array.isArray(target)
+				? target.join(", ")
+				: String(target || "resource");
+			throw new Error(`Unique constraint violation on ${targetStr}`);
+		}
+
+		if (code === "P2025") {
+			throw new Error(
+				`Record not found in database for context: ${JSON.stringify(context ?? "unknown")}`,
+			);
+		}
+
+		if (code === "P2003") {
+			throw new Error("Foreign key constraint failed in database operation");
+		}
+	}
 }
 
 export default PrismaBaseRepository;
