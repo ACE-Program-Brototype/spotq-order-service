@@ -1,11 +1,7 @@
 import { CART_ROUTES } from "@common/constants/routes.constants.ts";
 import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
-import type { AddCartItemController } from "@interfaces/controllers/add-cart-item.controller.ts";
-import type { ClearCartController } from "@interfaces/controllers/clear-cart.controller.ts";
-import type { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";
-import type { RemoveCartItemController } from "@interfaces/controllers/remove-cart-item.controller.ts";
-import type { UpdateCartItemQuantityController } from "@interfaces/controllers/update-cart-item-quantity.controller.ts";
+import type { CartController } from "@interfaces/controllers/cart.controller.ts";
 import { customerAuthMiddleware } from "@interfaces/middleware/customer-auth.middleware.ts";
 import {
 	validateRequestBody,
@@ -22,35 +18,20 @@ import { Router } from "express";
 
 const cartRouter: Router = Router();
 
-const getCartController = container.get<GetCartController>(
-	TYPES.GetCartController,
-);
-const addCartItemController = container.get<AddCartItemController>(
-	TYPES.AddCartItemController,
-);
-const updateCartItemQuantityController =
-	container.get<UpdateCartItemQuantityController>(
-		TYPES.UpdateCartItemQuantityController,
-	);
-const removeCartItemController = container.get<RemoveCartItemController>(
-	TYPES.RemoveCartItemController,
-);
-const clearCartController = container.get<ClearCartController>(
-	TYPES.ClearCartController,
-);
+const cartController = container.get<CartController>(TYPES.CartController);
 
 cartRouter.get(
 	CART_ROUTES.BY_ID,
 	customerAuthMiddleware,
 	validateRequestParams(cartIdParamSchema),
-	(req, res) => getCartController.getCart(req, res),
+	cartController.getCart,
 );
 
 cartRouter.delete(
 	CART_ROUTES.BY_ID,
 	customerAuthMiddleware,
 	validateRequestParams(cartIdParamSchema),
-	(req, res) => clearCartController.clearCart(req, res),
+	cartController.clearCart,
 );
 
 cartRouter.post(
@@ -58,7 +39,7 @@ cartRouter.post(
 	customerAuthMiddleware,
 	validateRequestParams(cartIdParamSchema),
 	validateRequestBody(addCartItemBodySchema),
-	(req, res) => addCartItemController.addItem(req, res),
+	cartController.addItem,
 );
 
 cartRouter.patch(
@@ -66,14 +47,14 @@ cartRouter.patch(
 	customerAuthMiddleware,
 	validateRequestParams(updateCartItemQuantityParamSchema),
 	validateRequestBody(updateCartItemQuantityBodySchema),
-	(req, res) => updateCartItemQuantityController.updateQuantity(req, res),
+	cartController.updateQuantity,
 );
 
 cartRouter.delete(
 	CART_ROUTES.ITEM_BY_ID,
 	customerAuthMiddleware,
 	validateRequestParams(cartItemParamSchema),
-	(req, res) => removeCartItemController.removeItem(req, res),
+	cartController.removeItem,
 );
 
 export default cartRouter;

@@ -16,6 +16,7 @@ import prisma from "@infrastructure/database/prisma.ts";
 import { MenuItemCatalogGateway } from "@infrastructure/gateways/menu-item-catalog.gateway.ts";
 import { PrismaCartRepository } from "@infrastructure/repositories/prisma-cart.repository.ts";
 import { AddCartItemController } from "@interfaces/controllers/add-cart-item.controller.ts";
+import { CartController } from "@interfaces/controllers/cart.controller.ts";
 import { ClearCartController } from "@interfaces/controllers/clear-cart.controller.ts";
 import { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";
 import { RemoveCartItemController } from "@interfaces/controllers/remove-cart-item.controller.ts";
@@ -86,6 +87,11 @@ container
 container
 	.bind<ClearCartController>(TYPES.ClearCartController)
 	.to(ClearCartController)
+	.inSingletonScope();
+
+container
+	.bind<CartController>(TYPES.CartController)
+	.to(CartController)
 	.inSingletonScope();
 
 export { container };
