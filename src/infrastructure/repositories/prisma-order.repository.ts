@@ -4,7 +4,7 @@ import type {
 	GetOrdersOverviewRepoResult,
 	IOrderRepository,
 } from "@domain/repositories/order.repository.interface.ts";
-import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
+import { Prisma, type PrismaClient } from "@generated/prisma/client.ts";
 import { OrderStatus } from "@generated/prisma/enums.ts";
 import { OrderPersistenceMapper } from "@infrastructure/database/mappers/order.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/repositories/prisma-base.repository.ts";
@@ -114,7 +114,8 @@ export class PrismaOrderRepository
 		const preparingOrders = statusCountMap[OrderStatus.PREPARING] ?? 0;
 		const readyOrders = statusCountMap[OrderStatus.READY] ?? 0;
 
-		const grossRevenue = Number(revenueAggregate._sum.grandTotal ?? 0);
+		const grossRevenue =
+			revenueAggregate._sum.grandTotal ?? new Prisma.Decimal(0);
 
 		const orders = OrderPersistenceMapper.toOverviewItemList(ordersRecords);
 
@@ -139,5 +140,3 @@ export class PrismaOrderRepository
 		};
 	}
 }
-
-export default PrismaOrderRepository;

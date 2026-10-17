@@ -1,3 +1,4 @@
+import type { Prisma } from "@generated/prisma/client.ts";
 import type { OrderStatus } from "@generated/prisma/enums.ts";
 
 export interface GetOrdersOverviewRepoParams {
@@ -12,7 +13,7 @@ export interface GetOrdersOverviewRepoParams {
 
 export interface OrderOverviewSummaryData {
 	totalOrders: number;
-	grossRevenue: number;
+	grossRevenue: Prisma.Decimal;
 	completedOrders: number;
 	cancelledOrders: number;
 	pendingOrders: number;
@@ -25,7 +26,7 @@ export interface OrderOverviewItemData {
 	orderNumber: string;
 	orderStatus: string;
 	userId: string | null;
-	grandTotal: number;
+	grandTotal: Prisma.Decimal;
 	itemsCount: number;
 	createdAt: Date;
 }

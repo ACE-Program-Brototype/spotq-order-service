@@ -1,11 +1,12 @@
 import type { OrderOverviewItemData } from "@domain/repositories/order.repository.interface.ts";
+import type { Prisma } from "@generated/prisma/client.ts";
 
 export interface PrismaOrderOverviewRecord {
 	id: string;
 	orderNumber: string;
 	orderStatus: string;
 	userId: string | null;
-	grandTotal: unknown;
+	grandTotal: Prisma.Decimal;
 	_count: {
 		items: number;
 	};
@@ -19,7 +20,7 @@ export const OrderPersistenceMapper = {
 			orderNumber: record.orderNumber,
 			orderStatus: record.orderStatus,
 			userId: record.userId,
-			grandTotal: Number(record.grandTotal),
+			grandTotal: record.grandTotal,
 			itemsCount: record._count.items,
 			createdAt: record.createdAt,
 		};
@@ -33,5 +34,3 @@ export const OrderPersistenceMapper = {
 		);
 	},
 };
-
-export default OrderPersistenceMapper;
