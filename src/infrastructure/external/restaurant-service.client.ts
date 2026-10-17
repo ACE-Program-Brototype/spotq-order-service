@@ -5,6 +5,7 @@ import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { RESTAURANT_SERVICE_ROUTES } from "@common/constants/routes.constants.ts";
 import { SERVICES } from "@common/constants/services.constants.ts";
 import env from "@config/env.ts";
+import { DomainError } from "@domain/errors/domain.error.ts";
 import { ForbiddenRestaurantAccessError } from "@domain/errors/forbidden-restaurant-access.error.ts";
 import { RestaurantNotEligibleError } from "@domain/errors/restaurant-not-eligible.error.ts";
 import { RestaurantNotFoundError } from "@domain/errors/restaurant-not-found.error.ts";
@@ -15,7 +16,7 @@ import { injectable } from "inversify";
 
 interface ApiResponseEnvelope<T> {
 	success: boolean;
-	data: T;
+	data?: T;
 	message?: string;
 }
 
@@ -43,7 +44,20 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 				timeout: RestaurantServiceClient.REQUEST_TIMEOUT_MS,
 			});
 
-			const validationData = response.data?.data;
+			const responseBody = response.data;
+
+			if (responseBody?.success !== true) {
+				logger.error(
+					{ restaurantId, response: responseBody },
+					"Restaurant service returned unsuccessful validation response",
+				);
+				throw new Error(
+					responseBody?.message ||
+						"Failed to validate restaurant from restaurant-service",
+				);
+			}
+
+			const validationData = responseBody.data;
 
 			if (!validationData) {
 				throw new RestaurantNotFoundError(
@@ -65,11 +79,7 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 
 			return validationData;
 		} catch (error) {
-			if (
-				error instanceof RestaurantNotFoundError ||
-				error instanceof RestaurantNotEligibleError ||
-				error instanceof ForbiddenRestaurantAccessError
-			) {
+			if (error instanceof DomainError) {
 				throw error;
 			}
 
@@ -116,5 +126,3 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 		}
 	}
 }
-
-export default RestaurantServiceClient;
