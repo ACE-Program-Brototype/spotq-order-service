@@ -1,9 +1,9 @@
-import { OrdersOverviewMapper } from "@application/mappers/orders-overview.mapper.ts";
-import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/get-orders-overview.use-case.port.ts";
+import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port.ts";
 import { HTTP_STATUS } from "@common/constants/http.constants.ts";
 import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { sendSuccessResponse } from "@common/response/api-response.ts";
 import { TYPES } from "@config/di/types.ts";
+import { RestaurantOrderRequestMapper } from "@interfaces/mappers/restaurant-order-request.mapper.ts";
 import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 
@@ -18,7 +18,7 @@ export class RestaurantOrderController {
 		req: Request,
 		res: Response,
 	): Promise<void> => {
-		const inputDto = OrdersOverviewMapper.toInputDto(req);
+		const inputDto = RestaurantOrderRequestMapper.toOrdersOverviewInputDto(req);
 		const result = await this.getOrdersOverviewUseCase.execute(inputDto);
 
 		sendSuccessResponse(

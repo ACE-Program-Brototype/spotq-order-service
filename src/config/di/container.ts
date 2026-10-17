@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
 import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
-import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/get-orders-overview.use-case.port.ts";
+import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import { GetCartUseCase } from "@application/use-cases/get-cart.use-case.ts";
 import { GetOrdersOverviewUseCase } from "@application/use-cases/get-orders-overview.use-case.ts";
 import { TYPES } from "@config/di/types.ts";

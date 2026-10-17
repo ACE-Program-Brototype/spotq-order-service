@@ -1,26 +1,7 @@
-import type {
-	GetOrdersOverviewInputDto,
-	OrdersOverviewResponseDto,
-} from "@application/dtos/get-orders-overview.dto.ts";
+import type { OrdersOverviewResponseDto } from "@application/dtos/orders/get-orders-overview.dto.ts";
 import type { GetOrdersOverviewRepoResult } from "@domain/repositories/order.repository.interface.ts";
-import type { OrdersOverviewQuery } from "@interfaces/validation/orders-overview-query.schema.ts";
-import type { Request } from "express";
 
 export const OrdersOverviewMapper = {
-	toInputDto(req: Request): GetOrdersOverviewInputDto {
-		const query = req.query as unknown as OrdersOverviewQuery;
-		return {
-			restaurantId: req.params.restaurantId as string,
-			authenticatedRestaurantId: req.restaurantAdmin?.restaurantId,
-			from: query?.from,
-			to: query?.to,
-			status: query?.status,
-			search: query?.search,
-			page: query?.page ?? 1,
-			limit: query?.limit ?? 20,
-		};
-	},
-
 	toResponseDto(
 		repoResult: GetOrdersOverviewRepoResult,
 	): OrdersOverviewResponseDto {
