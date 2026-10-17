@@ -8,7 +8,7 @@ import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 
 @injectable()
-export class GetOrdersOverviewController {
+export class RestaurantOrderController {
 	constructor(
 		@inject(TYPES.GetOrdersOverviewUseCase)
 		private readonly getOrdersOverviewUseCase: IGetOrdersOverviewUseCase,
@@ -30,4 +30,4 @@ export class GetOrdersOverviewController {
 	};
 }
 
-export default GetOrdersOverviewController;
+export default RestaurantOrderController;

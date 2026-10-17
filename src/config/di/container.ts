@@ -12,7 +12,7 @@ import { RestaurantServiceClient } from "@infrastructure/external/restaurant-ser
 import { PrismaCartRepository } from "@infrastructure/repositories/prisma-cart.repository.ts";
 import { PrismaOrderRepository } from "@infrastructure/repositories/prisma-order.repository.ts";
 import { GetCartController } from "@interfaces/controllers/get-cart.controller.ts";
-import { GetOrdersOverviewController } from "@interfaces/controllers/get-orders-overview.controller.ts";
+import { RestaurantOrderController } from "@interfaces/controllers/restaurant-order.controller.ts";
 import { Container } from "inversify";
 
 const container = new Container();
@@ -50,8 +50,8 @@ container
 	.inSingletonScope();
 
 container
-	.bind<GetOrdersOverviewController>(TYPES.GetOrdersOverviewController)
-	.to(GetOrdersOverviewController)
+	.bind<RestaurantOrderController>(TYPES.RestaurantOrderController)
+	.to(RestaurantOrderController)
 	.inSingletonScope();
 
 export { container };

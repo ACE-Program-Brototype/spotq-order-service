@@ -1,7 +1,7 @@
 import { RESTAURANT_ORDER_ROUTES } from "@common/constants/routes.constants.ts";
 import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
-import type { GetOrdersOverviewController } from "@interfaces/controllers/get-orders-overview.controller.ts";
+import type { RestaurantOrderController } from "@interfaces/controllers/restaurant-order.controller.ts";
 import { restaurantAdminAuthMiddleware } from "@interfaces/middleware/restaurant-admin-auth.middleware.ts";
 import {
 	validateRequestParams,
@@ -13,8 +13,8 @@ import { Router } from "express";
 
 const restaurantOrderRouter: Router = Router();
 
-const getOrdersOverviewController = container.get<GetOrdersOverviewController>(
-	TYPES.GetOrdersOverviewController,
+const restaurantOrderController = container.get<RestaurantOrderController>(
+	TYPES.RestaurantOrderController,
 );
 
 restaurantOrderRouter.get(
@@ -22,7 +22,7 @@ restaurantOrderRouter.get(
 	restaurantAdminAuthMiddleware,
 	validateRequestParams(restaurantIdParamSchema),
 	validateRequestQuery(ordersOverviewQuerySchema),
-	getOrdersOverviewController.getOrdersOverview,
+	restaurantOrderController.getOrdersOverview,
 );
 
 export default restaurantOrderRouter;

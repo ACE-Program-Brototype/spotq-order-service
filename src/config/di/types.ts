@@ -6,7 +6,7 @@ export const TYPES = {
 	RestaurantServiceClient: Symbol.for("RestaurantServiceClient"),
 	OrderRepository: Symbol.for("OrderRepository"),
 	GetOrdersOverviewUseCase: Symbol.for("GetOrdersOverviewUseCase"),
-	GetOrdersOverviewController: Symbol.for("GetOrdersOverviewController"),
+	RestaurantOrderController: Symbol.for("RestaurantOrderController"),
 };
 
 export default TYPES;

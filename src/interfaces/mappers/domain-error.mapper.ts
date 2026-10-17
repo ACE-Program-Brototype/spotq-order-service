@@ -23,9 +23,6 @@ export const DOMAIN_ERROR_STATUS_MAP: Record<string, HttpStatusCode> = {
 	[ORDER_ERROR_CODES.FORBIDDEN_RESTAURANT_ACCESS]: HTTP_STATUS.FORBIDDEN,
 };
 
-/**
- * Maps a domain error instance to a standardized HTTP response structure.
- */
 export function domainErrorMapper(err: DomainError): MappedDomainError {
 	const statusCode =
 		DOMAIN_ERROR_STATUS_MAP[err.errorCode] ?? HTTP_STATUS.BAD_REQUEST;
