@@ -19,12 +19,26 @@ const testMapper: IEntityMapper<TestEntity, TestModel> = {
 	toDomain: (model) => ({ id: model.id, name: model.name }),
 };
 
+interface MockDelegate {
+	findMany?: (args?: unknown) => Promise<TestModel[]>;
+	findUnique?: (args: { where: { id: string } }) => Promise<TestModel | null>;
+	create?: (args: { data: Record<string, unknown> }) => Promise<TestModel>;
+	update?: (args: {
+		where: { id: string };
+		data: Record<string, unknown>;
+	}) => Promise<TestModel>;
+	delete?: (args: { where: { id: string } }) => Promise<TestModel>;
+	count?: (args: { where: { id: string } }) => Promise<number>;
+}
+
 class ConcreteTestRepository extends PrismaBaseRepository<
 	TestEntity,
 	TestModel,
-	any
+	MockDelegate,
+	Record<string, unknown>,
+	Record<string, unknown>
 > {
-	constructor(mockDelegate: any) {
+	constructor(mockDelegate: MockDelegate) {
 		super(mockDelegate, testMapper);
 	}
 
@@ -60,9 +74,9 @@ describe("PrismaBaseRepository", () => {
 
 	it("should create new record and map to domain", async () => {
 		const mockDelegate = {
-			create: async ({ data }: { data: any }) => ({
+			create: async ({ data }: { data: Record<string, unknown> }) => ({
 				id: "new-1",
-				name: data.name,
+				name: data.name as string,
 			}),
 		};
 		const repo = new ConcreteTestRepository(mockDelegate);
@@ -78,10 +92,10 @@ describe("PrismaBaseRepository", () => {
 				data,
 			}: {
 				where: { id: string };
-				data: any;
+				data: Record<string, unknown>;
 			}) => ({
 				id: where.id,
-				name: data.name,
+				name: data.name as string,
 			}),
 		};
 		const repo = new ConcreteTestRepository(mockDelegate);

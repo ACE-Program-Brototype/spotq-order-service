@@ -154,11 +154,15 @@ describe("CartController", () => {
 			user: { userId: "user-1" },
 			body: { quantity: 3 },
 		} as unknown as Request;
-		const { res, getStatus } = createMockResponse();
+		const { res, getStatus, getBody } = createMockResponse();
 
 		await controller.updateQuantity(req, res);
 
 		assert.equal(getStatus(), HttpStatus.OK);
+		assert.equal(
+			(getBody() as { message: string }).message,
+			CART_MESSAGES.ITEM_UPDATED_SUCCESS,
+		);
 	});
 
 	it("should remove item successfully", async () => {
@@ -174,11 +178,15 @@ describe("CartController", () => {
 			params: { cartId: "cart-1", cartItemId: "item-1" },
 			user: { userId: "user-1" },
 		} as unknown as Request;
-		const { res, getStatus } = createMockResponse();
+		const { res, getStatus, getBody } = createMockResponse();
 
 		await controller.removeItem(req, res);
 
 		assert.equal(getStatus(), HttpStatus.OK);
+		assert.equal(
+			(getBody() as { message: string }).message,
+			CART_MESSAGES.ITEM_REMOVED_SUCCESS,
+		);
 	});
 
 	it("should clear cart successfully", async () => {
@@ -194,11 +202,15 @@ describe("CartController", () => {
 			params: { cartId: "cart-1" },
 			user: { userId: "user-1" },
 		} as unknown as Request;
-		const { res, getStatus } = createMockResponse();
+		const { res, getStatus, getBody } = createMockResponse();
 
 		await controller.clearCart(req, res);
 
 		assert.equal(getStatus(), HttpStatus.OK);
+		assert.equal(
+			(getBody() as { message: string }).message,
+			CART_MESSAGES.CART_CLEARED_SUCCESS,
+		);
 	});
 
 	it("should bubble domain errors to error middleware", async () => {
