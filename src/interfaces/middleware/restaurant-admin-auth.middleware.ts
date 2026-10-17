@@ -10,20 +10,7 @@ import type { NextFunction, Request, Response } from "express";
 
 const REQUIRED_ROLE = "RESTAURANT_OWNER";
 
-export interface AuthenticatedRestaurantAdmin {
-	userId: string;
-	restaurantId: string;
-	role: string;
-	email?: string | undefined;
-}
-
-declare global {
-	namespace Express {
-		interface Request {
-			restaurantAdmin?: AuthenticatedRestaurantAdmin;
-		}
-	}
-}
+export type { AuthenticatedRestaurantAdmin } from "@/types/express.d.ts";
 
 function getHeaderValue(
 	header: string | string[] | undefined,
