@@ -2,7 +2,6 @@ import type { OrderStatus } from "@generated/prisma/enums.ts";
 
 export interface GetOrdersOverviewInputDto {
 	restaurantId: string;
-	authenticatedRestaurantId?: string | undefined;
 	from?: Date | undefined;
 	to?: Date | undefined;
 	status?: OrderStatus | undefined;

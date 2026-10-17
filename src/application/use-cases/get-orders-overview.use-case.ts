@@ -6,7 +6,6 @@ import { OrdersOverviewMapper } from "@application/mappers/orders-overview.mappe
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import { TYPES } from "@config/di/types.ts";
-import { ForbiddenRestaurantAccessError } from "@domain/errors/forbidden-restaurant-access.error.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -22,13 +21,6 @@ export class GetOrdersOverviewUseCase implements IGetOrdersOverviewUseCase {
 	public async execute(
 		dto: GetOrdersOverviewInputDto,
 	): Promise<OrdersOverviewResponseDto> {
-		if (
-			dto.authenticatedRestaurantId &&
-			dto.authenticatedRestaurantId !== dto.restaurantId
-		) {
-			throw new ForbiddenRestaurantAccessError();
-		}
-
 		await this.restaurantServiceClient.validateRestaurant(dto.restaurantId);
 
 		const result = await this.orderRepository.getOrdersOverview({

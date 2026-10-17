@@ -7,7 +7,6 @@ export const RestaurantOrderRequestMapper = {
 		const query = req.query as unknown as OrdersOverviewQuery;
 		return {
 			restaurantId: req.params.restaurantId as string,
-			authenticatedRestaurantId: req.restaurantAdmin?.restaurantId,
 			from: query?.from,
 			to: query?.to,
 			status: query?.status,
