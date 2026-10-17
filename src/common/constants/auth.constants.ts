@@ -1,11 +1,6 @@
-/**
- * Authentication & Gateway Header Constants
- *
- * Centralized gateway forwarding headers and token prefix standards.
- */
-
 export const AUTH_HEADERS = {
 	USER_ID: "x-user-id",
+	RESTAURANT_ID: "x-restaurant-id",
 	USER_ROLE: "x-user-role",
 	USER_EMAIL: "x-user-email",
 	AUTHORIZATION: "authorization",
