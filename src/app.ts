@@ -5,6 +5,7 @@ import errorHandler from "@interfaces/middleware/error.middleware.ts";
 import cartRouter from "@interfaces/routes/cart.route.ts";
 import healthRouter from "@interfaces/routes/health.route.ts";
 import metricsRouter from "@interfaces/routes/metrics.route.ts";
+import restaurantOrderRouter from "@interfaces/routes/restaurant-order.route.ts";
 import compression from "compression";
 import cors from "cors";
 import express, { type Express } from "express";
@@ -30,6 +31,8 @@ app.use(ROUTES.HEALTH, healthRouter);
 app.use(ROUTES.METRICS, metricsRouter);
 
 app.use(ROUTES.CARTS, cartRouter);
+
+app.use(ROUTES.RESTAURANTS, restaurantOrderRouter);
 
 app.use(errorHandler);
 

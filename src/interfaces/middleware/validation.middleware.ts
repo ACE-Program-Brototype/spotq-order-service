@@ -75,3 +75,43 @@ export function validateRequestBody(schema: ZodType) {
 		}
 	};
 }
+
+export function validateRequestQuery(schema: ZodType) {
+	return async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> => {
+		try {
+			const parsed = await schema.parseAsync(req.query ?? {});
+			Object.defineProperty(req, "query", {
+				value: parsed,
+				writable: true,
+				configurable: true,
+				enumerable: true,
+			});
+			next();
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				const formattedErrors = error.issues.map((issue) => ({
+					field: issue.path.join("."),
+					message: issue.message,
+				}));
+				sendErrorResponse(
+					res,
+					messages.VALIDATION_ERROR,
+					CART_ERROR_CODES.VALIDATION_ERROR,
+					HTTP_STATUS.UNPROCESSABLE_ENTITY,
+					formattedErrors,
+				);
+				return;
+			}
+			sendErrorResponse(
+				res,
+				messages.INTERNAL_SERVER_ERROR,
+				CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
+				HTTP_STATUS.INTERNAL_SERVER_ERROR,
+			);
+		}
+	};
+}

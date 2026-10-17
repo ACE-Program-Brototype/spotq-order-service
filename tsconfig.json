@@ -23,7 +23,9 @@
 			"@config/*": ["./src/config/*"],
 			"@common/*": ["./src/common/*"],
 			"@shared/*": ["./src/common/*"],
-			"@generated/*": ["./src/generated/*"]
+			"@generated/*": ["./src/generated/*"],
+			"@types/*": ["./src/types/*"],
+			"@/*": ["./src/*"]
 		},
 
 		"sourceMap": true,
