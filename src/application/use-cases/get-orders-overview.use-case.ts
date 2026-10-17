@@ -44,5 +44,3 @@ export class GetOrdersOverviewUseCase implements IGetOrdersOverviewUseCase {
 		return OrdersOverviewMapper.toResponseDto(result);
 	}
 }
-
-export default GetOrdersOverviewUseCase;

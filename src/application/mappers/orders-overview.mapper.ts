@@ -32,5 +32,3 @@ export const OrdersOverviewMapper = {
 		};
 	},
 };
-
-export default OrdersOverviewMapper;
