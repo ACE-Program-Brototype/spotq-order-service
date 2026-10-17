@@ -4,22 +4,14 @@ import {
 	messages,
 } from "@common/constants/message.constants.ts";
 import { sendErrorResponse } from "@common/response/api-response.ts";
+import {
+	DOMAIN_ERROR_HTTP_MAP,
+	mapDomainErrorToHttpStatus,
+} from "@common/utils/domain-error-mapper.util.ts";
 import { DomainError } from "@domain/errors/domain.error.ts";
 import type { NextFunction, Request, Response } from "express";
 
-export const DOMAIN_ERROR_HTTP_MAP: Record<string, number> = {
-	[CART_ERROR_CODES.CART_NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
-	[CART_ERROR_CODES.CART_ITEM_NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
-	[CART_ERROR_CODES.MENU_ITEM_NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
-	[CART_ERROR_CODES.CART_EXPIRED]: HTTP_STATUS.GONE,
-	[CART_ERROR_CODES.FORBIDDEN_CART_ACCESS]: HTTP_STATUS.FORBIDDEN,
-	[CART_ERROR_CODES.DIFFERENT_RESTAURANT_CART]: HTTP_STATUS.CONFLICT,
-	[CART_ERROR_CODES.ITEM_UNAVAILABLE]: HTTP_STATUS.CONFLICT,
-};
-
-export function mapDomainErrorToHttpStatus(errorCode: string): number {
-	return DOMAIN_ERROR_HTTP_MAP[errorCode] ?? HTTP_STATUS.BAD_REQUEST;
-}
+export { DOMAIN_ERROR_HTTP_MAP, mapDomainErrorToHttpStatus };
 
 export function errorHandler(
 	err: unknown,
