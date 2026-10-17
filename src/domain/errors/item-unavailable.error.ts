@@ -1,10 +1,14 @@
-import { CART_MESSAGES } from "@common/constants/message.constants.ts";
+import {
+	CART_ERROR_CODES,
+	CART_MESSAGES,
+} from "@common/constants/message.constants.ts";
+import { DomainError } from "./domain.error.ts";
 
-export class ItemUnavailableError extends Error {
+export class ItemUnavailableError extends DomainError {
+	public readonly errorCode = CART_ERROR_CODES.ITEM_UNAVAILABLE;
+
 	constructor(message: string = CART_MESSAGES.ITEM_UNAVAILABLE) {
 		super(message);
-		this.name = "ItemUnavailableError";
-		Object.setPrototypeOf(this, new.target.prototype);
 	}
 }
 

@@ -1,10 +1,14 @@
-import { CART_MESSAGES } from "@common/constants/message.constants.ts";
+import {
+	CART_ERROR_CODES,
+	CART_MESSAGES,
+} from "@common/constants/message.constants.ts";
+import { DomainError } from "./domain.error.ts";
 
-export class CartItemNotFoundError extends Error {
+export class CartItemNotFoundError extends DomainError {
+	public readonly errorCode = CART_ERROR_CODES.CART_ITEM_NOT_FOUND;
+
 	constructor(message: string = CART_MESSAGES.ITEM_NOT_FOUND) {
 		super(message);
-		this.name = "CartItemNotFoundError";
-		Object.setPrototypeOf(this, new.target.prototype);
 	}
 }
 

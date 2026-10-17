@@ -1,5 +1,8 @@
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
+import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
+import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
+import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
 import type { CartProps } from "@domain/types/cart.types.ts";
 
 export class Cart {
@@ -27,6 +30,40 @@ export class Cart {
 		return (
 			this.status === CartStatus.EXPIRED ||
 			now.getTime() > this.expiresAt.getTime()
+		);
+	}
+
+	public validateAccess(userId: string): void {
+		if (this.userId !== userId) {
+			throw new ForbiddenCartAccessError();
+		}
+	}
+
+	public validateActive(now: Date = new Date()): void {
+		if (this.isExpired(now)) {
+			throw new CartExpiredError();
+		}
+	}
+
+	public validateRestaurant(restaurantId: string): void {
+		if (this.restaurantId !== restaurantId) {
+			throw new DifferentRestaurantCartError();
+		}
+	}
+
+	public findMatchingItem(
+		menuItemId: string,
+		variantId?: string | null,
+		addonIds?: string[],
+		specialInstructions?: string | null,
+	): CartItem | undefined {
+		return this.items.find((item) =>
+			item.matchesConfiguration(
+				menuItemId,
+				variantId,
+				addonIds,
+				specialInstructions,
+			),
 		);
 	}
 
