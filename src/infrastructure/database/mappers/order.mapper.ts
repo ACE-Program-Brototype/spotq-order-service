@@ -20,7 +20,7 @@ export const OrderPersistenceMapper = {
 			orderNumber: record.orderNumber,
 			orderStatus: record.orderStatus,
 			userId: record.userId,
-			grandTotal: record.grandTotal,
+			grandTotal: Number(record.grandTotal.toFixed(2)),
 			itemsCount: record._count.items,
 			createdAt: record.createdAt,
 		};

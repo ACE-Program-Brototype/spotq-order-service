@@ -1,5 +1,5 @@
 import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
-import { OrderStatus } from "@generated/prisma/enums.ts";
+import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { z } from "zod";
 
 export const ordersOverviewQuerySchema = z.object({

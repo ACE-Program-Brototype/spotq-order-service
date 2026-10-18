@@ -1,4 +1,4 @@
-import type { OrderStatus } from "@generated/prisma/enums.ts";
+import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 
 export interface GetOrdersOverviewInputDto {
 	restaurantId: string;
