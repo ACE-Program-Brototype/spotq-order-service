@@ -9,6 +9,8 @@ export interface UpdateCartInput {
 
 export interface AddItemInput {
 	cartId: string;
+	userId?: string;
+	restaurantId?: string;
 	menuItemId: string;
 	menuItemName: string;
 	variantId?: string | null;
@@ -22,6 +24,7 @@ export interface AddItemInput {
 
 export interface ICartRepository
 	extends IBaseRepository<Cart, unknown, UpdateCartInput> {
+	findActiveByUserId(userId: string): Promise<Cart | null>;
 	addItem(input: AddItemInput): Promise<Cart>;
 	updateItemQuantity(
 		cartId: string,

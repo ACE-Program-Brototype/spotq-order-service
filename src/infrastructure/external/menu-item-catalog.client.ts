@@ -1,7 +1,7 @@
 import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
-} from "@application/ports/gateways/menu-item-catalog.port.ts";
+} from "@application/ports/external/menu-item-catalog.port.ts";
 import { HttpStatus } from "@common/constants/http.constants.ts";
 import { RESTAURANT_SERVICE_ENDPOINTS } from "@common/constants/routes.constants.ts";
 import env from "@config/env.ts";
@@ -150,4 +150,5 @@ export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
 	}
 }
 
+export { MenuItemCatalogGateway as MenuItemCatalogClient };
 export default MenuItemCatalogGateway;

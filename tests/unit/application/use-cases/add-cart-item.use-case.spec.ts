@@ -3,14 +3,13 @@ import { describe, it } from "node:test";
 import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
-} from "@application/ports/gateways/menu-item-catalog.port.ts";
+} from "@application/ports/external/menu-item-catalog.port.ts";
 import { AddCartItemUseCase } from "@application/use-cases/add-cart-item.use-case.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
 import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
@@ -27,6 +26,15 @@ class MockCartRepository implements ICartRepository {
 		return this.carts.get(cartId) ?? null;
 	}
 
+	public async findActiveByUserId(userId: string): Promise<Cart | null> {
+		for (const cart of this.carts.values()) {
+			if (cart.userId === userId && !cart.isExpired()) {
+				return cart;
+			}
+		}
+		return null;
+	}
+
 	public async update(
 		cartId: string,
 		data: { status?: CartStatus; expiresAt?: Date },
@@ -39,8 +47,20 @@ class MockCartRepository implements ICartRepository {
 	}
 
 	public async addItem(input: AddItemInput): Promise<Cart> {
-		const cart = this.carts.get(input.cartId);
-		if (!cart) throw new Error("Cart not found");
+		let cart = this.carts.get(input.cartId);
+		if (!cart) {
+			cart = new Cart({
+				id: input.cartId,
+				restaurantId: input.restaurantId ?? "default-restaurant",
+				userId: input.userId ?? "default-user",
+				status: CartStatus.ACTIVE,
+				expiresAt: new Date(Date.now() + 86400000),
+				items: [],
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			});
+			this.carts.set(input.cartId, cart);
+		}
 
 		const targetAddonSignature = [...(input.addonIds ?? [])].sort().join(",");
 		const existingItem = cart.items.find((item) => {
@@ -105,6 +125,22 @@ class MockCartRepository implements ICartRepository {
 			createdAt: cart.createdAt,
 			updatedAt: new Date(),
 		});
+	}
+
+	public async updateItemQuantity(
+		_cartId: string,
+		_cartItemId: string,
+		_quantity: number,
+	): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async removeItem(_cartId: string, _cartItemId: string): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async clearCart(_cartId: string): Promise<Cart> {
+		throw new Error("Not implemented");
 	}
 }
 
@@ -275,20 +311,69 @@ describe("AddCartItemUseCase", () => {
 		);
 	});
 
-	it("should throw CartNotFoundError when cart does not exist", async () => {
+	it("should automatically initialize a new cart when adding an item for a new customer without an existing cart", async () => {
 		const cartRepo = new MockCartRepository();
 		const catalogPort = new MockCatalogPort();
-		const useCase = new AddCartItemUseCase(cartRepo, catalogPort);
 
+		catalogPort.items.set(menuItemId, {
+			menuItemId,
+			name: "Classic Margherita Pizza",
+			price: 249,
+			isAvailable: true,
+			addons: [],
+		});
+
+		const useCase = new AddCartItemUseCase(cartRepo, catalogPort);
+		const result = await useCase.execute({
+			cartId: "brand-new-cart-id",
+			authenticatedUserId: userId,
+			restaurantId,
+			menuItemId,
+			quantity: 1,
+		});
+
+		assert.equal(result.cartId, "brand-new-cart-id");
+		assert.equal(result.restaurantId, restaurantId);
+		assert.equal(result.itemCount, 1);
+		assert.equal(result.subtotal, 249);
+		assert.equal(result.items.length, 1);
+	});
+
+	it("should throw DifferentRestaurantCartError when user has an active cart for another restaurant", async () => {
+		const cartRepo = new MockCartRepository();
+		const catalogPort = new MockCatalogPort();
+
+		const activeCartOtherRestaurant = new Cart({
+			id: "existing-cart-id",
+			restaurantId: "restaurant-a",
+			userId,
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() + 86400000),
+			items: [
+				new CartItem({
+					id: "item-1",
+					cartId: "existing-cart-id",
+					menuItemId: "item-from-a",
+					quantity: 1,
+					unitPrice: 100,
+					addons: [],
+				}),
+			],
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
+		cartRepo.carts.set(activeCartOtherRestaurant.id, activeCartOtherRestaurant);
+
+		const useCase = new AddCartItemUseCase(cartRepo, catalogPort);
 		await assert.rejects(
 			useCase.execute({
-				cartId: "non-existent-cart",
+				cartId: "new-cart-id",
 				authenticatedUserId: userId,
-				restaurantId,
+				restaurantId: "restaurant-b",
 				menuItemId,
 				quantity: 1,
 			}),
-			(err) => err instanceof CartNotFoundError,
+			(err) => err instanceof DifferentRestaurantCartError,
 		);
 	});
 

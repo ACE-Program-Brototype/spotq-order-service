@@ -13,7 +13,7 @@ export const updateCartItemQuantityParamSchema = z.object({
 
 export const updateCartItemQuantityBodySchema = z.object({
 	quantity: z
-		.number({ invalid_type_error: CART_MESSAGES.INVALID_UPDATE_QUANTITY })
+		.number({ message: CART_MESSAGES.INVALID_UPDATE_QUANTITY })
 		.int({ message: CART_MESSAGES.INVALID_UPDATE_QUANTITY })
 		.min(0, { message: CART_MESSAGES.INVALID_UPDATE_QUANTITY })
 		.max(20, { message: CART_MESSAGES.INVALID_UPDATE_QUANTITY }),

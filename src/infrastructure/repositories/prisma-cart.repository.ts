@@ -149,9 +149,36 @@ export class PrismaCartRepository
 		return this.findById(cartId);
 	}
 
+	public async findActiveByUserId(userId: string): Promise<Cart | null> {
+		const record = await this.prisma.cart.findFirst({
+			where: {
+				userId,
+				expiresAt: {
+					gt: new Date(),
+				},
+			},
+			orderBy: {
+				updatedAt: "desc",
+			},
+			include: {
+				items: {
+					include: {
+						addons: true,
+					},
+				},
+			},
+		});
+
+		if (!record) {
+			return null;
+		}
+
+		return cartMapper.toDomain(record as unknown as PrismaCartRecord);
+	}
+
 	public async addItem(input: AddItemInput): Promise<Cart> {
 		const cart = await this.prisma.$transaction(async (tx) => {
-			const existingRecord = await tx.cart.findUnique({
+			let existingRecord = await tx.cart.findUnique({
 				where: { id: input.cartId },
 				include: {
 					items: {
@@ -162,10 +189,39 @@ export class PrismaCartRepository
 				},
 			});
 
+			if (!existingRecord && input.userId && input.restaurantId) {
+				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+				existingRecord = await tx.cart.upsert({
+					where: {
+						userId_restaurantId: {
+							userId: input.userId,
+							restaurantId: input.restaurantId,
+						},
+					},
+					create: {
+						id: input.cartId,
+						userId: input.userId,
+						restaurantId: input.restaurantId,
+						expiresAt: newExpiresAt,
+					},
+					update: {
+						expiresAt: newExpiresAt,
+					},
+					include: {
+						items: {
+							include: {
+								addons: true,
+							},
+						},
+					},
+				});
+			}
+
 			if (!existingRecord) {
 				throw new Error("Cart not found in repository");
 			}
 
+			const targetCartId = existingRecord.id;
 			const existingCart = cartMapper.toDomain(
 				existingRecord as unknown as PrismaCartRecord,
 			);
@@ -194,7 +250,7 @@ export class PrismaCartRepository
 			} else {
 				const newItemEntity = new CartItem({
 					id: "temp",
-					cartId: input.cartId,
+					cartId: targetCartId,
 					menuItemId: input.menuItemId,
 					menuItemName: input.menuItemName,
 					variantId: input.variantId ?? null,
@@ -214,7 +270,7 @@ export class PrismaCartRepository
 
 				const createdItem = await tx.cartItem.create({
 					data: {
-						cartId: input.cartId,
+						cartId: targetCartId,
 						menuItemId: input.menuItemId,
 						menuItemName: input.menuItemName,
 						variantId: input.variantId ?? null,
@@ -240,7 +296,7 @@ export class PrismaCartRepository
 
 			const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 			const reloadedRecord = await tx.cart.update({
-				where: { id: input.cartId },
+				where: { id: targetCartId },
 				data: {
 					expiresAt: newExpiresAt,
 				},

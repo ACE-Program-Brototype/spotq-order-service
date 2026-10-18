@@ -31,6 +31,6 @@ export interface CartProps {
 	status: CartStatus;
 	expiresAt: Date;
 	items?: CartItemProps[] | undefined;
-	createdAt: Date;
-	updatedAt: Date;
+	createdAt?: Date | undefined;
+	updatedAt?: Date | undefined;
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { MenuItemCatalogGateway } from "@infrastructure/gateways/menu-item-catalog.gateway.ts";
+import { MenuItemCatalogGateway } from "@infrastructure/external/menu-item-catalog.client.ts";
 
 describe("MenuItemCatalogGateway", () => {
 	const restaurantId = "2b6f0cc9-8d13-4f2e-a123-9e8ab12cd345";

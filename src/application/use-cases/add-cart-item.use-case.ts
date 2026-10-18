@@ -3,12 +3,12 @@ import type {
 	AddCartItemResponseDto,
 } from "@application/dtos/add-cart-item.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
-import type { IMenuItemCatalogPort } from "@application/ports/gateways/menu-item-catalog.port.ts";
+import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/add-cart-item.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
+import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
 import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
@@ -26,24 +26,38 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 	public async execute(
 		dto: AddCartItemRequestDto,
 	): Promise<AddCartItemResponseDto> {
-		const cart = await this.cartRepository.findById(dto.cartId);
+		let cart = await this.cartRepository.findById(dto.cartId);
 
-		if (!cart) {
-			throw new CartNotFoundError();
-		}
+		if (cart) {
+			cart.validateAccess(dto.authenticatedUserId);
 
-		cart.validateAccess(dto.authenticatedUserId);
-
-		if (cart.isExpired()) {
-			if (cart.status !== CartStatus.EXPIRED) {
-				await this.cartRepository.update(cart.id, {
-					status: CartStatus.EXPIRED,
-				});
+			if (cart.isExpired()) {
+				if (cart.status !== CartStatus.EXPIRED) {
+					await this.cartRepository.update(cart.id, {
+						status: CartStatus.EXPIRED,
+					});
+				}
+				throw new CartExpiredError();
 			}
-			throw new CartExpiredError();
-		}
 
-		cart.validateRestaurant(dto.restaurantId);
+			cart.validateRestaurant(dto.restaurantId);
+		} else {
+			const activeCart = await this.cartRepository.findActiveByUserId(
+				dto.authenticatedUserId,
+			);
+
+			if (
+				activeCart &&
+				activeCart.items.length > 0 &&
+				activeCart.restaurantId !== dto.restaurantId
+			) {
+				throw new DifferentRestaurantCartError();
+			}
+
+			if (activeCart && activeCart.restaurantId === dto.restaurantId) {
+				cart = activeCart;
+			}
+		}
 
 		const catalogItem = await this.catalogPort.getItemDetails(
 			dto.restaurantId,
@@ -94,7 +108,9 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 		}));
 
 		const updatedCart = await this.cartRepository.addItem({
-			cartId: cart.id,
+			cartId: cart ? cart.id : dto.cartId,
+			userId: dto.authenticatedUserId,
+			restaurantId: dto.restaurantId,
 			menuItemId: dto.menuItemId,
 			menuItemName: catalogItem.name,
 			variantId: dto.variantId ?? null,

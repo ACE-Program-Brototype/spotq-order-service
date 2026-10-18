@@ -3,7 +3,7 @@ import type {
 	UpdateCartItemQuantityResponseDto,
 } from "@application/dtos/update-cart-item-quantity.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
-import type { IMenuItemCatalogPort } from "@application/ports/gateways/menu-item-catalog.port.ts";
+import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/update-cart-item-quantity.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";

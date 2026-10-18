@@ -35,7 +35,27 @@ class MockCartRepository implements ICartRepository {
 		return existing ?? null;
 	}
 
+	public async findActiveByUserId(_userId: string): Promise<Cart | null> {
+		throw new Error("Not implemented");
+	}
+
 	public async addItem(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async updateItemQuantity(
+		_cartId: string,
+		_cartItemId: string,
+		_quantity: number,
+	): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async removeItem(_cartId: string, _cartItemId: string): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async clearCart(_cartId: string): Promise<Cart> {
 		throw new Error("Not implemented");
 	}
 }

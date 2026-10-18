@@ -64,6 +64,14 @@ class MockCartRepository implements ICartRepository {
 			updatedAt: new Date(),
 		});
 	}
+
+	public async findActiveByUserId(_userId: string): Promise<Cart | null> {
+		throw new Error("Not implemented");
+	}
+
+	public async clearCart(_cartId: string): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
 }
 
 describe("RemoveCartItemUseCase", () => {
@@ -118,7 +126,7 @@ describe("RemoveCartItemUseCase", () => {
 		assert.equal(res.itemCount, 1);
 		assert.equal(res.subtotal, 150);
 		assert.equal(res.items.length, 1);
-		assert.equal(res.items[0].cartItemId, item2Id);
+		assert.equal(res.items[0]?.cartItemId, item2Id);
 	});
 
 	it("successfully removes the last item leaving cart active with empty items", async () => {

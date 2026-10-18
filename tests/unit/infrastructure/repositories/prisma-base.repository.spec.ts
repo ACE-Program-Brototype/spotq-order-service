@@ -55,7 +55,7 @@ describe("PrismaBaseRepository", () => {
 		const repo = new ConcreteTestRepository(mockDelegate);
 		const results = await repo.find();
 		assert.equal(results.length, 1);
-		assert.equal(results[0].name, "Alpha");
+		assert.equal(results[0]?.name, "Alpha");
 	});
 
 	it("should findById and map record", async () => {
@@ -106,7 +106,7 @@ describe("PrismaBaseRepository", () => {
 
 	it("should delete record and return true", async () => {
 		const mockDelegate = {
-			delete: async () => ({ id: "1" }),
+			delete: async () => ({ id: "1", name: "Alpha" }),
 		};
 		const repo = new ConcreteTestRepository(mockDelegate);
 		const deleted = await repo.delete("1");

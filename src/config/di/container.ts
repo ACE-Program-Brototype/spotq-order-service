@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import type { IMenuItemCatalogPort } from "@application/ports/gateways/menu-item-catalog.port.ts";
+import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/add-cart-item.use-case.port.ts";
 import type { IClearCartUseCase } from "@application/ports/use-cases/clear-cart.use-case.port.ts";
 import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
@@ -13,7 +13,7 @@ import { UpdateCartItemQuantityUseCase } from "@application/use-cases/update-car
 import { TYPES } from "@config/di/types.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import prisma from "@infrastructure/database/prisma.ts";
-import { MenuItemCatalogGateway } from "@infrastructure/gateways/menu-item-catalog.gateway.ts";
+import { MenuItemCatalogGateway } from "@infrastructure/external/menu-item-catalog.client.ts";
 import { PrismaCartRepository } from "@infrastructure/repositories/prisma-cart.repository.ts";
 import { CartController } from "@interfaces/controllers/cart.controller.ts";
 import { Container } from "inversify";

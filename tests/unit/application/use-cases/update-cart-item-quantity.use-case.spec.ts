@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
-} from "@application/ports/gateways/menu-item-catalog.port.ts";
+} from "@application/ports/external/menu-item-catalog.port.ts";
 import { UpdateCartItemQuantityUseCase } from "@application/use-cases/update-cart-item-quantity.use-case.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
@@ -58,6 +58,7 @@ class MockCartRepository implements ICartRepository {
 			cart.items.splice(itemIndex, 1);
 		} else {
 			const existingItem = cart.items[itemIndex];
+			if (!existingItem) throw new Error("Item not found");
 			const addonsTotal = existingItem.addons.reduce(
 				(sum, a) => sum + a.price,
 				0,
@@ -97,6 +98,18 @@ class MockCartRepository implements ICartRepository {
 			createdAt: cart.createdAt,
 			updatedAt: new Date(),
 		});
+	}
+
+	public async findActiveByUserId(_userId: string): Promise<Cart | null> {
+		throw new Error("Not implemented in this test");
+	}
+
+	public async removeItem(cartId: string, cartItemId: string): Promise<Cart> {
+		return this.updateItemQuantity(cartId, cartItemId, 0);
+	}
+
+	public async clearCart(_cartId: string): Promise<Cart> {
+		throw new Error("Not implemented in this test");
 	}
 }
 
@@ -159,7 +172,7 @@ describe("UpdateCartItemQuantityUseCase", () => {
 		const catalog = new MockCatalogPort();
 		repo.carts.set(validCartId, createSampleCart());
 		catalog.mockItem = {
-			id: validMenuItemId,
+			menuItemId: validMenuItemId,
 			name: "Burger",
 			price: 100,
 			isAvailable: true,
@@ -185,8 +198,8 @@ describe("UpdateCartItemQuantityUseCase", () => {
 		assert.equal(res.itemCount, 3);
 		assert.equal(res.subtotal, 360); // (100 + 20) * 3
 		assert.equal(res.items.length, 1);
-		assert.equal(res.items[0].quantity, 3);
-		assert.equal(res.items[0].totalPrice, 360);
+		assert.equal(res.items[0]?.quantity, 3);
+		assert.equal(res.items[0]?.totalPrice, 360);
 		assert.equal(catalog.callCount, 1);
 	});
 
@@ -214,7 +227,7 @@ describe("UpdateCartItemQuantityUseCase", () => {
 		repo.carts.set(validCartId, cart);
 
 		catalog.mockItem = {
-			id: validMenuItemId,
+			menuItemId: validMenuItemId,
 			name: "Burger",
 			price: 100,
 			isAvailable: true,
@@ -238,8 +251,8 @@ describe("UpdateCartItemQuantityUseCase", () => {
 
 		assert.equal(res.itemCount, 1);
 		assert.equal(res.subtotal, 120);
-		assert.equal(res.items[0].quantity, 1);
-		assert.equal(res.items[0].totalPrice, 120);
+		assert.equal(res.items[0]?.quantity, 1);
+		assert.equal(res.items[0]?.totalPrice, 120);
 	});
 
 	it("gracefully removes item and addons when quantity is 0 without calling catalog", async () => {
@@ -267,7 +280,7 @@ describe("UpdateCartItemQuantityUseCase", () => {
 		const catalog = new MockCatalogPort();
 		repo.carts.set(validCartId, createSampleCart());
 		catalog.mockItem = {
-			id: validMenuItemId,
+			menuItemId: validMenuItemId,
 			name: "Burger",
 			price: 100,
 			isAvailable: true,
@@ -394,7 +407,7 @@ describe("UpdateCartItemQuantityUseCase", () => {
 		const catalog = new MockCatalogPort();
 		repo.carts.set(validCartId, createSampleCart());
 		catalog.mockItem = {
-			id: validMenuItemId,
+			menuItemId: validMenuItemId,
 			name: "Burger",
 			price: 100,
 			isAvailable: false,
@@ -420,7 +433,7 @@ describe("UpdateCartItemQuantityUseCase", () => {
 		const catalog = new MockCatalogPort();
 		repo.carts.set(validCartId, createSampleCart());
 		catalog.mockItem = {
-			id: validMenuItemId,
+			menuItemId: validMenuItemId,
 			name: "Burger",
 			price: 100,
 			isAvailable: true,
