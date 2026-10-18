@@ -39,6 +39,8 @@ export const ORDER_MESSAGES = {
 	INVALID_TO_DATE:
 		"Invalid 'to' date format. Expected valid ISO date or YYYY-MM-DD",
 	INVALID_ORDER_STATUS: "Invalid order status filter provided",
+	RESTAURANT_VALIDATION_FAILED:
+		"Failed to validate restaurant from restaurant-service",
 };
 
 export const ORDER_ERROR_CODES = {

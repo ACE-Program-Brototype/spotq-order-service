@@ -52,8 +52,7 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 					"Restaurant service returned unsuccessful validation response",
 				);
 				throw new Error(
-					responseBody?.message ||
-						"Failed to validate restaurant from restaurant-service",
+					responseBody?.message || ORDER_MESSAGES.RESTAURANT_VALIDATION_FAILED,
 				);
 			}
 
@@ -114,7 +113,7 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 					"Unexpected error response from restaurant validation endpoint",
 				);
 				throw new Error(
-					`Failed to validate restaurant from restaurant-service: HTTP ${status}`,
+					`${ORDER_MESSAGES.RESTAURANT_VALIDATION_FAILED}: HTTP ${status}`,
 				);
 			}
 
