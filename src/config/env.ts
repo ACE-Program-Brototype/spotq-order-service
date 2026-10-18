@@ -8,8 +8,14 @@ const envSchema = z.object({
 	DATABASE_URL: z.string().default("postgres://localhost:5432/spotq_order_db"),
 	REDIS_URL: z.string().default("redis://localhost:6379"),
 	LOG_LEVEL: z.string().default("info"),
-	RESTAURANT_SERVICE_URL: z.string().default("http://localhost:3001"),
+	RESTAURANT_SERVICE_URL: z
+		.string()
+		.url("RESTAURANT_SERVICE_URL must be a valid URL")
+		.transform((val) => val.replace(/\/+$/, ""))
+		.default("http://localhost:3001"),
+	RESTAURANT_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
 	SERVICE_NAME: z.string().default("order-service"),
+	S2S_SERVICE_NAME: z.string().default("order-service"),
 	S2S_PRIVATE_KEY: z.preprocess((val) => {
 		if (typeof val === "string" && val.trim().length > 0) {
 			return val.replace(/\\n/g, "\n").trim();
@@ -22,6 +28,10 @@ const envSchema = z.object({
 		}
 		return undefined;
 	}, z.string().optional()),
+	ORDER_S2S_PRIVATE_KEY: z.preprocess(
+		(val) => (typeof val === "string" ? val.replace(/\\n/g, "\n").trim() : ""),
+		z.string().default(""),
+	),
 	S2S_RESTAURANT_AUDIENCE: z.string().default("restaurant-service"),
 });
 

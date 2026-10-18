@@ -1,5 +1,8 @@
 import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import { CART_ERROR_CODES } from "@common/constants/message.constants.ts";
+import {
+	CART_ERROR_CODES,
+	ORDER_ERROR_CODES,
+} from "@common/constants/message.constants.ts";
 
 export const DOMAIN_ERROR_HTTP_MAP: Record<string, number> = {
 	[CART_ERROR_CODES.CART_NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
@@ -9,6 +12,9 @@ export const DOMAIN_ERROR_HTTP_MAP: Record<string, number> = {
 	[CART_ERROR_CODES.FORBIDDEN_CART_ACCESS]: HTTP_STATUS.FORBIDDEN,
 	[CART_ERROR_CODES.DIFFERENT_RESTAURANT_CART]: HTTP_STATUS.CONFLICT,
 	[CART_ERROR_CODES.ITEM_UNAVAILABLE]: HTTP_STATUS.CONFLICT,
+	[ORDER_ERROR_CODES.RESTAURANT_NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
+	[ORDER_ERROR_CODES.RESTAURANT_NOT_ELIGIBLE]: HTTP_STATUS.FORBIDDEN,
+	[ORDER_ERROR_CODES.FORBIDDEN_RESTAURANT_ACCESS]: HTTP_STATUS.FORBIDDEN,
 };
 
 export function mapDomainErrorToHttpStatus(errorCode: string): number {
