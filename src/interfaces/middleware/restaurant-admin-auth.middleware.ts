@@ -1,4 +1,4 @@
-import { AUTH_HEADERS } from "@common/constants/auth.constants.ts";
+import { AUTH_HEADERS, AUTH_ROLES } from "@common/constants/auth.constants.ts";
 import { HTTP_STATUS } from "@common/constants/http.constants.ts";
 import {
 	messages,
@@ -7,8 +7,6 @@ import {
 } from "@common/constants/message.constants.ts";
 import { sendErrorResponse } from "@common/response/api-response.ts";
 import type { NextFunction, Request, Response } from "express";
-
-const REQUIRED_ROLE = "RESTAURANT_OWNER";
 
 export type { AuthenticatedRestaurantAdmin } from "@/types/express.d.ts";
 
@@ -47,7 +45,7 @@ export function restaurantAdminAuthMiddleware(
 
 	const userId = headerUserId || restaurantId;
 
-	if (role !== REQUIRED_ROLE) {
+	if (role !== AUTH_ROLES.RESTAURANT_OWNER) {
 		sendErrorResponse(
 			res,
 			messages.FORBIDDEN,
@@ -76,5 +74,3 @@ export function restaurantAdminAuthMiddleware(
 
 	next();
 }
-
-export default restaurantAdminAuthMiddleware;

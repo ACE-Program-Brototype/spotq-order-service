@@ -6,9 +6,14 @@ export const AUTH_HEADERS = {
 	AUTHORIZATION: "authorization",
 } as const;
 
+export const AUTH_ROLES = {
+	RESTAURANT_OWNER: "RESTAURANT_OWNER",
+	CUSTOMER: "CUSTOMER",
+} as const;
+
+export type AuthRole = (typeof AUTH_ROLES)[keyof typeof AUTH_ROLES];
+
 export const AUTH_CONSTANTS = {
 	BEARER_PREFIX: "Bearer ",
 	BEARER_PREFIX_LENGTH: 7,
 } as const;
-
-export default AUTH_CONSTANTS;
