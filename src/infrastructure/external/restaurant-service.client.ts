@@ -25,7 +25,7 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 	private readonly baseUrl: string = env.RESTAURANT_SERVICE_URL;
 	private readonly s2sServiceName: string = env.S2S_SERVICE_NAME;
 	private readonly s2sPrivateKey: string = env.ORDER_S2S_PRIVATE_KEY;
-	private static readonly REQUEST_TIMEOUT_MS = 5000;
+	private readonly requestTimeoutMs: number = env.RESTAURANT_SERVICE_TIMEOUT_MS;
 
 	public async validateRestaurant(
 		restaurantId: string,
@@ -41,7 +41,7 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 					this.s2sPrivateKey,
 					this.s2sServiceName,
 				),
-				timeout: RestaurantServiceClient.REQUEST_TIMEOUT_MS,
+				timeout: this.requestTimeoutMs,
 			});
 
 			const responseBody = response.data;
