@@ -3,6 +3,10 @@ export const TYPES = {
 	CartRepository: Symbol.for("CartRepository"),
 	GetCartUseCase: Symbol.for("GetCartUseCase"),
 	GetCartController: Symbol.for("GetCartController"),
+	RestaurantServiceClient: Symbol.for("RestaurantServiceClient"),
+	OrderRepository: Symbol.for("OrderRepository"),
+	GetOrdersOverviewUseCase: Symbol.for("GetOrdersOverviewUseCase"),
+	RestaurantOrderController: Symbol.for("RestaurantOrderController"),
 };
 
 export default TYPES;

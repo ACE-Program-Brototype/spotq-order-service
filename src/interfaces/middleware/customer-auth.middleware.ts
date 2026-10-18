@@ -11,19 +11,7 @@ import { sendErrorResponse } from "@common/response/api-response.ts";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-export interface AuthenticatedUser {
-	userId: string;
-	role?: string | undefined;
-	email?: string | undefined;
-}
-
-declare global {
-	namespace Express {
-		interface Request {
-			user?: AuthenticatedUser;
-		}
-	}
-}
+export type { AuthenticatedUser } from "@/types/express.d.ts";
 
 function getHeaderValue(
 	header: string | string[] | undefined,
