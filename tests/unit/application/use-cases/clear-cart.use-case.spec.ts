@@ -21,8 +21,13 @@ class MockCartRepository implements ICartRepository {
 		return this.carts.get(cartId) ?? null;
 	}
 
-	public async findActiveByUserId(_userId: string): Promise<Cart | null> {
-		throw new Error("Not implemented");
+	public async findActiveByUserId(userId: string): Promise<Cart | null> {
+		for (const cart of this.carts.values()) {
+			if (cart.userId === userId && !cart.isExpired()) {
+				return cart;
+			}
+		}
+		return null;
 	}
 
 	public async update(

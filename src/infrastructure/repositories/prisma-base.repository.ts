@@ -14,15 +14,15 @@ export interface PrismaErrorLike {
 
 @injectable()
 export abstract class PrismaBaseRepository<
-	TDomain extends { id: string },
-	TModel,
-	TDelegate,
+	TDomain extends { id: string } = { id: string },
+	TModel = unknown,
+	TDelegate = unknown,
 	TCreateInput = unknown,
 	TUpdateInput = Record<string, unknown>,
 > implements IBaseRepository<TDomain, TCreateInput, TUpdateInput>
 {
 	constructor(
-		protected readonly dbModel: TDelegate,
+		protected readonly dbModel?: TDelegate,
 		protected readonly mapper?: IEntityMapper<TDomain, TModel>,
 	) {}
 
