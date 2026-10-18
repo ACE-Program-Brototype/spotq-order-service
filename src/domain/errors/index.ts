@@ -4,5 +4,6 @@ export * from "./cart-not-found.error.ts";
 export * from "./different-restaurant-cart.error.ts";
 export * from "./domain.error.ts";
 export * from "./forbidden-cart-access.error.ts";
+export * from "./invalid-cart-quantity.error.ts";
 export * from "./item-unavailable.error.ts";
 export * from "./menu-item-not-found.error.ts";

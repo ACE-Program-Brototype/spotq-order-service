@@ -9,6 +9,7 @@ import {
 	mapDomainErrorToHttpStatus,
 } from "@common/utils/domain-error-mapper.util.ts";
 import { DomainError } from "@domain/errors/domain.error.ts";
+import logger from "@infrastructure/logger/pino.ts";
 import type { NextFunction, Request, Response } from "express";
 
 export { DOMAIN_ERROR_HTTP_MAP, mapDomainErrorToHttpStatus };
@@ -21,10 +22,15 @@ export function errorHandler(
 ): void {
 	if (err instanceof DomainError) {
 		const statusCode = mapDomainErrorToHttpStatus(err.errorCode);
+		logger.warn({ err, errorCode: err.errorCode, statusCode }, err.message);
 		sendErrorResponse(res, err.message, err.errorCode, statusCode);
 		return;
 	}
 
+	logger.error(
+		{ err },
+		err instanceof Error ? err.message : messages.INTERNAL_SERVER_ERROR,
+	);
 	sendErrorResponse(
 		res,
 		err instanceof Error ? err.message : messages.INTERNAL_SERVER_ERROR,

@@ -3,6 +3,7 @@ import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
+import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
 import type {
 	AddItemInput,
 	ICartRepository,
@@ -215,6 +216,38 @@ export class PrismaCartRepository
 						},
 					},
 				});
+			} else if (
+				existingRecord &&
+				existingRecord.items.length === 0 &&
+				input.restaurantId &&
+				existingRecord.restaurantId !== input.restaurantId
+			) {
+				await tx.cart.delete({ where: { id: existingRecord.id } });
+				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+				existingRecord = await tx.cart.upsert({
+					where: {
+						userId_restaurantId: {
+							userId: input.userId ?? existingRecord.userId,
+							restaurantId: input.restaurantId,
+						},
+					},
+					create: {
+						id: input.cartId,
+						userId: input.userId ?? existingRecord.userId,
+						restaurantId: input.restaurantId,
+						expiresAt: newExpiresAt,
+					},
+					update: {
+						expiresAt: newExpiresAt,
+					},
+					include: {
+						items: {
+							include: {
+								addons: true,
+							},
+						},
+					},
+				});
 			}
 
 			if (!existingRecord) {
@@ -234,6 +267,9 @@ export class PrismaCartRepository
 
 			if (matchingItem) {
 				const newQuantity = matchingItem.quantity + input.quantity;
+				if (newQuantity > 20) {
+					throw new InvalidCartQuantityError();
+				}
 				const updatedItem = new CartItem({
 					...matchingItem,
 					quantity: newQuantity,

@@ -34,6 +34,10 @@ describe("Error Middleware", () => {
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.ITEM_UNAVAILABLE),
 			HTTP_STATUS.CONFLICT,
 		);
+		assert.equal(
+			mapDomainErrorToHttpStatus(CART_ERROR_CODES.VALIDATION_ERROR),
+			HTTP_STATUS.UNPROCESSABLE_ENTITY,
+		);
 	});
 
 	it("should format response correctly when handling DomainError", () => {

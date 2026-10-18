@@ -5,7 +5,7 @@ export interface ClearCartRequestDto {
 
 export interface ClearCartResponseDto {
 	cartId: string;
-	restaurantId: string | null;
+	restaurantId: string;
 	itemCount: number;
 	subtotal: number;
 	updatedAt: string;

@@ -40,7 +40,7 @@ export class ClearCartUseCase implements IClearCartUseCase {
 		if (cart.items.length === 0) {
 			return {
 				cartId: cart.id,
-				restaurantId: null,
+				restaurantId: cart.restaurantId,
 				itemCount: 0,
 				subtotal: 0,
 				updatedAt: cart.updatedAt.toISOString(),
@@ -52,7 +52,7 @@ export class ClearCartUseCase implements IClearCartUseCase {
 
 		return {
 			cartId: updatedCart.id,
-			restaurantId: null,
+			restaurantId: updatedCart.restaurantId,
 			itemCount: 0,
 			subtotal: 0,
 			updatedAt: updatedCart.updatedAt.toISOString(),

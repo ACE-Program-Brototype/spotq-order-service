@@ -12,6 +12,7 @@ import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
+import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
 import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
 import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
 import type {
@@ -280,7 +281,47 @@ describe("AddCartItemUseCase", () => {
 		assert.equal(result.items[0]?.quantity, 3);
 	});
 
-	it("should throw DifferentRestaurantCartError when restaurantId does not match cart", async () => {
+	it("should throw DifferentRestaurantCartError when restaurantId does not match cart with existing items", async () => {
+		const cartRepo = new MockCartRepository();
+		const catalogPort = new MockCatalogPort();
+
+		cartRepo.carts.set(
+			cartId,
+			new Cart({
+				id: cartId,
+				restaurantId: "restaurant-a",
+				userId,
+				status: CartStatus.ACTIVE,
+				expiresAt: new Date(Date.now() + 86400000),
+				items: [
+					new CartItem({
+						id: "item-1",
+						cartId,
+						menuItemId: "item-a",
+						quantity: 1,
+						unitPrice: 100,
+						totalPrice: 100,
+					}),
+				],
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			}),
+		);
+
+		const useCase = new AddCartItemUseCase(cartRepo, catalogPort);
+		await assert.rejects(
+			useCase.execute({
+				cartId,
+				authenticatedUserId: userId,
+				restaurantId: "restaurant-b",
+				menuItemId,
+				quantity: 1,
+			}),
+			(err) => err instanceof DifferentRestaurantCartError,
+		);
+	});
+
+	it("should allow adding items from a new restaurant when existing cart has 0 items", async () => {
 		const cartRepo = new MockCartRepository();
 		const catalogPort = new MockCatalogPort();
 
@@ -298,16 +339,63 @@ describe("AddCartItemUseCase", () => {
 			}),
 		);
 
+		catalogPort.items.set(menuItemId, {
+			menuItemId,
+			name: "Classic Margherita Pizza",
+			price: 249,
+			isAvailable: true,
+			addons: [],
+		});
+
+		const useCase = new AddCartItemUseCase(cartRepo, catalogPort);
+		const result = await useCase.execute({
+			cartId,
+			authenticatedUserId: userId,
+			restaurantId: "restaurant-b",
+			menuItemId,
+			quantity: 1,
+		});
+
+		assert.equal(result.cartId, cartId);
+		assert.equal(result.itemCount, 1);
+	});
+
+	it("should throw InvalidCartQuantityError when aggregated quantity exceeds 20", async () => {
+		const cartRepo = new MockCartRepository();
+		const catalogPort = new MockCatalogPort();
+
+		cartRepo.carts.set(
+			cartId,
+			new Cart({
+				id: cartId,
+				restaurantId,
+				userId,
+				status: CartStatus.ACTIVE,
+				expiresAt: new Date(Date.now() + 86400000),
+				items: [
+					new CartItem({
+						id: "item-1",
+						cartId,
+						menuItemId,
+						quantity: 15,
+						unitPrice: 249,
+						totalPrice: 3735,
+						addons: [],
+					}),
+				],
+			}),
+		);
+
 		const useCase = new AddCartItemUseCase(cartRepo, catalogPort);
 		await assert.rejects(
 			useCase.execute({
 				cartId,
 				authenticatedUserId: userId,
-				restaurantId: "restaurant-b",
+				restaurantId,
 				menuItemId,
-				quantity: 1,
+				quantity: 10,
 			}),
-			(err) => err instanceof DifferentRestaurantCartError,
+			(err) => err instanceof InvalidCartQuantityError,
 		);
 	});
 

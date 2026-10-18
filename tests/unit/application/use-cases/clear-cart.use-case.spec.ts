@@ -124,7 +124,7 @@ describe("ClearCartUseCase", () => {
 		});
 
 		assert.equal(res.cartId, validCartId);
-		assert.equal(res.restaurantId, null);
+		assert.equal(res.restaurantId, validRestaurantId);
 		assert.equal(res.itemCount, 0);
 		assert.equal(res.subtotal, 0);
 		assert.deepEqual(res.items, []);
@@ -150,6 +150,7 @@ describe("ClearCartUseCase", () => {
 		});
 
 		assert.equal(res.cartId, validCartId);
+		assert.equal(res.restaurantId, validRestaurantId);
 		assert.equal(res.itemCount, 0);
 		assert.equal(res.subtotal, 0);
 		assert.deepEqual(res.items, []);

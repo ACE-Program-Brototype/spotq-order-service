@@ -9,6 +9,7 @@ import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
+import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
 import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
 import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
@@ -40,7 +41,19 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 				throw new CartExpiredError();
 			}
 
-			cart.validateRestaurant(dto.restaurantId);
+			if (cart.items.length > 0) {
+				cart.validateRestaurant(dto.restaurantId);
+			}
+
+			const matchingItem = cart.findMatchingItem(
+				dto.menuItemId,
+				dto.variantId,
+				dto.addonIds,
+				dto.specialInstructions,
+			);
+			if (matchingItem && matchingItem.quantity + dto.quantity > 20) {
+				throw new InvalidCartQuantityError();
+			}
 		} else {
 			const activeCart = await this.cartRepository.findActiveByUserId(
 				dto.authenticatedUserId,

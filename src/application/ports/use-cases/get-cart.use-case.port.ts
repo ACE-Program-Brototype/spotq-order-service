@@ -1,10 +1,2 @@
-import type {
-	GetCartRequestDto,
-	GetCartResponseDto,
-} from "@application/dtos/get-cart.dto.ts";
-
-export interface IGetCartUseCase {
-	execute(dto: GetCartRequestDto): Promise<GetCartResponseDto>;
-}
-
-export default IGetCartUseCase;
+export type { default } from "./cart/get-cart.use-case.port.ts";
+export * from "./cart/get-cart.use-case.port.ts";

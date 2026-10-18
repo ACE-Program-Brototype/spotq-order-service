@@ -1,10 +1,2 @@
-import type {
-	ClearCartRequestDto,
-	ClearCartResponseDto,
-} from "@application/dtos/clear-cart.dto.ts";
-
-export interface IClearCartUseCase {
-	execute(dto: ClearCartRequestDto): Promise<ClearCartResponseDto>;
-}
-
-export default IClearCartUseCase;
+export type { default } from "./cart/clear-cart.use-case.port.ts";
+export * from "./cart/clear-cart.use-case.port.ts";
