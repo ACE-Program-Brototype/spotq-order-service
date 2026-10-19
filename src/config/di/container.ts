@@ -12,7 +12,7 @@ import { ClearCartUseCase } from "@application/use-cases/cart/clear-cart.use-cas
 import { GetCartUseCase } from "@application/use-cases/cart/get-cart.use-case.ts";
 import { RemoveCartItemUseCase } from "@application/use-cases/cart/remove-cart-item.use-case.ts";
 import { UpdateCartItemQuantityUseCase } from "@application/use-cases/cart/update-cart-item-quantity.use-case.ts";
-import { GetOrdersOverviewUseCase } from "@application/use-cases/get-orders-overview.use-case.ts";
+import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orders-overview.use-case.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";

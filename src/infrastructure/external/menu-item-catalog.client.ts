@@ -128,5 +128,3 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 		}
 	}
 }
-
-export { MenuItemCatalogClient as MenuItemCatalogGateway };

@@ -11,6 +11,7 @@ import type {
 } from "@domain/repositories/cart.repository.interface.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
 import { inject, injectable } from "inversify";
+import type { IEntityMapper } from "./prisma-base.repository.ts";
 
 type PrismaCartRecord = {
 	id: string;
@@ -193,9 +194,7 @@ export class PrismaCartRepository implements ICartRepository {
 				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
 				if (existingByPair) {
-					const isExpired =
-						existingByPair.expiresAt < new Date() ||
-						existingByPair.status === CartStatus.EXPIRED;
+					const isExpired = existingByPair.expiresAt < new Date();
 
 					if (isExpired) {
 						const staleItemIds = existingByPair.items.map((it) => it.id);
@@ -212,7 +211,6 @@ export class PrismaCartRepository implements ICartRepository {
 					existingRecord = await tx.cart.update({
 						where: { id: existingByPair.id },
 						data: {
-							status: CartStatus.ACTIVE,
 							expiresAt: newExpiresAt,
 						},
 						include: {

@@ -1,5 +1,5 @@
 export interface AddCartItemRequestDto {
-	cartId: string;
+	cartId?: string | undefined;
 	authenticatedUserId: string;
 	restaurantId: string;
 	menuItemId: string;
