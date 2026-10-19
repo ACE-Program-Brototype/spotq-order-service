@@ -4,14 +4,13 @@ import type {
 } from "@application/dtos/update-cart-item-quantity.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
-import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/update-cart-item-quantity.use-case.port.ts";
+import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
+import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartItemNotFoundError } from "@domain/errors/cart-item-not-found.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
-import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -60,39 +59,11 @@ export class UpdateCartItemQuantityUseCase
 				addonIds.length > 0 ? addonIds : undefined,
 			);
 
-			if (!catalogItem) {
-				throw new MenuItemNotFoundError();
-			}
-
-			if (!catalogItem.isAvailable) {
-				throw new ItemUnavailableError();
-			}
-
-			if (targetItem.variantId) {
-				if (!catalogItem.variant) {
-					throw new MenuItemNotFoundError();
-				}
-				if (!catalogItem.variant.isAvailable) {
-					throw new ItemUnavailableError();
-				}
-			}
-
-			if (addonIds.length > 0) {
-				const requestedAddonSet = new Set(addonIds);
-				const foundAddonMap = new Map(
-					catalogItem.addons.map((a) => [a.addonId, a]),
-				);
-
-				for (const addonId of requestedAddonSet) {
-					const addon = foundAddonMap.get(addonId);
-					if (!addon) {
-						throw new MenuItemNotFoundError();
-					}
-					if (!addon.isAvailable) {
-						throw new ItemUnavailableError();
-					}
-				}
-			}
+			validateCatalogItemAvailability(
+				catalogItem,
+				targetItem.variantId,
+				addonIds,
+			);
 		}
 
 		const updatedCart = await this.cartRepository.updateItemQuantity(

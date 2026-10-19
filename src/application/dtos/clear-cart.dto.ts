@@ -1,13 +1,8 @@
+import type { CartMutationResponseDto } from "@application/mappers/cart-response.mapper.ts";
+
 export interface ClearCartRequestDto {
 	cartId: string;
 	authenticatedUserId: string;
 }
 
-export interface ClearCartResponseDto {
-	cartId: string;
-	restaurantId: string;
-	itemCount: number;
-	subtotal: number;
-	updatedAt: string;
-	items: unknown[];
-}
+export type ClearCartResponseDto = CartMutationResponseDto;

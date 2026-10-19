@@ -1,15 +1,8 @@
 import { CART_MESSAGES } from "@common/constants/message.constants.ts";
-import { REGEX } from "@common/constants/regex.constants.ts";
+import { cartItemParamSchema } from "@interfaces/validation/cart-item-param.schema.ts";
 import { z } from "zod";
 
-export const updateCartItemQuantityParamSchema = z.object({
-	cartId: z
-		.string()
-		.regex(REGEX.UUID, { message: CART_MESSAGES.INVALID_CART_ID }),
-	cartItemId: z
-		.string()
-		.regex(REGEX.UUID, { message: CART_MESSAGES.INVALID_CART_ITEM_ID }),
-});
+export const updateCartItemQuantityParamSchema = cartItemParamSchema;
 
 export const updateCartItemQuantityBodySchema = z.object({
 	quantity: z

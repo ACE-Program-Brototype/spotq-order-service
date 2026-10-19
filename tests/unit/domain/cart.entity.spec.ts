@@ -132,8 +132,30 @@ describe("Cart Domain Entities", () => {
 			() => cart.validateAccess("wrong-user"),
 			ForbiddenCartAccessError,
 		);
+		// Empty cart can switch restaurants without error
+		assert.doesNotThrow(() => cart.validateRestaurant("other-rest"));
+
+		// Cart with items must throw DifferentRestaurantCartError on restaurant mismatch
+		const cartWithItems = new Cart({
+			id: "cart-with-items",
+			restaurantId: "rest-1",
+			userId: "user-1",
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() + 3600000),
+			items: [
+				new CartItem({
+					id: "item-1",
+					cartId: "cart-with-items",
+					menuItemId: "menu-1",
+					quantity: 1,
+					unitPrice: 100,
+					totalPrice: 100,
+					addons: [],
+				}),
+			],
+		});
 		assert.throws(
-			() => cart.validateRestaurant("other-rest"),
+			() => cartWithItems.validateRestaurant("other-rest"),
 			DifferentRestaurantCartError,
 		);
 

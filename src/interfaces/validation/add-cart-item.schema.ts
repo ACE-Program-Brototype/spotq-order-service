@@ -18,6 +18,9 @@ export const addCartItemBodySchema = z.object({
 		.array(
 			z.string().regex(REGEX.UUID, { message: CART_MESSAGES.INVALID_ADDON_ID }),
 		)
+		.refine((items) => new Set(items).size === items.length, {
+			message: CART_MESSAGES.DUPLICATE_ADDON_ID,
+		})
 		.optional()
 		.default([]),
 	quantity: z

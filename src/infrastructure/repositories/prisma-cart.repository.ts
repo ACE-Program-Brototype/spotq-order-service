@@ -10,10 +10,6 @@ import type {
 	UpdateCartInput,
 } from "@domain/repositories/cart.repository.interface.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
-import {
-	type IEntityMapper,
-	PrismaBaseRepository,
-} from "@infrastructure/repositories/prisma-base.repository.ts";
 import { inject, injectable } from "inversify";
 
 type PrismaCartRecord = {
@@ -93,24 +89,13 @@ const cartMapper: IEntityMapper<Cart, PrismaCartRecord> = {
 };
 
 @injectable()
-export class PrismaCartRepository
-	extends PrismaBaseRepository<
-		Cart,
-		PrismaCartRecord,
-		PrismaClient["cart"],
-		unknown,
-		UpdateCartInput
-	>
-	implements ICartRepository
-{
+export class PrismaCartRepository implements ICartRepository {
 	constructor(
 		@inject(TYPES.PrismaClient)
 		private readonly prisma: PrismaClient,
-	) {
-		super(prisma.cart, cartMapper);
-	}
+	) {}
 
-	public override async findById(cartId: string): Promise<Cart | null> {
+	public async findById(cartId: string): Promise<Cart | null> {
 		const record = await this.prisma.cart.findUnique({
 			where: { id: cartId },
 			include: {
@@ -129,7 +114,7 @@ export class PrismaCartRepository
 		return cartMapper.toDomain(record as unknown as PrismaCartRecord);
 	}
 
-	public override async update(
+	public async update(
 		cartId: string,
 		data: UpdateCartInput,
 	): Promise<Cart | null> {
@@ -191,31 +176,71 @@ export class PrismaCartRepository
 			});
 
 			if (!existingRecord && input.userId && input.restaurantId) {
-				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-				existingRecord = await tx.cart.upsert({
+				const existingByPair = await tx.cart.findUnique({
 					where: {
 						userId_restaurantId: {
 							userId: input.userId,
 							restaurantId: input.restaurantId,
 						},
 					},
-					create: {
-						id: input.cartId,
-						userId: input.userId,
-						restaurantId: input.restaurantId,
-						expiresAt: newExpiresAt,
-					},
-					update: {
-						expiresAt: newExpiresAt,
-					},
 					include: {
 						items: {
-							include: {
-								addons: true,
-							},
+							select: { id: true },
 						},
 					},
 				});
+
+				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+				if (existingByPair) {
+					const isExpired =
+						existingByPair.expiresAt < new Date() ||
+						existingByPair.status === CartStatus.EXPIRED;
+
+					if (isExpired) {
+						const staleItemIds = existingByPair.items.map((it) => it.id);
+						if (staleItemIds.length > 0) {
+							await tx.cartItemAddon.deleteMany({
+								where: { cartItemId: { in: staleItemIds } },
+							});
+							await tx.cartItem.deleteMany({
+								where: { cartId: existingByPair.id },
+							});
+						}
+					}
+
+					existingRecord = await tx.cart.update({
+						where: { id: existingByPair.id },
+						data: {
+							status: CartStatus.ACTIVE,
+							expiresAt: newExpiresAt,
+						},
+						include: {
+							items: {
+								include: {
+									addons: true,
+								},
+							},
+						},
+					});
+				} else {
+					existingRecord = await tx.cart.create({
+						data: {
+							id: input.cartId,
+							userId: input.userId,
+							restaurantId: input.restaurantId,
+							status: CartStatus.ACTIVE,
+							expiresAt: newExpiresAt,
+						},
+						include: {
+							items: {
+								include: {
+									addons: true,
+								},
+							},
+						},
+					});
+				}
 			} else if (
 				existingRecord &&
 				existingRecord.items.length === 0 &&

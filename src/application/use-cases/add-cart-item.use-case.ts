@@ -4,14 +4,13 @@ import type {
 } from "@application/dtos/add-cart-item.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
-import type { IAddCartItemUseCase } from "@application/ports/use-cases/add-cart-item.use-case.port.ts";
+import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
+import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
-import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
-import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -27,7 +26,9 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 	public async execute(
 		dto: AddCartItemRequestDto,
 	): Promise<AddCartItemResponseDto> {
-		let cart = await this.cartRepository.findById(dto.cartId);
+		let cart = dto.cartId
+			? await this.cartRepository.findById(dto.cartId)
+			: null;
 
 		if (cart) {
 			cart.validateAccess(dto.authenticatedUserId);
@@ -41,9 +42,7 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 				throw new CartExpiredError();
 			}
 
-			if (cart.items.length > 0) {
-				cart.validateRestaurant(dto.restaurantId);
-			}
+			cart.validateRestaurant(dto.restaurantId);
 
 			const matchingItem = cart.findMatchingItem(
 				dto.menuItemId,
@@ -79,39 +78,7 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 			dto.addonIds,
 		);
 
-		if (!catalogItem) {
-			throw new MenuItemNotFoundError();
-		}
-
-		if (!catalogItem.isAvailable) {
-			throw new ItemUnavailableError();
-		}
-
-		if (dto.variantId) {
-			if (!catalogItem.variant) {
-				throw new MenuItemNotFoundError();
-			}
-			if (!catalogItem.variant.isAvailable) {
-				throw new ItemUnavailableError();
-			}
-		}
-
-		if (dto.addonIds && dto.addonIds.length > 0) {
-			const requestedAddonSet = new Set(dto.addonIds);
-			const foundAddonMap = new Map(
-				catalogItem.addons.map((a) => [a.addonId, a]),
-			);
-
-			for (const addonId of requestedAddonSet) {
-				const addon = foundAddonMap.get(addonId);
-				if (!addon) {
-					throw new MenuItemNotFoundError();
-				}
-				if (!addon.isAvailable) {
-					throw new ItemUnavailableError();
-				}
-			}
-		}
+		validateCatalogItemAvailability(catalogItem, dto.variantId, dto.addonIds);
 
 		const unitPrice = catalogItem.variant?.price ?? catalogItem.price;
 		const itemAddons = (catalogItem.addons ?? []).map((a) => ({
@@ -121,7 +88,7 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 		}));
 
 		const updatedCart = await this.cartRepository.addItem({
-			cartId: cart ? cart.id : dto.cartId,
+			cartId: cart ? cart.id : (dto.cartId as string),
 			userId: dto.authenticatedUserId,
 			restaurantId: dto.restaurantId,
 			menuItemId: dto.menuItemId,

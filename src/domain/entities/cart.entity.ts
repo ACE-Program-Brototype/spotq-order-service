@@ -46,7 +46,7 @@ export class Cart {
 	}
 
 	public validateRestaurant(restaurantId: string): void {
-		if (this.restaurantId !== restaurantId) {
+		if (this.items.length > 0 && this.restaurantId !== restaurantId) {
 			throw new DifferentRestaurantCartError();
 		}
 	}

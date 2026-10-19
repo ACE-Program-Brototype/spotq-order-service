@@ -33,7 +33,7 @@ export function errorHandler(
 	);
 	sendErrorResponse(
 		res,
-		err instanceof Error ? err.message : messages.INTERNAL_SERVER_ERROR,
+		messages.INTERNAL_SERVER_ERROR,
 		CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
 		HTTP_STATUS.INTERNAL_SERVER_ERROR,
 	);

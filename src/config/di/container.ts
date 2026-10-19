@@ -1,12 +1,12 @@
 import "reflect-metadata";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
-import type { IAddCartItemUseCase } from "@application/ports/use-cases/add-cart-item.use-case.port.ts";
-import type { IClearCartUseCase } from "@application/ports/use-cases/clear-cart.use-case.port.ts";
-import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
+import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
+import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-cart.use-case.port.ts";
+import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
+import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
+import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
-import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/remove-cart-item.use-case.port.ts";
-import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/update-cart-item-quantity.use-case.port.ts";
 import { AddCartItemUseCase } from "@application/use-cases/add-cart-item.use-case.ts";
 import { ClearCartUseCase } from "@application/use-cases/clear-cart.use-case.ts";
 import { GetCartUseCase } from "@application/use-cases/get-cart.use-case.ts";

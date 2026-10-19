@@ -10,10 +10,7 @@ import {
 import { addCartItemBodySchema } from "@interfaces/validation/add-cart-item.schema.ts";
 import { cartItemParamSchema } from "@interfaces/validation/cart-item-param.schema.ts";
 import { cartIdParamSchema } from "@interfaces/validation/cart-param.schema.ts";
-import {
-	updateCartItemQuantityBodySchema,
-	updateCartItemQuantityParamSchema,
-} from "@interfaces/validation/update-cart-quantity.schema.ts";
+import { updateCartItemQuantityBodySchema } from "@interfaces/validation/update-cart-quantity.schema.ts";
 import { Router } from "express";
 
 const cartRouter: Router = Router();
@@ -37,7 +34,6 @@ cartRouter.delete(
 cartRouter.post(
 	CART_ROUTES.ITEMS,
 	customerAuthMiddleware,
-	validateRequestParams(cartIdParamSchema),
 	validateRequestBody(addCartItemBodySchema),
 	cartController.addItem,
 );
@@ -45,7 +41,7 @@ cartRouter.post(
 cartRouter.patch(
 	CART_ROUTES.ITEM_BY_ID,
 	customerAuthMiddleware,
-	validateRequestParams(updateCartItemQuantityParamSchema),
+	validateRequestParams(cartItemParamSchema),
 	validateRequestBody(updateCartItemQuantityBodySchema),
 	cartController.updateQuantity,
 );

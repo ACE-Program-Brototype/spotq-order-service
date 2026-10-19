@@ -4,7 +4,6 @@ import { ClearCartUseCase } from "@application/use-cases/clear-cart.use-case.ts"
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
 import type {
@@ -187,29 +186,37 @@ describe("ClearCartUseCase", () => {
 		);
 	});
 
-	it("throws CartExpiredError if cart has expired", async () => {
+	it("successfully clears an expired cart allowing the user to reset without 410 lockout", async () => {
 		const repo = new MockCartRepository();
 		const expiredCart = new Cart({
 			id: validCartId,
 			restaurantId: validRestaurantId,
 			userId: validUserId,
-			status: CartStatus.ACTIVE,
+			status: CartStatus.EXPIRED,
 			expiresAt: new Date(Date.now() - 3600000),
-			items: [],
+			items: [
+				new CartItem({
+					id: "item-1",
+					cartId: validCartId,
+					menuItemId: "menu-1",
+					quantity: 1,
+					unitPrice: 100,
+					totalPrice: 100,
+					addons: [],
+				}),
+			],
 		});
 		repo.carts.set(validCartId, expiredCart);
 
 		const useCase = new ClearCartUseCase(repo);
+		const res = await useCase.execute({
+			cartId: validCartId,
+			authenticatedUserId: validUserId,
+		});
 
-		await assert.rejects(
-			() =>
-				useCase.execute({
-					cartId: validCartId,
-					authenticatedUserId: validUserId,
-				}),
-			CartExpiredError,
-		);
-
-		assert.equal(repo.carts.get(validCartId)?.status, CartStatus.EXPIRED);
+		assert.equal(res.cartId, validCartId);
+		assert.equal(res.itemCount, 0);
+		assert.deepEqual(res.items, []);
+		assert.equal(repo.clearCartCallCount, 1);
 	});
 });

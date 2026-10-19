@@ -6,8 +6,8 @@ import { HttpStatus } from "@common/constants/http.constants.ts";
 import { RESTAURANT_SERVICE_ENDPOINTS } from "@common/constants/routes.constants.ts";
 import env from "@config/env.ts";
 import logger from "@infrastructure/logger/pino.ts";
-import { generateToken, type TokenIssuerConfig } from "@spotq-org/s2s-core";
 import { injectable } from "inversify";
+import { getS2SInternalHeaders } from "./s2s-headers.ts";
 
 interface ApiResponse<T> {
 	success: boolean;
@@ -46,31 +46,6 @@ export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
 		this.baseUrl = env.RESTAURANT_SERVICE_URL;
 	}
 
-	private getRequestHeaders(): Record<string, string> {
-		const headers: Record<string, string> = {
-			Accept: "application/json",
-			"x-caller-service": env.SERVICE_NAME,
-		};
-
-		if (env.S2S_PRIVATE_KEY) {
-			try {
-				const issuerConfig: TokenIssuerConfig = {
-					serviceName: env.SERVICE_NAME,
-					privateKey: env.S2S_PRIVATE_KEY,
-				};
-				const token = generateToken(env.S2S_RESTAURANT_AUDIENCE, issuerConfig);
-				headers.Authorization = `Bearer ${token}`;
-			} catch (error) {
-				logger.error(
-					{ error },
-					"Failed to generate S2S token for restaurant service",
-				);
-			}
-		}
-
-		return headers;
-	}
-
 	public async getItemDetails(
 		restaurantId: string,
 		menuItemId: string,
@@ -84,7 +59,11 @@ export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
 			);
 			const url = `${this.baseUrl}${endpoint}`;
 			const response = await fetch(url, {
-				headers: this.getRequestHeaders(),
+				headers: getS2SInternalHeaders(
+					env.S2S_RESTAURANT_AUDIENCE,
+					env.S2S_PRIVATE_KEY,
+					env.SERVICE_NAME,
+				),
 			});
 
 			if (response.status === HttpStatus.NOT_FOUND) {

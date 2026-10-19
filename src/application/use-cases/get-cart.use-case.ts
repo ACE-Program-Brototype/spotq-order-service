@@ -3,7 +3,7 @@ import type {
 	GetCartResponseDto,
 } from "@application/dtos/get-cart.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
-import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
+import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";

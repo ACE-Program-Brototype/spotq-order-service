@@ -4,6 +4,7 @@ import { HTTP_STATUS } from "@common/constants/http.constants.ts";
 import {
 	CART_ERROR_CODES,
 	CART_MESSAGES,
+	messages,
 } from "@common/constants/message.constants.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import {
@@ -93,7 +94,7 @@ describe("Error Middleware", () => {
 			success: false,
 			statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
 			code: CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
-			message: "Database explosion",
+			message: messages.INTERNAL_SERVER_ERROR,
 			error: undefined,
 		});
 	});

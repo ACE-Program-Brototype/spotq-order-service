@@ -8,7 +8,7 @@ export const ROUTES = {
 export const CART_ROUTES = {
 	ROOT: "/",
 	BY_ID: "/:cartId",
-	ITEMS: "/:cartId/items",
+	ITEMS: "/items",
 	ITEM_BY_ID: "/:cartId/items/:cartItemId",
 } as const;
 

@@ -1,8 +1,8 @@
-import type { IAddCartItemUseCase } from "@application/ports/use-cases/add-cart-item.use-case.port.ts";
-import type { IClearCartUseCase } from "@application/ports/use-cases/clear-cart.use-case.port.ts";
-import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
-import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/remove-cart-item.use-case.port.ts";
-import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/update-cart-item-quantity.use-case.port.ts";
+import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
+import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-cart.use-case.port.ts";
+import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
+import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
+import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
 import { HttpStatus } from "@common/constants/http.constants.ts";
 import { CART_MESSAGES } from "@common/constants/message.constants.ts";
 import { sendSuccessResponse } from "@common/response/api-response.ts";
@@ -45,7 +45,9 @@ export class CartController {
 	};
 
 	public addItem = async (req: Request, res: Response): Promise<void> => {
-		const cartId = req.params.cartId as string;
+		const cartId = (req.params.cartId ?? req.body?.cartId) as
+			| string
+			| undefined;
 		const authenticatedUserId = req.user?.userId as string;
 		const body = req.body as AddCartItemBody;
 

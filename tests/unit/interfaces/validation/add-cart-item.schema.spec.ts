@@ -83,4 +83,14 @@ describe("addCartItemBodySchema validation", () => {
 		assert.equal(parsed.quantity, 1);
 		assert.deepEqual(parsed.addonIds, []);
 	});
+
+	it("should fail validation when addonIds contains duplicate IDs", () => {
+		const duplicateId = "77aa88bb-99cc-4dde-aff0-1234567890ab";
+		assert.throws(() => {
+			addCartItemBodySchema.parse({
+				...validPayload,
+				addonIds: [duplicateId, duplicateId],
+			});
+		});
+	});
 });

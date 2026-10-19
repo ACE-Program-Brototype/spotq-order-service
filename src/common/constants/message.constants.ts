@@ -35,6 +35,7 @@ export const CART_MESSAGES = {
 	ITEM_UNAVAILABLE:
 		"Selected item, variant, or add-on is currently unavailable",
 	MENU_ITEM_NOT_FOUND: "Menu item not found in restaurant catalog",
+	DUPLICATE_ADDON_ID: "Duplicate addon IDs are not allowed",
 };
 
 export const CART_ERROR_CODES = {
