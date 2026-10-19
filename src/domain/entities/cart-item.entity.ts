@@ -71,5 +71,3 @@ export class CartItem {
 		return thisAddonIds === targetAddonIds;
 	}
 }
-
-export default CartItem;

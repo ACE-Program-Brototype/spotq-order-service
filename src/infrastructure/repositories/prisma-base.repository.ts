@@ -154,5 +154,3 @@ export abstract class PrismaBaseRepository<
 		}
 	}
 }
-
-export default PrismaBaseRepository;

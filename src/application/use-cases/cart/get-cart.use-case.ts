@@ -1,7 +1,7 @@
 import type {
 	GetCartRequestDto,
 	GetCartResponseDto,
-} from "@application/dtos/get-cart.dto.ts";
+} from "@application/dtos/cart/get-cart.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -29,5 +29,3 @@ export class GetCartUseCase implements IGetCartUseCase {
 		return CartResponseMapper.toDto(cart);
 	}
 }
-
-export default GetCartUseCase;

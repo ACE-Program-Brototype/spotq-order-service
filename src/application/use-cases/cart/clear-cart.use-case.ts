@@ -1,7 +1,7 @@
 import type {
 	ClearCartRequestDto,
 	ClearCartResponseDto,
-} from "@application/dtos/clear-cart.dto.ts";
+} from "@application/dtos/cart/clear-cart.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-cart.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -36,5 +36,3 @@ export class ClearCartUseCase implements IClearCartUseCase {
 		return CartResponseMapper.toMutationDto(updatedCart);
 	}
 }
-
-export default ClearCartUseCase;

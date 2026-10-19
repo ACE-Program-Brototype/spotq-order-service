@@ -15,5 +15,3 @@ export class CartItemAddon {
 		this.price = props.price ?? 0;
 	}
 }
-
-export default CartItemAddon;

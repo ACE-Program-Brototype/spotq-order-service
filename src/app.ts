@@ -1,8 +1,8 @@
 import ROUTES from "@common/constants/routes.constants.ts";
 import swaggerSpec from "@config/swagger.ts";
 import httpLogger from "@infrastructure/logger/pino-http.ts";
-import errorHandler from "@interfaces/middleware/error.middleware.ts";
-import cartRouter from "@interfaces/routes/cart.route.ts";
+import { errorHandler } from "@interfaces/middleware/error.middleware.ts";
+import { cartRouter } from "@interfaces/routes/cart.route.ts";
 import healthRouter from "@interfaces/routes/health.route.ts";
 import metricsRouter from "@interfaces/routes/metrics.route.ts";
 import restaurantOrderRouter from "@interfaces/routes/restaurant-order.route.ts";

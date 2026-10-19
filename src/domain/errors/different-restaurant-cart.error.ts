@@ -11,5 +11,3 @@ export class DifferentRestaurantCartError extends DomainError {
 		super(message, CART_ERROR_CODES.DIFFERENT_RESTAURANT_CART);
 	}
 }
-
-export default DifferentRestaurantCartError;

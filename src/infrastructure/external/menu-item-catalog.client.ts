@@ -39,7 +39,7 @@ interface RemoteMenuItem {
 }
 
 @injectable()
-export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
+export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 	private readonly baseUrl: string;
 
 	constructor() {
@@ -129,5 +129,4 @@ export class MenuItemCatalogGateway implements IMenuItemCatalogPort {
 	}
 }
 
-export { MenuItemCatalogGateway as MenuItemCatalogClient };
-export default MenuItemCatalogGateway;
+export { MenuItemCatalogClient as MenuItemCatalogGateway };

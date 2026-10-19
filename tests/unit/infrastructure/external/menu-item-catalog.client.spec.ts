@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { MenuItemCatalogGateway } from "@infrastructure/external/menu-item-catalog.client.ts";
+import { MenuItemCatalogClient } from "@infrastructure/external/menu-item-catalog.client.ts";
 
-describe("MenuItemCatalogGateway", () => {
+describe("MenuItemCatalogClient", () => {
 	const restaurantId = "2b6f0cc9-8d13-4f2e-a123-9e8ab12cd345";
 	const menuItemId = "3f2a1b00-55de-4d39-a9a7-9f6b986e8123";
 	const variantId = "9a8b7c6d-1111-4222-b333-c44455566677";
@@ -43,7 +43,7 @@ describe("MenuItemCatalogGateway", () => {
 			}) as unknown as Response;
 
 		try {
-			const gateway = new MenuItemCatalogGateway();
+			const gateway = new MenuItemCatalogClient();
 			const result = await gateway.getItemDetails(
 				restaurantId,
 				menuItemId,
@@ -71,7 +71,7 @@ describe("MenuItemCatalogGateway", () => {
 			}) as unknown as Response;
 
 		try {
-			const gateway = new MenuItemCatalogGateway();
+			const gateway = new MenuItemCatalogClient();
 			const result = await gateway.getItemDetails(
 				restaurantId,
 				menuItemId,
@@ -90,7 +90,7 @@ describe("MenuItemCatalogGateway", () => {
 		};
 
 		try {
-			const gateway = new MenuItemCatalogGateway();
+			const gateway = new MenuItemCatalogClient();
 			await assert.rejects(
 				async () => {
 					await gateway.getItemDetails(restaurantId, menuItemId, variantId);
@@ -117,7 +117,7 @@ describe("MenuItemCatalogGateway", () => {
 		};
 
 		try {
-			const gateway = new MenuItemCatalogGateway();
+			const gateway = new MenuItemCatalogClient();
 			await gateway.getItemDetails(restaurantId, menuItemId, variantId);
 			assert.equal(capturedHeaders?.["x-caller-service"], "order-service");
 		} finally {

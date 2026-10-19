@@ -7,13 +7,13 @@ import {
 	validateRequestBody,
 	validateRequestParams,
 } from "@interfaces/middleware/validation.middleware.ts";
-import { addCartItemBodySchema } from "@interfaces/validation/add-cart-item.schema.ts";
-import { cartItemParamSchema } from "@interfaces/validation/cart-item-param.schema.ts";
-import { cartIdParamSchema } from "@interfaces/validation/cart-param.schema.ts";
-import { updateCartItemQuantityBodySchema } from "@interfaces/validation/update-cart-quantity.schema.ts";
+import { addCartItemBodySchema } from "@interfaces/validation/cart/add-cart-item.schema.ts";
+import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
+import { cartIdParamSchema } from "@interfaces/validation/cart/cart-param.schema.ts";
+import { updateCartItemQuantityBodySchema } from "@interfaces/validation/cart/update-cart-quantity.schema.ts";
 import { Router } from "express";
 
-const cartRouter: Router = Router();
+export const cartRouter: Router = Router();
 
 const cartController = container.get<CartController>(TYPES.CartController);
 
@@ -52,5 +52,3 @@ cartRouter.delete(
 	validateRequestParams(cartItemParamSchema),
 	cartController.removeItem,
 );
-
-export default cartRouter;

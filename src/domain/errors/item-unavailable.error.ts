@@ -11,5 +11,3 @@ export class ItemUnavailableError extends DomainError {
 		super(message, CART_ERROR_CODES.ITEM_UNAVAILABLE);
 	}
 }
-
-export default ItemUnavailableError;

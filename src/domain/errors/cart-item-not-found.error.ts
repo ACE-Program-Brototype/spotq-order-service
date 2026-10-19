@@ -11,5 +11,3 @@ export class CartItemNotFoundError extends DomainError {
 		super(message, CART_ERROR_CODES.CART_ITEM_NOT_FOUND);
 	}
 }
-
-export default CartItemNotFoundError;

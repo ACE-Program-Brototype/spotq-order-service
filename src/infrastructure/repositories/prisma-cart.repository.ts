@@ -517,5 +517,3 @@ export class PrismaCartRepository implements ICartRepository {
 		return cart;
 	}
 }
-
-export default PrismaCartRepository;

@@ -29,5 +29,3 @@ export interface IMenuItemCatalogPort {
 		addonIds?: string[],
 	): Promise<CatalogItemDetails | null>;
 }
-
-export default IMenuItemCatalogPort;

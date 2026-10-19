@@ -11,5 +11,3 @@ export class InvalidCartQuantityError extends DomainError {
 		super(message, CART_ERROR_CODES.VALIDATION_ERROR);
 	}
 }
-
-export default InvalidCartQuantityError;

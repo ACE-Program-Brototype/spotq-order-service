@@ -41,5 +41,3 @@ export function validateCatalogItemAvailability(
 		}
 	}
 }
-
-export default validateCatalogItemAvailability;

@@ -79,5 +79,3 @@ export class Cart {
 		return this.items.reduce((sum, item) => sum + item.quantity, 0);
 	}
 }
-
-export default Cart;

@@ -33,5 +33,3 @@ export function domainErrorMapper(err: DomainError): MappedDomainError {
 		message: err.message,
 	};
 }
-
-export default domainErrorMapper;

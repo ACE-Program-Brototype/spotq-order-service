@@ -1,7 +1,7 @@
 import type {
 	RemoveCartItemRequestDto,
 	RemoveCartItemResponseDto,
-} from "@application/dtos/remove-cart-item.dto.ts";
+} from "@application/dtos/cart/remove-cart-item.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -52,5 +52,3 @@ export class RemoveCartItemUseCase implements IRemoveCartItemUseCase {
 		return CartResponseMapper.toMutationDto(updatedCart);
 	}
 }
-
-export default RemoveCartItemUseCase;

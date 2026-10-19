@@ -8,5 +8,3 @@ export class CartExpiredError extends DomainError {
 		super(message, CART_ERROR_CODES.CART_EXPIRED);
 	}
 }
-
-export default CartExpiredError;

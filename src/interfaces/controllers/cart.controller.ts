@@ -7,8 +7,8 @@ import { HttpStatus } from "@common/constants/http.constants.ts";
 import { CART_MESSAGES } from "@common/constants/message.constants.ts";
 import { sendSuccessResponse } from "@common/response/api-response.ts";
 import { TYPES } from "@config/di/types.ts";
-import type { AddCartItemBody } from "@interfaces/validation/add-cart-item.schema.ts";
-import type { UpdateCartItemQuantityBody } from "@interfaces/validation/update-cart-quantity.schema.ts";
+import type { AddCartItemBody } from "@interfaces/validation/cart/add-cart-item.schema.ts";
+import type { UpdateCartItemQuantityBody } from "@interfaces/validation/cart/update-cart-quantity.schema.ts";
 import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 
@@ -130,5 +130,3 @@ export class CartController {
 		);
 	};
 }
-
-export default CartController;

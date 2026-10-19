@@ -38,5 +38,3 @@ export function errorHandler(
 		HTTP_STATUS.INTERNAL_SERVER_ERROR,
 	);
 }
-
-export default errorHandler;

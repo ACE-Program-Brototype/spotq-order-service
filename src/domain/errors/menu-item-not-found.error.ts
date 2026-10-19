@@ -11,5 +11,3 @@ export class MenuItemNotFoundError extends DomainError {
 		super(message, CART_ERROR_CODES.MENU_ITEM_NOT_FOUND);
 	}
 }
-
-export default MenuItemNotFoundError;

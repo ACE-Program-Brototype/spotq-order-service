@@ -8,5 +8,3 @@ export class ForbiddenCartAccessError extends DomainError {
 		super(message, CART_ERROR_CODES.FORBIDDEN_CART_ACCESS);
 	}
 }
-
-export default ForbiddenCartAccessError;

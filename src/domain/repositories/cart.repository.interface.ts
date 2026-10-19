@@ -34,5 +34,3 @@ export interface ICartRepository {
 	removeItem(cartId: string, cartItemId: string): Promise<Cart>;
 	clearCart(cartId: string): Promise<Cart>;
 }
-
-export default ICartRepository;

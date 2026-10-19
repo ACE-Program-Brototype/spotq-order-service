@@ -1,4 +1,4 @@
-import type { GetCartResponseDto } from "@application/dtos/get-cart.dto.ts";
+import type { GetCartResponseDto } from "@application/dtos/cart/get-cart.dto.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 
 export interface CartMutationResponseDto {
@@ -64,5 +64,3 @@ export const CartResponseMapper = {
 		};
 	},
 };
-
-export default CartResponseMapper;

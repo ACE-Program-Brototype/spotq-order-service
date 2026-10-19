@@ -4,7 +4,7 @@ import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
 } from "@application/ports/external/menu-item-catalog.port.ts";
-import { AddCartItemUseCase } from "@application/use-cases/add-cart-item.use-case.ts";
+import { AddCartItemUseCase } from "@application/use-cases/cart/add-cart-item.use-case.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";

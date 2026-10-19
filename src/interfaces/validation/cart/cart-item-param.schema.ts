@@ -12,5 +12,3 @@ export const cartItemParamSchema = z.object({
 });
 
 export type CartItemParam = z.infer<typeof cartItemParamSchema>;
-
-export default cartItemParamSchema;

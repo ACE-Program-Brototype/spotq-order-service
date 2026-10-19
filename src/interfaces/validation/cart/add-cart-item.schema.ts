@@ -36,5 +36,3 @@ export const addCartItemBodySchema = z.object({
 });
 
 export type AddCartItemBody = z.infer<typeof addCartItemBodySchema>;
-
-export default addCartItemBodySchema;

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ClearCartUseCase } from "@application/use-cases/clear-cart.use-case.ts";
+import { ClearCartUseCase } from "@application/use-cases/cart/clear-cart.use-case.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";

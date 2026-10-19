@@ -64,5 +64,3 @@ export function getS2SInternalHeaders(
 
 	return headers;
 }
-
-export default getS2SInternalHeaders;

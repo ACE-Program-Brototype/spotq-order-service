@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { addCartItemBodySchema } from "@interfaces/validation/add-cart-item.schema.ts";
+import { addCartItemBodySchema } from "@interfaces/validation/cart/add-cart-item.schema.ts";
 
 describe("addCartItemBodySchema validation", () => {
 	const validPayload = {

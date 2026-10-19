@@ -1,5 +1,5 @@
 import { CART_MESSAGES } from "@common/constants/message.constants.ts";
-import { cartItemParamSchema } from "@interfaces/validation/cart-item-param.schema.ts";
+import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
 import { z } from "zod";
 
 export const updateCartItemQuantityParamSchema = cartItemParamSchema;
@@ -18,5 +18,3 @@ export type UpdateCartItemQuantityParam = z.infer<
 export type UpdateCartItemQuantityBody = z.infer<
 	typeof updateCartItemQuantityBodySchema
 >;
-
-export default updateCartItemQuantityBodySchema;

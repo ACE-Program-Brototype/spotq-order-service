@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { cartItemParamSchema } from "@interfaces/validation/cart-item-param.schema.ts";
+import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
 
 describe("cartItemParamSchema validation", () => {
 	const validParams = {

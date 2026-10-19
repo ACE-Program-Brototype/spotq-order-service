@@ -1,7 +1,7 @@
 import type {
 	AddCartItemRequestDto,
 	AddCartItemResponseDto,
-} from "@application/dtos/add-cart-item.dto.ts";
+} from "@application/dtos/cart/add-cart-item.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
@@ -105,5 +105,3 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 		return CartResponseMapper.toMutationDto(updatedCart);
 	}
 }
-
-export default AddCartItemUseCase;

@@ -7,17 +7,17 @@ import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
-import { AddCartItemUseCase } from "@application/use-cases/add-cart-item.use-case.ts";
-import { ClearCartUseCase } from "@application/use-cases/clear-cart.use-case.ts";
-import { GetCartUseCase } from "@application/use-cases/get-cart.use-case.ts";
+import { AddCartItemUseCase } from "@application/use-cases/cart/add-cart-item.use-case.ts";
+import { ClearCartUseCase } from "@application/use-cases/cart/clear-cart.use-case.ts";
+import { GetCartUseCase } from "@application/use-cases/cart/get-cart.use-case.ts";
+import { RemoveCartItemUseCase } from "@application/use-cases/cart/remove-cart-item.use-case.ts";
+import { UpdateCartItemQuantityUseCase } from "@application/use-cases/cart/update-cart-item-quantity.use-case.ts";
 import { GetOrdersOverviewUseCase } from "@application/use-cases/get-orders-overview.use-case.ts";
-import { RemoveCartItemUseCase } from "@application/use-cases/remove-cart-item.use-case.ts";
-import { UpdateCartItemQuantityUseCase } from "@application/use-cases/update-cart-item-quantity.use-case.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import prisma from "@infrastructure/database/prisma.ts";
-import { MenuItemCatalogGateway } from "@infrastructure/external/menu-item-catalog.client.ts";
+import { MenuItemCatalogClient } from "@infrastructure/external/menu-item-catalog.client.ts";
 import { RestaurantServiceClient } from "@infrastructure/external/restaurant-service.client.ts";
 import { PrismaCartRepository } from "@infrastructure/repositories/prisma-cart.repository.ts";
 import { PrismaOrderRepository } from "@infrastructure/repositories/prisma-order.repository.ts";
@@ -36,7 +36,7 @@ container
 
 container
 	.bind<IMenuItemCatalogPort>(TYPES.MenuItemCatalogPort)
-	.to(MenuItemCatalogGateway)
+	.to(MenuItemCatalogClient)
 	.inSingletonScope();
 
 container
@@ -90,4 +90,3 @@ container
 	.inSingletonScope();
 
 export { container };
-export default container;

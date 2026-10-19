@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
 	updateCartItemQuantityBodySchema,
 	updateCartItemQuantityParamSchema,
-} from "@interfaces/validation/update-cart-quantity.schema.ts";
+} from "@interfaces/validation/cart/update-cart-quantity.schema.ts";
 
 describe("updateCartItemQuantityParamSchema validation", () => {
 	const validParams = {
