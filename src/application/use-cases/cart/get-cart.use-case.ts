@@ -1,13 +1,11 @@
 import type {
 	GetCartRequestDto,
 	GetCartResponseDto,
-} from "@application/dtos/get-cart.dto.ts";
+} from "@application/dtos/cart/get-cart.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
-import type { IGetCartUseCase } from "@application/ports/use-cases/get-cart.use-case.port.ts";
+import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -25,16 +23,9 @@ export class GetCartUseCase implements IGetCartUseCase {
 			throw new CartNotFoundError();
 		}
 
-		if (cart.userId !== dto.authenticatedUserId) {
-			throw new ForbiddenCartAccessError();
-		}
-
-		if (cart.isExpired()) {
-			throw new CartExpiredError();
-		}
+		cart.validateAccess(dto.authenticatedUserId);
+		cart.validateActive();
 
 		return CartResponseMapper.toDto(cart);
 	}
 }
-
-export default GetCartUseCase;

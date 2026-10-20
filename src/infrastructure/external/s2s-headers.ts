@@ -2,6 +2,40 @@ import env from "@config/env.ts";
 import logger from "@infrastructure/logger/pino.ts";
 import { generateToken, type TokenIssuerConfig } from "@spotq-org/s2s-core";
 
+interface CachedToken {
+	token: string;
+	expiresAt: number;
+}
+
+const tokenCache = new Map<string, CachedToken>();
+const TOKEN_TTL_MS = 10 * 60 * 1000;
+
+export function getCachedS2SToken(
+	targetServiceName: string,
+	privateKey: string,
+	callerServiceName: string = env.S2S_SERVICE_NAME,
+): string {
+	const cacheKey = `${callerServiceName}:${targetServiceName}`;
+	const cached = tokenCache.get(cacheKey);
+	const now = Date.now();
+
+	if (cached && cached.expiresAt > now) {
+		return cached.token;
+	}
+
+	const issuerConfig: TokenIssuerConfig = {
+		serviceName: callerServiceName,
+		privateKey,
+	};
+	const token = generateToken(targetServiceName, issuerConfig);
+	tokenCache.set(cacheKey, {
+		token,
+		expiresAt: now + TOKEN_TTL_MS,
+	});
+
+	return token;
+}
+
 export function getS2SInternalHeaders(
 	targetServiceName: string,
 	privateKey?: string,
@@ -14,11 +48,11 @@ export function getS2SInternalHeaders(
 
 	if (privateKey) {
 		try {
-			const issuerConfig: TokenIssuerConfig = {
-				serviceName: callerServiceName,
+			const token = getCachedS2SToken(
+				targetServiceName,
 				privateKey,
-			};
-			const token = generateToken(targetServiceName, issuerConfig);
+				callerServiceName,
+			);
 			headers.Authorization = `Bearer ${token}`;
 		} catch (error) {
 			logger.error(
@@ -30,5 +64,3 @@ export function getS2SInternalHeaders(
 
 	return headers;
 }
-
-export default getS2SInternalHeaders;

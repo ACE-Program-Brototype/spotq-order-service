@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { cartIdParamSchema } from "@interfaces/validation/cart-param.schema.ts";
+import { cartIdParamSchema } from "@interfaces/validation/cart/cart-param.schema.ts";
 
 describe("cartIdParamSchema validation", () => {
 	it("should succeed with a valid UUIDv4", () => {

@@ -9,5 +9,3 @@ export const cartIdParamSchema = z.object({
 });
 
 export type CartIdParam = z.infer<typeof cartIdParamSchema>;
-
-export default cartIdParamSchema;

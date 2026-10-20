@@ -85,5 +85,3 @@ export function customerAuthMiddleware(
 
 	next();
 }
-
-export default customerAuthMiddleware;

@@ -2,21 +2,37 @@ import { z } from "zod";
 
 const envSchema = z.object({
 	PORT: z.coerce.number().default(3002),
-	NODE_ENV: z.enum(["development", "staging", "production"]),
-	DATABASE_URL: z.string(),
-	REDIS_URL: z.string(),
-	LOG_LEVEL: z.string(),
+	NODE_ENV: z
+		.enum(["development", "staging", "production", "test"])
+		.default("development"),
+	DATABASE_URL: z.string().default("postgres://localhost:5432/spotq_order_db"),
+	REDIS_URL: z.string().default("redis://localhost:6379"),
+	LOG_LEVEL: z.string().default("info"),
 	RESTAURANT_SERVICE_URL: z
 		.string()
 		.url("RESTAURANT_SERVICE_URL must be a valid URL")
-		.transform((val) => val.replace(/\/+$/, "")),
+		.transform((val) => val.replace(/\/+$/, ""))
+		.default("http://localhost:3001"),
 	RESTAURANT_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
+	SERVICE_NAME: z.string().default("order-service"),
 	S2S_SERVICE_NAME: z.string().default("order-service"),
-
+	S2S_PRIVATE_KEY: z.preprocess((val) => {
+		if (typeof val === "string" && val.trim().length > 0) {
+			return val.replace(/\\n/g, "\n").trim();
+		}
+		if (
+			typeof process.env.ORDER_S2S_PRIVATE_KEY === "string" &&
+			process.env.ORDER_S2S_PRIVATE_KEY.trim().length > 0
+		) {
+			return process.env.ORDER_S2S_PRIVATE_KEY.replace(/\\n/g, "\n").trim();
+		}
+		return undefined;
+	}, z.string().optional()),
 	ORDER_S2S_PRIVATE_KEY: z.preprocess(
-		(val) => (typeof val === "string" ? val.replace(/\\n/g, "\n") : ""),
+		(val) => (typeof val === "string" ? val.replace(/\\n/g, "\n").trim() : ""),
 		z.string().default(""),
 	),
+	S2S_RESTAURANT_AUDIENCE: z.string().default("restaurant-service"),
 });
 
 const env = envSchema.parse(process.env);

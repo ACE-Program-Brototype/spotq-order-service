@@ -1,5 +1,20 @@
-import type { GetCartResponseDto } from "@application/dtos/get-cart.dto.ts";
+import type { GetCartResponseDto } from "@application/dtos/cart/get-cart.dto.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
+
+export interface CartMutationResponseDto {
+	cartId: string;
+	restaurantId: string;
+	itemCount: number;
+	subtotal: number;
+	updatedAt: string;
+	items: Array<{
+		cartItemId: string;
+		menuItemId: string;
+		quantity: number;
+		unitPrice: number;
+		totalPrice: number;
+	}>;
+}
 
 export const CartResponseMapper = {
 	toDto(cart: Cart): GetCartResponseDto {
@@ -31,6 +46,21 @@ export const CartResponseMapper = {
 			})),
 		};
 	},
-};
 
-export default CartResponseMapper;
+	toMutationDto(cart: Cart): CartMutationResponseDto {
+		return {
+			cartId: cart.id,
+			restaurantId: cart.restaurantId,
+			itemCount: cart.calculateItemCount(),
+			subtotal: cart.calculateSubtotal(),
+			updatedAt: cart.updatedAt.toISOString(),
+			items: cart.items.map((item) => ({
+				cartItemId: item.id,
+				menuItemId: item.menuItemId,
+				quantity: item.quantity,
+				unitPrice: item.unitPrice,
+				totalPrice: item.totalPrice,
+			})),
+		};
+	},
+};

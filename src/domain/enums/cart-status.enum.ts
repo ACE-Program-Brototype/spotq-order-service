@@ -4,5 +4,3 @@ export enum CartStatus {
 	CONVERTED = "CONVERTED",
 	ABANDONED = "ABANDONED",
 }
-
-export default CartStatus;

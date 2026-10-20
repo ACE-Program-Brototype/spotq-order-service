@@ -9,5 +9,3 @@ export class RestaurantNotEligibleError extends DomainError {
 		super(message, ORDER_ERROR_CODES.RESTAURANT_NOT_ELIGIBLE);
 	}
 }
-
-export default RestaurantNotEligibleError;

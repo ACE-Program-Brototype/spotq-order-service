@@ -9,5 +9,3 @@ export class ForbiddenRestaurantAccessError extends DomainError {
 		super(message, ORDER_ERROR_CODES.FORBIDDEN_RESTAURANT_ACCESS);
 	}
 }
-
-export default ForbiddenRestaurantAccessError;

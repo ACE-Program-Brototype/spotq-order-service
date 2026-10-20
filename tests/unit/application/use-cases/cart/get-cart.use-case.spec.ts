@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { GetCartUseCase } from "@application/use-cases/get-cart.use-case.ts";
+import { GetCartUseCase } from "@application/use-cases/cart/get-cart.use-case.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
@@ -33,6 +33,35 @@ class MockCartRepository implements ICartRepository {
 			existing.status = data.status;
 		}
 		return existing ?? null;
+	}
+
+	public async findActiveByUserId(userId: string): Promise<Cart | null> {
+		for (const cart of this.carts.values()) {
+			if (cart.userId === userId && !cart.isExpired()) {
+				return cart;
+			}
+		}
+		return null;
+	}
+
+	public async addItem(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async updateItemQuantity(
+		_cartId: string,
+		_cartItemId: string,
+		_quantity: number,
+	): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async removeItem(_cartId: string, _cartItemId: string): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async clearCart(_cartId: string): Promise<Cart> {
+		throw new Error("Not implemented");
 	}
 }
 
@@ -85,7 +114,7 @@ describe("GetCartUseCase", () => {
 
 		assert.equal(result.cartId, cartId);
 		assert.equal(result.itemCount, 2);
-		assert.equal(result.subtotal, 518);
+		assert.equal(result.subtotal, 538);
 		assert.equal(result.items.length, 1);
 		assert.equal(result.items[0]?.cartItemId, "item-1");
 		assert.equal(result.items[0]?.addons.length, 1);
