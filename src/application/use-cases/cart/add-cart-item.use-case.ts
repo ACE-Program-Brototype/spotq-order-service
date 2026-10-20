@@ -88,7 +88,7 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 		}));
 
 		const updatedCart = await this.cartRepository.addItem({
-			cartId: cart ? cart.id : (dto.cartId as string),
+			cartId: cart?.id ?? dto.cartId,
 			userId: dto.authenticatedUserId,
 			restaurantId: dto.restaurantId,
 			menuItemId: dto.menuItemId,

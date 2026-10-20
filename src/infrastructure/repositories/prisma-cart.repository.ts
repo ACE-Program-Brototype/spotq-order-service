@@ -165,16 +165,18 @@ export class PrismaCartRepository implements ICartRepository {
 
 	public async addItem(input: AddItemInput): Promise<Cart> {
 		const cart = await this.prisma.$transaction(async (tx) => {
-			let existingRecord = await tx.cart.findUnique({
-				where: { id: input.cartId },
-				include: {
-					items: {
+			let existingRecord = input.cartId
+				? await tx.cart.findUnique({
+						where: { id: input.cartId },
 						include: {
-							addons: true,
+							items: {
+								include: {
+									addons: true,
+								},
+							},
 						},
-					},
-				},
-			});
+					})
+				: null;
 
 			if (!existingRecord && input.userId && input.restaurantId) {
 				const existingByPair = await tx.cart.findUnique({
@@ -224,10 +226,9 @@ export class PrismaCartRepository implements ICartRepository {
 				} else {
 					existingRecord = await tx.cart.create({
 						data: {
-							id: input.cartId,
+							...(input.cartId ? { id: input.cartId } : {}),
 							userId: input.userId,
 							restaurantId: input.restaurantId,
-							status: CartStatus.ACTIVE,
 							expiresAt: newExpiresAt,
 						},
 						include: {
@@ -255,7 +256,7 @@ export class PrismaCartRepository implements ICartRepository {
 						},
 					},
 					create: {
-						id: input.cartId,
+						...(input.cartId ? { id: input.cartId } : {}),
 						userId: input.userId ?? existingRecord.userId,
 						restaurantId: input.restaurantId,
 						expiresAt: newExpiresAt,

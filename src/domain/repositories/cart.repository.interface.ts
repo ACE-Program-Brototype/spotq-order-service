@@ -7,7 +7,7 @@ export interface UpdateCartInput {
 }
 
 export interface AddItemInput {
-	cartId: string;
+	cartId?: string | undefined;
 	userId?: string;
 	restaurantId?: string;
 	menuItemId: string;

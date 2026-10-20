@@ -48,10 +48,11 @@ class MockCartRepository implements ICartRepository {
 	}
 
 	public async addItem(input: AddItemInput): Promise<Cart> {
-		let cart = this.carts.get(input.cartId);
+		const cartId = input.cartId ?? "cart-1";
+		let cart = this.carts.get(cartId);
 		if (!cart) {
 			cart = new Cart({
-				id: input.cartId,
+				id: cartId,
 				restaurantId: input.restaurantId ?? "default-restaurant",
 				userId: input.userId ?? "default-user",
 				status: CartStatus.ACTIVE,
@@ -60,7 +61,7 @@ class MockCartRepository implements ICartRepository {
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			});
-			this.carts.set(input.cartId, cart);
+			this.carts.set(cartId, cart);
 		}
 
 		const targetAddonSignature = [...(input.addonIds ?? [])].sort().join(",");
@@ -100,7 +101,7 @@ class MockCartRepository implements ICartRepository {
 		} else {
 			const newItem = new CartItem({
 				id: "new-item-id",
-				cartId: input.cartId,
+				cartId: cart.id,
 				menuItemId: input.menuItemId,
 				variantId: input.variantId ?? null,
 				quantity: input.quantity,
