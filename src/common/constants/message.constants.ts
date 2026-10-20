@@ -65,6 +65,11 @@ export const ORDER_MESSAGES = {
 	INVALID_ORDER_STATUS: "Invalid order status filter provided",
 	RESTAURANT_VALIDATION_FAILED:
 		"Failed to validate restaurant from restaurant-service",
+	ORDER_PLACED_SUCCESS: "Order placed successfully",
+	CART_EMPTY: "Cannot place an order with an empty cart",
+	INVALID_PAYMENT_MODE:
+		"Online payment feature is coming soon. Please select Pay at Counter.",
+	ORDER_NOT_FOUND: "Order not found",
 };
 
 export const ORDER_ERROR_CODES = {
@@ -74,6 +79,9 @@ export const ORDER_ERROR_CODES = {
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
+	CART_EMPTY: "CART_EMPTY",
+	INVALID_PAYMENT_MODE: "INVALID_PAYMENT_MODE",
+	ORDER_NOT_FOUND: "ORDER_NOT_FOUND",
 };
 
 export default messages;

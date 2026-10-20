@@ -1,4 +1,5 @@
 import { TYPES } from "@config/di/types.ts";
+import type { Order } from "@domain/entities/order.entity.ts";
 import type {
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
@@ -6,20 +7,160 @@ import type {
 } from "@domain/repositories/order.repository.interface.ts";
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
 import { OrderStatus } from "@generated/prisma/enums.ts";
-import { OrderPersistenceMapper } from "@infrastructure/database/mappers/order.mapper.ts";
+import {
+	OrderPersistenceMapper,
+	type PrismaOrderWithRelations,
+} from "@infrastructure/database/mappers/order.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/repositories/prisma-base.repository.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
 export class PrismaOrderRepository
-	extends PrismaBaseRepository
+	extends PrismaBaseRepository<Order, PrismaOrderWithRelations>
 	implements IOrderRepository
 {
 	constructor(
 		@inject(TYPES.PrismaClient)
 		private readonly prisma: PrismaClient,
 	) {
-		super();
+		super(prisma.order, OrderPersistenceMapper);
+	}
+
+	public async create(order: Order): Promise<Order> {
+		try {
+			const createdRecord = await this.prisma.$transaction(async (tx) => {
+				const record = await tx.order.create({
+					data: {
+						id: order.id,
+						orderNumber: order.orderNumber,
+						restaurantId: order.restaurantId,
+						userId: order.userId,
+						userName: order.userName,
+						userPhone: order.userPhone,
+						tableId: order.tableId,
+						tableNumber: order.tableNumber,
+						queueEntryId: order.queueEntryId,
+						paymentId: order.paymentId,
+						priority: order.priority,
+						orderType: order.orderType,
+						paymentMode: order.paymentMode,
+						paymentStatus: order.paymentStatus,
+						orderStatus: order.orderStatus,
+						subtotal: order.subtotal,
+						taxAmount: order.taxAmount,
+						platformFee: order.platformFee,
+						discountAmount: order.discountAmount,
+						couponCode: order.couponCode,
+						grandTotal: order.grandTotal,
+						estimatedReadyAt: order.estimatedReadyAt,
+						specialInstructions: order.specialInstructions,
+						createdAt: order.createdAt,
+						updatedAt: order.updatedAt,
+						items: {
+							create: order.items.map((item) => ({
+								id: item.id,
+								menuItemId: item.menuItemId,
+								itemName: item.itemName,
+								variantId: item.variantId,
+								variantName: item.variantName,
+								quantity: item.quantity,
+								unitPrice: item.unitPrice,
+								totalPrice: item.totalPrice,
+								specialInstructions: item.specialInstructions,
+								createdAt: item.createdAt,
+								addons: {
+									create: item.addons.map((addon) => ({
+										id: addon.id,
+										addonId: addon.addonId,
+										addonName: addon.addonName,
+										price: addon.price,
+									})),
+								},
+							})),
+						},
+						statusHistory: {
+							create: order.statusHistory.map((history) => ({
+								id: history.id,
+								previousStatus: history.previousStatus,
+								currentStatus: history.currentStatus,
+								changedBy: history.changedBy,
+								notes: history.notes,
+								createdAt: history.createdAt,
+							})),
+						},
+					},
+					include: {
+						items: {
+							include: {
+								addons: true,
+							},
+						},
+						statusHistory: true,
+					},
+				});
+
+				return record;
+			});
+
+			return OrderPersistenceMapper.toDomain(createdRecord);
+		} catch (error) {
+			this.handlePrismaError(error, order);
+			throw error;
+		}
+	}
+
+	public override async findById(id: string): Promise<Order | null> {
+		try {
+			const record = await this.prisma.order.findUnique({
+				where: { id },
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+					statusHistory: true,
+				},
+			});
+
+			return record ? OrderPersistenceMapper.toDomain(record) : null;
+		} catch (error) {
+			this.handlePrismaError(error, id);
+			throw error;
+		}
+	}
+
+	public async findActiveByUserId(
+		restaurantId: string,
+		userId: string,
+	): Promise<Order | null> {
+		try {
+			const record = await this.prisma.order.findFirst({
+				where: {
+					restaurantId,
+					userId,
+					orderStatus: {
+						notIn: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
+					},
+				},
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+					statusHistory: true,
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+			});
+
+			return record ? OrderPersistenceMapper.toDomain(record) : null;
+		} catch (error) {
+			this.handlePrismaError(error, { restaurantId, userId });
+			throw error;
+		}
 	}
 
 	public async getOrdersOverview(

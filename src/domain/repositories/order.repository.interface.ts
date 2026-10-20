@@ -1,3 +1,4 @@
+import type { Order } from "@domain/entities/order.entity.ts";
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 
 export interface GetOrdersOverviewRepoParams {
@@ -43,6 +44,12 @@ export interface GetOrdersOverviewRepoResult {
 }
 
 export interface IOrderRepository {
+	create(order: Order): Promise<Order>;
+	findById(id: string): Promise<Order | null>;
+	findActiveByUserId(
+		restaurantId: string,
+		userId: string,
+	): Promise<Order | null>;
 	getOrdersOverview(
 		params: GetOrdersOverviewRepoParams,
 	): Promise<GetOrdersOverviewRepoResult>;

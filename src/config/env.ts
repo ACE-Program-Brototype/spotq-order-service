@@ -33,6 +33,13 @@ const envSchema = z.object({
 		z.string().default(""),
 	),
 	S2S_RESTAURANT_AUDIENCE: z.string().default("restaurant-service"),
+	QUEUE_SERVICE_URL: z
+		.string()
+		.url("QUEUE_SERVICE_URL must be a valid URL")
+		.transform((val) => val.replace(/\/+$/, ""))
+		.default("http://localhost:3004"),
+	QUEUE_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
+	S2S_QUEUE_AUDIENCE: z.string().default("queue-service"),
 });
 
 const env = envSchema.parse(process.env);

@@ -3,6 +3,7 @@ export const ROUTES = {
 	METRICS: "/metrics",
 	CARTS: "/carts",
 	RESTAURANTS: "/restaurants",
+	ORDERS: "/orders",
 } as const;
 
 export const CART_ROUTES = {
@@ -10,6 +11,10 @@ export const CART_ROUTES = {
 	BY_ID: "/:cartId",
 	ITEMS: "/items",
 	ITEM_BY_ID: "/:cartId/items/:cartItemId",
+} as const;
+
+export const ORDER_ROUTES = {
+	PLACE: "/",
 } as const;
 
 export const RESTAURANT_SERVICE_ENDPOINTS = {
@@ -26,6 +31,11 @@ export const RESTAURANT_ORDER_ROUTES = {
 export const RESTAURANT_SERVICE_ROUTES = {
 	VALIDATION: (restaurantId: string) =>
 		`/api/internal/v1/restaurants/${encodeURIComponent(restaurantId)}/validation`,
+} as const;
+
+export const QUEUE_SERVICE_ROUTES = {
+	ACTIVE_USER_QUEUE: (restaurantId: string, userId: string) =>
+		`/api/internal/v1/restaurants/${encodeURIComponent(restaurantId)}/queue/users/${encodeURIComponent(userId)}/active`,
 } as const;
 
 export default ROUTES;
