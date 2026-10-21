@@ -42,8 +42,36 @@ export interface GetOrdersOverviewRepoResult {
 	pagination: OrderOverviewPaginationData;
 }
 
+export interface GetCustomerOrderHistoryRepoParams {
+	customerId: string;
+	page: number;
+	limit: number;
+	status?: OrderStatus | undefined;
+}
+
+export interface CustomerOrderHistoryItemData {
+	orderId: string;
+	orderNumber: string;
+	restaurantId: string;
+	orderStatus: string;
+	itemsCount: number;
+	grandTotal: number;
+	createdAt: Date;
+}
+
+export interface GetCustomerOrderHistoryRepoResult {
+	orders: CustomerOrderHistoryItemData[];
+	totalOrders: number;
+	totalPages: number;
+	currentPage: number;
+	hasNext: boolean;
+}
+
 export interface IOrderRepository {
 	getOrdersOverview(
 		params: GetOrdersOverviewRepoParams,
 	): Promise<GetOrdersOverviewRepoResult>;
+	getCustomerOrderHistory(
+		params: GetCustomerOrderHistoryRepoParams,
+	): Promise<GetCustomerOrderHistoryRepoResult>;
 }

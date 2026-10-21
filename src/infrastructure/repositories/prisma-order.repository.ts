@@ -1,5 +1,7 @@
 import { TYPES } from "@config/di/types.ts";
 import type {
+	GetCustomerOrderHistoryRepoParams,
+	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
 	IOrderRepository,
@@ -138,6 +140,58 @@ export class PrismaOrderRepository
 				totalPages,
 				totalItems: totalFilteredItems,
 			},
+		};
+	}
+
+	public async getCustomerOrderHistory(
+		params: GetCustomerOrderHistoryRepoParams,
+	): Promise<GetCustomerOrderHistoryRepoResult> {
+		const where: Prisma.OrderWhereInput = {
+			userId: params.customerId,
+			...(params.status && { orderStatus: params.status }),
+		};
+
+		const skip = (params.page - 1) * params.limit;
+
+		const [ordersRecords, totalOrders] = await Promise.all([
+			this.prisma.order.findMany({
+				where,
+				skip,
+				take: params.limit,
+				orderBy: {
+					createdAt: "desc",
+				},
+				select: {
+					id: true,
+					orderNumber: true,
+					restaurantId: true,
+					orderStatus: true,
+					grandTotal: true,
+					createdAt: true,
+					_count: {
+						select: {
+							items: true,
+						},
+					},
+				},
+			}),
+			this.prisma.order.count({
+				where,
+			}),
+		]);
+
+		const totalPages = Math.ceil(totalOrders / params.limit) || 0;
+		const hasNext = params.page < totalPages;
+
+		const orders =
+			OrderPersistenceMapper.toCustomerOrderItemList(ordersRecords);
+
+		return {
+			orders,
+			totalOrders,
+			totalPages,
+			currentPage: params.page,
+			hasNext,
 		};
 	}
 }
