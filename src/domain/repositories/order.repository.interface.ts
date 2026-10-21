@@ -44,7 +44,7 @@ export interface GetOrdersOverviewRepoResult {
 }
 
 export interface IOrderRepository {
-	create(order: Order): Promise<Order>;
+	create(order: Order, cartIdToClear?: string): Promise<Order>;
 	findById(id: string): Promise<Order | null>;
 	findActiveByUserId(
 		restaurantId: string,

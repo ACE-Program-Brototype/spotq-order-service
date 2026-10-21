@@ -59,9 +59,13 @@ describe("OrderController", () => {
 		createdAt: new Date().toISOString(),
 	};
 
-	it("should place order successfully with 201 Created", async () => {
+	it("should place order successfully with 201 Created and forward user details from req.body", async () => {
+		let capturedDto: PlaceOrderInputDto | null = null;
 		const mockPlaceOrderUseCase: IPlaceOrderUseCase = {
-			execute: async (_dto: PlaceOrderInputDto) => mockOrderResponse,
+			execute: async (dto: PlaceOrderInputDto) => {
+				capturedDto = dto;
+				return mockOrderResponse;
+			},
 		};
 		const controller = new OrderController(mockPlaceOrderUseCase);
 
@@ -72,6 +76,8 @@ describe("OrderController", () => {
 				restaurantId: "22222222-2222-2222-2222-222222222222",
 				cartId: "00000000-0000-0000-0000-000000000001",
 				paymentMode: "PAY_AT_COUNTER",
+				userName: "Jane Customer",
+				userPhone: "+919876543210",
 				specialInstructions: "Less spicy",
 			},
 		} as unknown as Request;
@@ -87,6 +93,34 @@ describe("OrderController", () => {
 		assert.equal(body.success, true);
 		assert.equal(body.message, ORDER_MESSAGES.ORDER_PLACED_SUCCESS);
 		assert.equal(body.data.id, "order-123");
+		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userName, "Jane Customer");
+		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userPhone, "+919876543210");
+	});
+
+	it("should fallback to req.user for userName and userPhone when omitted from req.body", async () => {
+		let capturedDto: PlaceOrderInputDto | null = null;
+		const mockPlaceOrderUseCase: IPlaceOrderUseCase = {
+			execute: async (dto: PlaceOrderInputDto) => {
+				capturedDto = dto;
+				return mockOrderResponse;
+			},
+		};
+		const controller = new OrderController(mockPlaceOrderUseCase);
+
+		const { res, getStatus } = createMockResponse();
+		const req = {
+			user: { userId: "user-123", name: "John Fallback", phone: "+919999999999" },
+			body: {
+				restaurantId: "22222222-2222-2222-2222-222222222222",
+				paymentMode: "PAY_AT_COUNTER",
+			},
+		} as unknown as Request;
+
+		await controller.placeOrder(req, res);
+
+		assert.equal(getStatus(), HTTP_STATUS.CREATED);
+		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userName, "John Fallback");
+		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userPhone, "+919999999999");
 	});
 
 	it("should propagate domain errors when use case throws", async () => {

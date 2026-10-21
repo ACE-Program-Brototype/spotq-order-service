@@ -130,4 +130,51 @@ describe("placeOrderBodySchema validation", () => {
 			},
 		);
 	});
+
+	it("should succeed with valid userName and userPhone in request body", async () => {
+		const payload = {
+			restaurantId: validRestaurantId,
+			paymentMode: "PAY_AT_COUNTER",
+			userName: "Jane Doe",
+			userPhone: "+919876543210",
+		};
+
+		const parsed = await placeOrderBodySchema.parseAsync(payload);
+		assert.equal(parsed.userName, "Jane Doe");
+		assert.equal(parsed.userPhone, "+919876543210");
+	});
+
+	it("should fail validation when userPhone format is invalid", async () => {
+		const payload = {
+			restaurantId: validRestaurantId,
+			paymentMode: "PAY_AT_COUNTER",
+			userPhone: "not-a-phone-number",
+		};
+
+		await assert.rejects(
+			async () => placeOrderBodySchema.parseAsync(payload),
+			(err: unknown) => {
+				const error = err as Error;
+				assert.equal(error.name, "ZodError");
+				return true;
+			},
+		);
+	});
+
+	it("should fail validation when userName exceeds 100 characters", async () => {
+		const payload = {
+			restaurantId: validRestaurantId,
+			paymentMode: "PAY_AT_COUNTER",
+			userName: "a".repeat(101),
+		};
+
+		await assert.rejects(
+			async () => placeOrderBodySchema.parseAsync(payload),
+			(err: unknown) => {
+				const error = err as Error;
+				assert.equal(error.name, "ZodError");
+				return true;
+			},
+		);
+	});
 });

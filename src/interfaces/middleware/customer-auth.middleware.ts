@@ -30,10 +30,14 @@ export function customerAuthMiddleware(
 	const headerUserId = getHeaderValue(req.headers[AUTH_HEADERS.USER_ID]);
 	const headerRole = getHeaderValue(req.headers[AUTH_HEADERS.USER_ROLE]);
 	const headerEmail = getHeaderValue(req.headers[AUTH_HEADERS.USER_EMAIL]);
+	const headerName = getHeaderValue(req.headers[AUTH_HEADERS.USER_NAME]);
+	const headerPhone = getHeaderValue(req.headers[AUTH_HEADERS.USER_PHONE]);
 
 	let userId = headerUserId;
 	let role = headerRole;
 	let email = headerEmail;
+	let name = headerName;
+	let phone = headerPhone;
 
 	if (!userId && req.headers[AUTH_HEADERS.AUTHORIZATION]) {
 		const authHeader = getHeaderValue(req.headers[AUTH_HEADERS.AUTHORIZATION]);
@@ -48,12 +52,18 @@ export function customerAuthMiddleware(
 					userId?: string;
 					role?: string;
 					email?: string;
+					name?: string;
+					userName?: string;
+					phone?: string;
+					userPhone?: string;
 				} | null;
 
 				if (decoded) {
 					userId = decoded.sub || decoded.userId || decoded.id;
 					if (!role && decoded.role) role = decoded.role;
 					if (!email && decoded.email) email = decoded.email;
+					if (!name) name = decoded.name || decoded.userName;
+					if (!phone) phone = decoded.phone || decoded.userPhone;
 				}
 			} catch {
 				sendErrorResponse(
@@ -81,6 +91,8 @@ export function customerAuthMiddleware(
 		userId,
 		role,
 		email,
+		name,
+		phone,
 	};
 
 	next();

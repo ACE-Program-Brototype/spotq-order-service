@@ -20,6 +20,8 @@ export class OrderController {
 
 		const result = await this.placeOrderUseCase.execute({
 			userId,
+			userName: body.userName ?? req.user?.name,
+			userPhone: body.userPhone ?? req.user?.phone,
 			restaurantId: body.restaurantId,
 			cartId: body.cartId,
 			paymentMode: body.paymentMode,

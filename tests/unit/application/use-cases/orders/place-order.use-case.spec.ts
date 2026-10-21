@@ -97,9 +97,13 @@ class MockCartRepository implements ICartRepository {
 class MockOrderRepository implements IOrderRepository {
 	public orders: Map<string, Order> = new Map();
 	public activeOrderByUserId: Map<string, Order> = new Map();
+	public clearedCartIds: string[] = [];
 
-	public async create(order: Order): Promise<Order> {
+	public async create(order: Order, cartIdToClear?: string): Promise<Order> {
 		this.orders.set(order.id, order);
+		if (cartIdToClear) {
+			this.clearedCartIds.push(cartIdToClear);
+		}
 		return order;
 	}
 
@@ -452,11 +456,11 @@ describe("PlaceOrderUseCase", () => {
 		assert.equal(result.orderType, OrderType.DINE_IN);
 		assert.equal(result.paymentStatus, PaymentStatus.PENDING);
 		assert.equal(result.orderStatus, OrderStatus.PLACED);
-		assert.equal(cartRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
 	});
 
 	it("Priority 3 (QUEUE): assigns priority 3 and sets queueEntryId and PRE_ORDER when user has active queue entry", async () => {
-		const { useCase, queueClient, restaurantClient, cartRepo } = setupFixture();
+		const { useCase, queueClient, restaurantClient, orderRepo } = setupFixture();
 		restaurantClient.validationResult.canAccessQueueService = true;
 
 		const activeQueueEntry: ActiveQueueDetails = {
@@ -484,11 +488,11 @@ describe("PlaceOrderUseCase", () => {
 		assert.equal(result.priority, OrderPriority.QUEUE);
 		assert.equal(result.queueEntryId, "queue-entry-777");
 		assert.equal(result.orderType, OrderType.PRE_ORDER);
-		assert.equal(cartRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
 	});
 
 	it("Priority 2 (NORMAL): assigns priority 2 and DINE_IN when user has no active order and no queue", async () => {
-		const { useCase, queueClient, cartRepo, orderRepo } = setupFixture();
+		const { useCase, queueClient, orderRepo } = setupFixture();
 		queueClient.activeQueue = null;
 
 		const result = await useCase.execute({
@@ -501,7 +505,7 @@ describe("PlaceOrderUseCase", () => {
 		assert.equal(result.priority, OrderPriority.NORMAL);
 		assert.equal(result.queueEntryId, null);
 		assert.equal(result.orderType, OrderType.DINE_IN);
-		assert.equal(cartRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
 
 		// Verify order is saved in repository
 		const savedOrder = await orderRepo.findById(result.id);
@@ -517,7 +521,7 @@ describe("PlaceOrderUseCase", () => {
 	});
 
 	it("finds active cart by userId if cartId is omitted", async () => {
-		const { useCase, cartRepo } = setupFixture();
+		const { useCase, orderRepo } = setupFixture();
 
 		const result = await useCase.execute({
 			userId,
@@ -526,6 +530,6 @@ describe("PlaceOrderUseCase", () => {
 		});
 
 		assert.equal(result.userId, userId);
-		assert.equal(cartRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
 	});
 });

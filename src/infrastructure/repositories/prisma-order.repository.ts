@@ -26,7 +26,7 @@ export class PrismaOrderRepository
 		super(prisma.order, OrderPersistenceMapper);
 	}
 
-	public async create(order: Order): Promise<Order> {
+	public async create(order: Order, cartIdToClear?: string): Promise<Order> {
 		try {
 			const createdRecord = await this.prisma.$transaction(async (tx) => {
 				const record = await tx.order.create({
@@ -98,6 +98,27 @@ export class PrismaOrderRepository
 						statusHistory: true,
 					},
 				});
+
+				if (cartIdToClear) {
+					const existingCart = await tx.cart.findUnique({
+						where: { id: cartIdToClear },
+						include: {
+							items: {
+								select: { id: true },
+							},
+						},
+					});
+
+					if (existingCart && existingCart.items.length > 0) {
+						const itemIds = existingCart.items.map((item) => item.id);
+						await tx.cartItemAddon.deleteMany({
+							where: { cartItemId: { in: itemIds } },
+						});
+						await tx.cartItem.deleteMany({
+							where: { cartId: cartIdToClear },
+						});
+					}
+				}
 
 				return record;
 			});

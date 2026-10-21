@@ -9,6 +9,10 @@ import type { IRestaurantServiceClient } from "@application/ports/external/resta
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { generateOrderNumber } from "@application/utils/order-number.util.ts";
+import {
+	ORDER_DEFAULTS,
+	ORDER_MESSAGES,
+} from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { Order } from "@domain/entities/order.entity.ts";
@@ -79,51 +83,54 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		const restaurantValidation =
 			await this.restaurantServiceClient.validateRestaurant(cart.restaurantId);
 
-		const orderItemsData = [];
-		for (const cartItem of cart.items) {
-			const addonIds = cartItem.addons.map((a) => a.addonId);
-			const catalogItem = await this.catalogPort.getItemDetails(
-				cart.restaurantId,
-				cartItem.menuItemId,
-				cartItem.variantId,
-				addonIds,
-			);
+		const orderItemsData = await Promise.all(
+			cart.items.map(async (cartItem) => {
+				const addonIds = cartItem.addons.map((a) => a.addonId);
+				const catalogItem = await this.catalogPort.getItemDetails(
+					cart.restaurantId,
+					cartItem.menuItemId,
+					cartItem.variantId,
+					addonIds,
+				);
 
-			validateCatalogItemAvailability(
-				catalogItem,
-				cartItem.variantId,
-				addonIds,
-			);
+				validateCatalogItemAvailability(
+					catalogItem,
+					cartItem.variantId,
+					addonIds,
+				);
 
-			const unitPrice =
-				catalogItem.variant?.price ?? catalogItem.price ?? cartItem.unitPrice;
-			const itemName = catalogItem.name ?? cartItem.menuItemName ?? "Item";
-			const variantName =
-				catalogItem.variant?.name ?? cartItem.variantName ?? null;
-			const catalogAddonsMap = new Map(
-				catalogItem.addons.map((a) => [a.addonId, a]),
-			);
+				const unitPrice =
+					catalogItem.variant?.price ?? catalogItem.price ?? cartItem.unitPrice;
+				const itemName =
+					catalogItem.name ?? cartItem.menuItemName ?? ORDER_DEFAULTS.ITEM_NAME;
+				const variantName =
+					catalogItem.variant?.name ?? cartItem.variantName ?? null;
+				const catalogAddonsMap = new Map(
+					catalogItem.addons.map((a) => [a.addonId, a]),
+				);
 
-			const addons = cartItem.addons.map((a) => {
-				const catalogAddon = catalogAddonsMap.get(a.addonId);
+				const addons = cartItem.addons.map((a) => {
+					const catalogAddon = catalogAddonsMap.get(a.addonId);
+					return {
+						addonId: a.addonId,
+						addonName:
+							catalogAddon?.name ?? a.addonName ?? ORDER_DEFAULTS.ADDON_NAME,
+						price: catalogAddon?.price ?? a.price,
+					};
+				});
+
 				return {
-					addonId: a.addonId,
-					addonName: catalogAddon?.name ?? a.addonName ?? "Addon",
-					price: catalogAddon?.price ?? a.price,
+					menuItemId: cartItem.menuItemId,
+					itemName,
+					variantId: cartItem.variantId,
+					variantName,
+					quantity: cartItem.quantity,
+					unitPrice,
+					specialInstructions: cartItem.specialInstructions,
+					addons,
 				};
-			});
-
-			orderItemsData.push({
-				menuItemId: cartItem.menuItemId,
-				itemName,
-				variantId: cartItem.variantId,
-				variantName,
-				quantity: cartItem.quantity,
-				unitPrice,
-				specialInstructions: cartItem.specialInstructions,
-				addons,
-			});
-		}
+			}),
+		);
 
 		let priority: number = OrderPriority.NORMAL;
 		let queueEntryId: string | null = null;
@@ -172,15 +179,13 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 					previousStatus: null,
 					currentStatus: OrderStatus.PLACED,
 					changedBy: dto.userId,
-					notes: "Order placed by customer",
+					notes: ORDER_MESSAGES.ORDER_PLACED_AUDIT_NOTE,
 					createdAt: new Date(),
 				},
 			],
 		});
 
-		const createdOrder = await this.orderRepository.create(order);
-
-		await this.cartRepository.clearCart(cart.id);
+		const createdOrder = await this.orderRepository.create(order, cart.id);
 
 		return OrderResponseMapper.toDto(createdOrder);
 	}
