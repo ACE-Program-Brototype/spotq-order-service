@@ -13,6 +13,8 @@ export const TYPES = {
 	OrderRepository: Symbol.for("OrderRepository"),
 	GetOrdersOverviewUseCase: Symbol.for("GetOrdersOverviewUseCase"),
 	RestaurantOrderController: Symbol.for("RestaurantOrderController"),
+	GetOrderHistoryUseCase: Symbol.for("GetOrderHistoryUseCase"),
+	CustomerOrderController: Symbol.for("CustomerOrderController"),
 };
 
 export default TYPES;

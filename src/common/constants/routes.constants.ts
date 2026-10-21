@@ -1,8 +1,13 @@
 export const ROUTES = {
+	ROOT: "/",
 	HEALTH: "/health",
 	METRICS: "/metrics",
 	CARTS: "/carts",
 	RESTAURANTS: "/restaurants",
+} as const;
+
+export const ORDER_ROUTES = {
+	HISTORY: "/history",
 } as const;
 
 export const CART_ROUTES = {
