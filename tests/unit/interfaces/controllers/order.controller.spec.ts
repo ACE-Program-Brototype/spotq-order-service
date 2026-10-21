@@ -93,8 +93,14 @@ describe("OrderController", () => {
 		assert.equal(body.success, true);
 		assert.equal(body.message, ORDER_MESSAGES.ORDER_PLACED_SUCCESS);
 		assert.equal(body.data.id, "order-123");
-		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userName, "Jane Customer");
-		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userPhone, "+919876543210");
+		assert.equal(
+			(capturedDto as unknown as PlaceOrderInputDto)?.userName,
+			"Jane Customer",
+		);
+		assert.equal(
+			(capturedDto as unknown as PlaceOrderInputDto)?.userPhone,
+			"+919876543210",
+		);
 	});
 
 	it("should fallback to req.user for userName and userPhone when omitted from req.body", async () => {
@@ -109,7 +115,11 @@ describe("OrderController", () => {
 
 		const { res, getStatus } = createMockResponse();
 		const req = {
-			user: { userId: "user-123", name: "John Fallback", phone: "+919999999999" },
+			user: {
+				userId: "user-123",
+				name: "John Fallback",
+				phone: "+919999999999",
+			},
 			body: {
 				restaurantId: "22222222-2222-2222-2222-222222222222",
 				paymentMode: "PAY_AT_COUNTER",
@@ -119,8 +129,14 @@ describe("OrderController", () => {
 		await controller.placeOrder(req, res);
 
 		assert.equal(getStatus(), HTTP_STATUS.CREATED);
-		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userName, "John Fallback");
-		assert.equal((capturedDto as unknown as PlaceOrderInputDto)?.userPhone, "+919999999999");
+		assert.equal(
+			(capturedDto as unknown as PlaceOrderInputDto)?.userName,
+			"John Fallback",
+		);
+		assert.equal(
+			(capturedDto as unknown as PlaceOrderInputDto)?.userPhone,
+			"+919999999999",
+		);
 	});
 
 	it("should propagate domain errors when use case throws", async () => {

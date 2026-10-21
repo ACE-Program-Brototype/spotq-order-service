@@ -423,7 +423,7 @@ describe("PlaceOrderUseCase", () => {
 	});
 
 	it("Priority 1 (ADDON): assigns priority 1 and DINE_IN when user has uncompleted orders in this restaurant", async () => {
-		const { useCase, orderRepo, cartRepo } = setupFixture();
+		const { useCase, orderRepo } = setupFixture();
 
 		const activeOrder = new Order({
 			orderNumber: "ORD-ACTIVE-001",
@@ -460,7 +460,8 @@ describe("PlaceOrderUseCase", () => {
 	});
 
 	it("Priority 3 (QUEUE): assigns priority 3 and sets queueEntryId and PRE_ORDER when user has active queue entry", async () => {
-		const { useCase, queueClient, restaurantClient, orderRepo } = setupFixture();
+		const { useCase, queueClient, restaurantClient, orderRepo } =
+			setupFixture();
 		restaurantClient.validationResult.canAccessQueueService = true;
 
 		const activeQueueEntry: ActiveQueueDetails = {
