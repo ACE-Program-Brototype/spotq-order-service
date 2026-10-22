@@ -34,10 +34,14 @@ import type {
 	ICartRepository,
 	UpdateCartInput,
 } from "@domain/repositories/cart.repository.interface.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
-	IOrderRepository,
-} from "@domain/repositories/order.repository.interface.ts";
-import { GetOrdersOverviewRepoParams, GetOrdersOverviewRepoResult } from "@domain/types/order-repository.types";
+	CancelledOrderData,
+	GetCustomerOrderHistoryRepoParams,
+	GetCustomerOrderHistoryRepoResult,
+	GetOrdersOverviewRepoParams,
+	GetOrdersOverviewRepoResult,
+} from "@domain/types/order-repository.types.ts";
 
 class MockCartRepository implements ICartRepository {
 	public carts: Map<string, Cart> = new Map();
@@ -131,15 +135,15 @@ class MockOrderRepository implements IOrderRepository {
 	}
 
 	public async getCustomerOrderHistory(
-		_params: any,
-	): Promise<any> {
+		_params: GetCustomerOrderHistoryRepoParams,
+	): Promise<GetCustomerOrderHistoryRepoResult> {
 		throw new Error("Not implemented in test");
 	}
 
 	public async cancelOrder(
-		_order: any,
-		_previousStatus: any,
-	): Promise<any> {
+		_order: Order,
+		_previousStatus: OrderStatus,
+	): Promise<CancelledOrderData> {
 		throw new Error("Not implemented in test");
 	}
 }
