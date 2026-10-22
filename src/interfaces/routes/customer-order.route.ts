@@ -8,6 +8,7 @@ import {
 	validateRequestParams,
 	validateRequestQuery,
 } from "@interfaces/middleware/validation.middleware.ts";
+import { placeOrderBodySchema } from "@interfaces/validation/order/place-order.schema.ts";
 import { orderHistoryQuerySchema } from "@interfaces/validation/order-history-query.schema.ts";
 import { cancelOrderBodySchema } from "@interfaces/validation/orders/cancel-order-body.schema.ts";
 import { cancelOrderParamSchema } from "@interfaces/validation/orders/cancel-order-param.schema.ts";
@@ -17,6 +18,13 @@ const customerOrderRouter: Router = Router();
 
 const customerOrderController = container.get<CustomerOrderController>(
 	TYPES.CustomerOrderController,
+);
+
+customerOrderRouter.post(
+	ORDER_ROUTES.PLACE,
+	customerAuthMiddleware,
+	validateRequestBody(placeOrderBodySchema),
+	customerOrderController.placeOrder,
 );
 
 customerOrderRouter.get(

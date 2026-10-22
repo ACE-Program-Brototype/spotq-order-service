@@ -6,7 +6,6 @@ import { cartRouter } from "@interfaces/routes/cart.route.ts";
 import customerOrderRouter from "@interfaces/routes/customer-order.route.ts";
 import healthRouter from "@interfaces/routes/health.route.ts";
 import metricsRouter from "@interfaces/routes/metrics.route.ts";
-import orderRouter from "@interfaces/routes/order.route.ts";
 import restaurantOrderRouter from "@interfaces/routes/restaurant-order.route.ts";
 import compression from "compression";
 import cors from "cors";
@@ -34,11 +33,9 @@ app.use(ROUTES.METRICS, metricsRouter);
 
 app.use(ROUTES.CARTS, cartRouter);
 
-app.use(ROUTES.ROOT, orderRouter);
+app.use(ROUTES.ROOT, customerOrderRouter);
 
 app.use(ROUTES.RESTAURANTS, restaurantOrderRouter);
-
-app.use(ROUTES.ROOT, customerOrderRouter);
 
 app.use(errorHandler);
 

@@ -31,7 +31,6 @@ import { PrismaCartRepository } from "@infrastructure/repositories/prisma-cart.r
 import { PrismaOrderRepository } from "@infrastructure/repositories/prisma-order.repository.ts";
 import { CartController } from "@interfaces/controllers/cart.controller.ts";
 import { CustomerOrderController } from "@interfaces/controllers/customer-order.controller.ts";
-import { OrderController } from "@interfaces/controllers/order.controller.ts";
 import { RestaurantOrderController } from "@interfaces/controllers/restaurant-order.controller.ts";
 import { Container } from "inversify";
 
@@ -122,11 +121,6 @@ container
 container
 	.bind<IPlaceOrderUseCase>(TYPES.PlaceOrderUseCase)
 	.to(PlaceOrderUseCase)
-	.inSingletonScope();
-
-container
-	.bind<OrderController>(TYPES.OrderController)
-	.to(OrderController)
 	.inSingletonScope();
 
 export { container };
