@@ -48,9 +48,16 @@ class MockCartRepository implements ICartRepository {
 		return this.carts.get(cartId) ?? null;
 	}
 
-	public async findActiveByUserId(userId: string): Promise<Cart | null> {
+	public async findActiveByUserId(
+		userId: string,
+		restaurantId?: string,
+	): Promise<Cart | null> {
 		for (const cart of this.carts.values()) {
-			if (cart.userId === userId && !cart.isExpired()) {
+			if (
+				cart.userId === userId &&
+				(!restaurantId || cart.restaurantId === restaurantId) &&
+				!cart.isExpired()
+			) {
 				return cart;
 			}
 		}
@@ -429,6 +436,8 @@ describe("PlaceOrderUseCase", () => {
 			orderNumber: "ORD-ACTIVE-001",
 			restaurantId,
 			userId,
+			tableId: "table-uuid-7",
+			tableNumber: 7,
 			priority: 2,
 			orderType: OrderType.DINE_IN,
 			paymentMode: PaymentMode.PAY_AT_COUNTER,
@@ -454,9 +463,49 @@ describe("PlaceOrderUseCase", () => {
 
 		assert.equal(result.priority, OrderPriority.ADDON);
 		assert.equal(result.orderType, OrderType.DINE_IN);
+		assert.equal(result.tableId, "table-uuid-7");
+		assert.equal(result.tableNumber, 7);
 		assert.equal(result.paymentStatus, PaymentStatus.PENDING);
 		assert.equal(result.orderStatus, OrderStatus.PLACED);
 		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
+	});
+
+	it("retrieves the active cart for the specific restaurantId when cartId is not provided", async () => {
+		const { useCase, cartRepo, orderRepo } = setupFixture();
+
+		// Add an active cart for another restaurant
+		const otherCart = new Cart({
+			id: "cart-other-restaurant",
+			restaurantId: "other-rest-uuid",
+			userId,
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() + 86400000),
+			items: [
+				new CartItem({
+					id: "cart-item-other",
+					cartId: "cart-other-restaurant",
+					menuItemId: "item-other",
+					quantity: 1,
+					unitPrice: 100,
+					addons: [],
+				}),
+			],
+		});
+		cartRepo.carts.set("cart-other-restaurant", otherCart);
+
+		// Place order for target restaurantId without passing cartId
+		const result = await useCase.execute({
+			userId,
+			restaurantId,
+			paymentMode: PaymentMode.PAY_AT_COUNTER,
+		});
+
+		assert.equal(result.restaurantId, restaurantId);
+		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(
+			orderRepo.clearedCartIds.includes("cart-other-restaurant"),
+			false,
+		);
 	});
 
 	it("Priority 3 (QUEUE): assigns priority 3 and sets queueEntryId and PRE_ORDER when user has active queue entry", async () => {
@@ -492,6 +541,66 @@ describe("PlaceOrderUseCase", () => {
 		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
 	});
 
+	it("Priority 3 (QUEUE): assigns priority 3 and PRE_ORDER even if customer has an existing active order while still waiting in queue", async () => {
+		const { useCase, queueClient, restaurantClient, orderRepo } =
+			setupFixture();
+		restaurantClient.validationResult.canAccessQueueService = true;
+
+		const existingActiveOrder = new Order({
+			orderNumber: "ORD-QUEUE-PREV",
+			restaurantId,
+			userId,
+			tableId: null,
+			tableNumber: null,
+			queueEntryId: "queue-entry-777",
+			priority: OrderPriority.QUEUE,
+			orderType: OrderType.PRE_ORDER,
+			paymentMode: PaymentMode.PAY_AT_COUNTER,
+			paymentStatus: PaymentStatus.PENDING,
+			orderStatus: OrderStatus.PLACED,
+			items: [
+				{
+					menuItemId: "item-prev",
+					itemName: "Garlic Bread",
+					quantity: 1,
+					unitPrice: 120,
+				},
+			],
+		});
+		orderRepo.activeOrderByUserId.set(
+			`${restaurantId}:${userId}`,
+			existingActiveOrder,
+		);
+
+		const activeQueueEntry: ActiveQueueDetails = {
+			id: "queue-entry-777",
+			restaurantId,
+			userId,
+			queueNumber: "Q-12",
+			partySize: 4,
+			status: "WAITING",
+			position: 2,
+			estimatedWaitMinutes: 15,
+		};
+		queueClient.activeQueue = {
+			hasActiveQueue: true,
+			queueEntry: activeQueueEntry,
+		};
+
+		const result = await useCase.execute({
+			userId,
+			restaurantId,
+			cartId,
+			paymentMode: PaymentMode.PAY_AT_COUNTER,
+		});
+
+		assert.equal(result.priority, OrderPriority.QUEUE);
+		assert.equal(result.queueEntryId, "queue-entry-777");
+		assert.equal(result.orderType, OrderType.PRE_ORDER);
+		assert.equal(result.tableId, null);
+		assert.equal(result.tableNumber, null);
+	});
+
 	it("Priority 2 (NORMAL): assigns priority 2 and DINE_IN when user has no active order and no queue", async () => {
 		const { useCase, queueClient, orderRepo } = setupFixture();
 		queueClient.activeQueue = null;
@@ -511,6 +620,8 @@ describe("PlaceOrderUseCase", () => {
 		// Verify order is saved in repository
 		const savedOrder = await orderRepo.findById(result.id);
 		assert.notEqual(savedOrder, null);
+		assert.equal(savedOrder?.restaurantName, "SpotQ Test Kitchen");
+		assert.equal(result.restaurantName, "SpotQ Test Kitchen");
 		assert.equal(savedOrder?.priority, OrderPriority.NORMAL);
 		assert.equal(savedOrder?.items.length, 1);
 		assert.equal(savedOrder?.items[0]?.addons.length, 1);

@@ -76,9 +76,6 @@ export const ORDER_MESSAGES = {
 		"Special instructions cannot exceed 250 characters",
 	INVALID_USER_NAME: "User name cannot exceed 100 characters",
 	INVALID_USER_PHONE: "Invalid phone number format",
-	ORDER_PLACED_AUDIT_NOTE: "Order placed by customer",
-	DEFAULT_ITEM_NAME: "Item",
-	DEFAULT_ADDON_NAME: "Addon",
 	ORDER_NOT_FOUND: "Order not found",
 };
 

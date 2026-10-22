@@ -38,6 +38,7 @@ describe("OrderController", () => {
 		id: "order-123",
 		orderNumber: "ORD-ABC-123",
 		restaurantId: "rest-123",
+		restaurantName: "SpotQ Test Kitchen",
 		userId: "user-123",
 		userName: "John Doe",
 		userPhone: "9876543210",

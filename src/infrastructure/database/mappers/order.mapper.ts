@@ -55,6 +55,7 @@ export const OrderPersistenceMapper = {
 			id: record.id,
 			orderNumber: record.orderNumber,
 			restaurantId: record.restaurantId,
+			restaurantName: record.restaurantName,
 			userId: record.userId,
 			userName: record.userName,
 			userPhone: record.userPhone,

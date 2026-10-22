@@ -13,6 +13,7 @@ export interface OrderProps {
 	id?: string;
 	orderNumber: string;
 	restaurantId: string;
+	restaurantName?: string | null;
 	userId?: string | null;
 	userName?: string | null;
 	userPhone?: string | null;
@@ -43,6 +44,7 @@ export class Order {
 	public readonly id: string;
 	public readonly orderNumber: string;
 	public readonly restaurantId: string;
+	public readonly restaurantName: string | null;
 	public readonly userId: string | null;
 	public readonly userName: string | null;
 	public readonly userPhone: string | null;
@@ -72,6 +74,7 @@ export class Order {
 		this.id = props.id ?? crypto.randomUUID();
 		this.orderNumber = props.orderNumber;
 		this.restaurantId = props.restaurantId;
+		this.restaurantName = props.restaurantName ?? null;
 		this.userId = props.userId ?? null;
 		this.userName = props.userName ?? null;
 		this.userPhone = props.userPhone ?? null;

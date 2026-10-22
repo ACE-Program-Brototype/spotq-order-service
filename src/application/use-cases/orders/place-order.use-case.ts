@@ -9,10 +9,7 @@ import type { IRestaurantServiceClient } from "@application/ports/external/resta
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { generateOrderNumber } from "@application/utils/order-number.util.ts";
-import {
-	ORDER_DEFAULTS,
-	ORDER_MESSAGES,
-} from "@common/constants/message.constants.ts";
+import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { Order } from "@domain/entities/order.entity.ts";
@@ -54,7 +51,10 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		if (dto.cartId) {
 			cart = await this.cartRepository.findById(dto.cartId);
 		} else {
-			cart = await this.cartRepository.findActiveByUserId(dto.userId);
+			cart = await this.cartRepository.findActiveByUserId(
+				dto.userId,
+				dto.restaurantId,
+			);
 		}
 
 		if (!cart) {
@@ -135,16 +135,10 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		let priority: number = OrderPriority.NORMAL;
 		let queueEntryId: string | null = null;
 		let orderType: OrderType = OrderType.DINE_IN;
+		let tableId: string | null = null;
+		let tableNumber: number | null = null;
 
-		const activeOrder = await this.orderRepository.findActiveByUserId(
-			cart.restaurantId,
-			dto.userId,
-		);
-
-		if (activeOrder) {
-			priority = OrderPriority.ADDON;
-			orderType = OrderType.DINE_IN;
-		} else if (restaurantValidation.canAccessQueueService) {
+		if (restaurantValidation.canAccessQueueService) {
 			const activeQueue = await this.queueServiceClient.checkUserActiveQueue(
 				cart.restaurantId,
 				dto.userId,
@@ -157,15 +151,30 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 			}
 		}
 
+		if (!queueEntryId) {
+			const activeOrder = await this.orderRepository.findActiveByUserId(
+				cart.restaurantId,
+				dto.userId,
+			);
+
+			if (activeOrder) {
+				priority = OrderPriority.ADDON;
+				orderType = OrderType.DINE_IN;
+				tableId = activeOrder.tableId;
+				tableNumber = activeOrder.tableNumber;
+			}
+		}
+
 		const orderNumber = generateOrderNumber();
 		const order = new Order({
 			orderNumber,
 			restaurantId: cart.restaurantId,
+			restaurantName: restaurantValidation.restaurantName,
 			userId: dto.userId,
 			userName: dto.userName ?? null,
 			userPhone: dto.userPhone ?? null,
-			tableId: null,
-			tableNumber: null,
+			tableId,
+			tableNumber,
 			queueEntryId,
 			priority,
 			orderType,
@@ -179,7 +188,7 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 					previousStatus: null,
 					currentStatus: OrderStatus.PLACED,
 					changedBy: dto.userId,
-					notes: ORDER_MESSAGES.ORDER_PLACED_AUDIT_NOTE,
+					notes: ORDER_DEFAULTS.AUDIT_NOTE,
 					createdAt: new Date(),
 				},
 			],

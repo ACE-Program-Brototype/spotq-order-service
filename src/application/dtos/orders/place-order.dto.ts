@@ -38,6 +38,7 @@ export interface OrderResponseDto {
 	id: string;
 	orderNumber: string;
 	restaurantId: string;
+	restaurantName: string | null;
 	userId: string | null;
 	userName: string | null;
 	userPhone: string | null;

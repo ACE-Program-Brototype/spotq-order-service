@@ -34,6 +34,7 @@ export class PrismaOrderRepository
 						id: order.id,
 						orderNumber: order.orderNumber,
 						restaurantId: order.restaurantId,
+						restaurantName: order.restaurantName,
 						userId: order.userId,
 						userName: order.userName,
 						userPhone: order.userPhone,

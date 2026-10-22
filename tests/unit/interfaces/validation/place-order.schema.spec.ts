@@ -161,6 +161,23 @@ describe("placeOrderBodySchema validation", () => {
 		);
 	});
 
+	it("should fail validation when userPhone exceeds 20 characters via regex", async () => {
+		const payload = {
+			restaurantId: validRestaurantId,
+			paymentMode: "PAY_AT_COUNTER",
+			userPhone: "+9112345678901234567890", // 23 characters
+		};
+
+		await assert.rejects(
+			async () => placeOrderBodySchema.parseAsync(payload),
+			(err: unknown) => {
+				const error = err as Error;
+				assert.equal(error.name, "ZodError");
+				return true;
+			},
+		);
+	});
+
 	it("should fail validation when userName exceeds 100 characters", async () => {
 		const payload = {
 			restaurantId: validRestaurantId,

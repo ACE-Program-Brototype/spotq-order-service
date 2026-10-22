@@ -30,9 +30,6 @@ export const placeOrderBodySchema = z.object({
 		.string()
 		.trim()
 		.regex(REGEX.PHONE, { message: ORDER_MESSAGES.INVALID_USER_PHONE })
-		.max(ORDER_LIMITS.MAX_USER_PHONE_LENGTH, {
-			message: ORDER_MESSAGES.INVALID_USER_PHONE,
-		})
 		.nullable()
 		.optional(),
 	specialInstructions: z
