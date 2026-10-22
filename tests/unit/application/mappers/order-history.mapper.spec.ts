@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { OrderHistoryMapper } from "@application/mappers/order-history.mapper.ts";
-import type { GetCustomerOrderHistoryRepoResult } from "@domain/repositories/order.repository.interface.ts";
+import type { GetCustomerOrderHistoryRepoResult } from "@domain/types/order-repository.types";
 
 describe("OrderHistoryMapper", () => {
 	it("should map repo results to response DTO correctly", () => {

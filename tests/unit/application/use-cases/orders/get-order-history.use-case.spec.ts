@@ -2,10 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-history.use-case.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import type {
-	GetCustomerOrderHistoryRepoParams,
-	IOrderRepository,
-} from "@domain/repositories/order.repository.interface.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import type { GetCustomerOrderHistoryRepoParams } from "@domain/types/order-repository.types";
 
 describe("GetOrderHistoryUseCase", () => {
 	it("should retrieve customer orders and return mapped order history", async () => {
@@ -43,6 +41,10 @@ describe("GetOrderHistoryUseCase", () => {
 					hasNext: false,
 				};
 			},
+			findById: async () => null,
+			cancelOrder: async () => {
+				throw new Error("Not implemented");
+			},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);
@@ -79,6 +81,10 @@ describe("GetOrderHistoryUseCase", () => {
 				currentPage: 1,
 				hasNext: false,
 			}),
+			findById: async () => null,
+			cancelOrder: async () => {
+				throw new Error("Not implemented");
+			},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);

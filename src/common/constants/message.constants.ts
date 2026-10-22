@@ -1,3 +1,5 @@
+import { AUTH_ROLES } from "./auth.constants.ts";
+
 export const messages = {
 	SUCCESS: "Request processed successfully",
 	INTERNAL_SERVER_ERROR: "Internal Server Error",
@@ -66,13 +68,36 @@ export const ORDER_MESSAGES = {
 	RESTAURANT_VALIDATION_FAILED:
 		"Failed to validate restaurant from restaurant-service",
 	HISTORY_FETCHED_SUCCESS: "Order history retrieved successfully",
+	CANCEL_SUCCESS: "Order cancelled successfully",
+	ORDER_NOT_FOUND: "Order not found",
+	ORDER_ALREADY_IN_PREPARATION:
+		"Order is already in preparation and cannot be cancelled",
+	ORDER_ALREADY_CANCELLED: "Order is already cancelled",
+	ORDER_FORBIDDEN_CANCEL: "Customers can only cancel their own orders",
+	INVALID_ORDER_ID: "Invalid order ID format",
+	INVALID_CANCELLATION_REASON:
+		"Cancellation reason cannot exceed 500 characters",
+	CART_EMPTY: "Cannot place an order with an empty cart",
+	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
 };
+
+export const ORDER_DEFAULTS = {
+	ITEM_NAME: "Item",
+	ADDON_NAME: "Addon",
+	AUDIT_NOTE: "Order placed by customer",
+	CANCEL_AUDIT_NOTE: "Order cancelled by customer",
+	CHANGED_BY_CUSTOMER: AUTH_ROLES.CUSTOMER,
+} as const;
 
 export const ORDER_ERROR_CODES = {
 	RESTAURANT_NOT_FOUND: "RESTAURANT_NOT_FOUND",
 	RESTAURANT_NOT_ELIGIBLE: "RESTAURANT_NOT_ELIGIBLE",
 	FORBIDDEN_RESTAURANT_ACCESS: "FORBIDDEN_RESTAURANT_ACCESS",
 	FORBIDDEN: "FORBIDDEN",
+	ORDER_NOT_FOUND: "ORDER_NOT_FOUND",
+	ORDER_CANNOT_BE_CANCELLED: "ORDER_CANNOT_BE_CANCELLED",
+	INVALID_ORDER_ID: "INVALID_ORDER_ID",
+	CART_EMPTY: "CART_EMPTY",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",

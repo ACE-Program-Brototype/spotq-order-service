@@ -14,7 +14,7 @@ export interface PrismaErrorLike {
 
 @injectable()
 export abstract class PrismaBaseRepository<
-	TDomain extends { id: string } = { id: string },
+	TDomain = unknown,
 	TModel = unknown,
 	TDelegate = unknown,
 	TCreateInput = unknown,

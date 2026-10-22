@@ -41,4 +41,36 @@ describe("OrderRequestMapper", () => {
 			status: OrderStatus.CONFIRMED,
 		});
 	});
+
+	it("should map params, body, and customerId to CancelOrderInputDto", () => {
+		const req = {
+			user: { userId: "cust-owner-789" },
+			params: { orderId: "ord-992817203" },
+			body: { cancellation_reason: "Changed my mind" },
+		} as unknown as Request;
+
+		const dto = OrderRequestMapper.toCancelOrderInputDto(req);
+
+		assert.deepEqual(dto, {
+			orderId: "ord-992817203",
+			customerId: "cust-owner-789",
+			cancellationReason: "Changed my mind",
+		});
+	});
+
+	it("should map CancelOrderInputDto with null cancellationReason when omitted", () => {
+		const req = {
+			user: { userId: "cust-owner-789" },
+			params: { orderId: "ord-992817203" },
+			body: {},
+		} as unknown as Request;
+
+		const dto = OrderRequestMapper.toCancelOrderInputDto(req);
+
+		assert.deepEqual(dto, {
+			orderId: "ord-992817203",
+			customerId: "cust-owner-789",
+			cancellationReason: null,
+		});
+	});
 });

@@ -8,6 +8,7 @@ export const ROUTES = {
 
 export const ORDER_ROUTES = {
 	HISTORY: "/history",
+	CANCEL: "/:orderId/cancel",
 } as const;
 
 export const CART_ROUTES = {

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import { HTTP_STATUS } from "@common/constants/http.constants.ts";
 import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
@@ -45,14 +46,22 @@ describe("CustomerOrderController", () => {
 		};
 
 		let capturedInput: unknown = null;
-		const mockUseCase: IGetOrderHistoryUseCase = {
+		const mockGetHistoryUseCase: IGetOrderHistoryUseCase = {
 			execute: async (dto) => {
 				capturedInput = dto;
 				return mockResponseData;
 			},
 		};
+		const mockCancelUseCase: ICancelOrderUseCase = {
+			execute: async () => {
+				throw new Error("Not implemented");
+			},
+		};
 
-		const controller = new CustomerOrderController(mockUseCase);
+		const controller = new CustomerOrderController(
+			mockGetHistoryUseCase,
+			mockCancelUseCase,
+		);
 		const { res, getStatus, getBody } = createMockResponse();
 
 		const req = {
@@ -81,6 +90,63 @@ describe("CustomerOrderController", () => {
 			statusCode: HTTP_STATUS.OK,
 			message: ORDER_MESSAGES.HISTORY_FETCHED_SUCCESS,
 			data: mockResponseData,
+		});
+	});
+
+	it("should cancel order and send 200 OK with cancelled order data", async () => {
+		const mockCancelledData = {
+			order_id: "ord-123",
+			order_number: "SQ-101",
+			status: "CANCELLED",
+			cancellation_reason: "Changed my mind",
+			cancelled_at: "2026-10-06T13:52:00.000Z",
+		};
+
+		let capturedCancelDto: unknown = null;
+		const mockGetHistoryUseCase: IGetOrderHistoryUseCase = {
+			execute: async () => {
+				throw new Error("Not implemented");
+			},
+		};
+		const mockCancelUseCase: ICancelOrderUseCase = {
+			execute: async (dto) => {
+				capturedCancelDto = dto;
+				return mockCancelledData;
+			},
+		};
+
+		const controller = new CustomerOrderController(
+			mockGetHistoryUseCase,
+			mockCancelUseCase,
+		);
+		const { res, getStatus, getBody } = createMockResponse();
+
+		const req = {
+			user: {
+				userId: "user-cust-1",
+				role: "CUSTOMER",
+			},
+			params: {
+				orderId: "ord-123",
+			},
+			body: {
+				cancellation_reason: "Changed my mind",
+			},
+		} as unknown as Request;
+
+		await controller.cancelOrder(req, res);
+
+		assert.equal(getStatus(), HTTP_STATUS.OK);
+		assert.deepEqual(capturedCancelDto, {
+			orderId: "ord-123",
+			customerId: "user-cust-1",
+			cancellationReason: "Changed my mind",
+		});
+		assert.deepEqual(getBody(), {
+			success: true,
+			statusCode: HTTP_STATUS.OK,
+			message: ORDER_MESSAGES.CANCEL_SUCCESS,
+			data: mockCancelledData,
 		});
 	});
 });
