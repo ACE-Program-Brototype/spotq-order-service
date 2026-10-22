@@ -7,7 +7,7 @@ export interface UpdateCartInput {
 }
 
 export interface AddItemInput {
-	cartId: string;
+	cartId?: string | undefined;
 	userId?: string;
 	restaurantId?: string;
 	menuItemId: string;
@@ -20,6 +20,7 @@ export interface AddItemInput {
 	unitPrice: number;
 	itemAddons: Array<{ addonId: string; price: number; name: string }>;
 }
+
 export interface ICartRepository {
 	findById(cartId: string): Promise<Cart | null>;
 	findActiveByUserId(
