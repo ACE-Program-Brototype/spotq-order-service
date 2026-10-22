@@ -21,5 +21,3 @@ export class OrderItemAddon {
 		this.price = props.price;
 	}
 }
-
-export default OrderItemAddon;

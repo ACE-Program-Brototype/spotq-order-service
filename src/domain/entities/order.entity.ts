@@ -1,8 +1,8 @@
 import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
-import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
-import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { OrderType } from "@domain/enums/order-type.enum.ts";
+import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
+import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
 import {
 	ForbiddenOrderAccessError,
@@ -28,9 +28,9 @@ export interface OrderProps {
 	queueEntryId?: string | null;
 	paymentId?: string | null;
 	priority?: number;
-	orderType?: OrderType;
-	paymentMode?: PaymentMode;
-	paymentStatus?: PaymentStatus;
+	orderType: OrderType;
+	paymentMode: PaymentMode;
+	paymentStatus: PaymentStatus;
 	orderStatus: OrderStatus;
 	subtotal?: number;
 	taxAmount?: number;
@@ -42,8 +42,8 @@ export interface OrderProps {
 	specialInstructions?: string | null;
 	cancellationReason?: string | null;
 	cancelledAt?: Date | null;
-	items?: OrderItemProps[] | undefined;
-	statusHistory?: OrderStatusHistoryProps[] | undefined;
+	items: OrderItemProps[];
+	statusHistory?: OrderStatusHistoryProps[];
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -97,9 +97,9 @@ export class Order {
 		this.queueEntryId = props.queueEntryId ?? null;
 		this.paymentId = props.paymentId ?? null;
 		this.priority = props.priority ?? 2;
-		this.orderType = props.orderType ?? OrderType.DINE_IN;
-		this.paymentMode = props.paymentMode ?? PaymentMode.ONLINE;
-		this.paymentStatus = props.paymentStatus ?? PaymentStatus.PENDING;
+		this.orderType = props.orderType;
+		this.paymentMode = props.paymentMode;
+		this.paymentStatus = props.paymentStatus;
 		this.orderStatus = props.orderStatus;
 		this.items = (props.items ?? []).map((item) => new OrderItem(item));
 		this.statusHistory = (props.statusHistory ?? []).map(
@@ -118,9 +118,7 @@ export class Order {
 		this.createdAt = props.createdAt ?? new Date();
 		this.updatedAt = props.updatedAt ?? new Date();
 
-		if (props.items !== undefined) {
-			this.validateItemsExist();
-		}
+		this.validateItemsExist();
 	}
 
 	public calculateSubtotal(): number {
@@ -183,5 +181,3 @@ export class Order {
 		this.cancelledAt = new Date();
 	}
 }
-
-export default Order;

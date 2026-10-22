@@ -54,5 +54,3 @@ export class OrderItem {
 		return Number(((this.unitPrice + addonsTotal) * this.quantity).toFixed(2));
 	}
 }
-
-export default OrderItem;

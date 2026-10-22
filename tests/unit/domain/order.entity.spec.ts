@@ -79,6 +79,7 @@ describe("Order Domain Entity", () => {
 					userId: customerId,
 					orderType: OrderType.TAKEAWAY,
 					paymentMode: PaymentMode.COD,
+					paymentStatus: PaymentStatus.PENDING,
 					orderStatus: OrderStatus.PLACED,
 					items: [],
 				}),
@@ -95,6 +96,7 @@ describe("Order Domain Entity", () => {
 			userId: customerId,
 			orderType: OrderType.DINE_IN,
 			paymentMode: PaymentMode.ONLINE,
+			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
 			items: [item],
 		});
@@ -137,6 +139,7 @@ describe("Order Domain Entity", () => {
 			userId: customerId,
 			orderType: OrderType.DINE_IN,
 			paymentMode: PaymentMode.ONLINE,
+			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
 			items: [item],
 		});

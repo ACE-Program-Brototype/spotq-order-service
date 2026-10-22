@@ -1,10 +1,37 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
-import { Order } from "@domain/entities/order.entity.ts";
+import { Order, type OrderProps } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
+import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
 import { PrismaOrderRepository } from "@infrastructure/repositories/prisma-order.repository.ts";
+
+function createSampleOrder(props: Partial<OrderProps> = {}): Order {
+	return new Order({
+		id: props.id ?? "ord-123",
+		orderNumber: props.orderNumber ?? "SQ-101",
+		restaurantId: props.restaurantId ?? "rest-1",
+		userId: props.userId === undefined ? "user-1" : props.userId,
+		orderType: props.orderType ?? OrderType.DINE_IN,
+		paymentMode: props.paymentMode ?? PaymentMode.ONLINE,
+		paymentStatus: props.paymentStatus ?? PaymentStatus.PENDING,
+		orderStatus: props.orderStatus ?? OrderStatus.CANCELLED,
+		cancellationReason: props.cancellationReason ?? null,
+		cancelledAt: props.cancelledAt ?? new Date(),
+		items: props.items ?? [
+			{
+				menuItemId: "item-1",
+				itemName: "Burger",
+				quantity: 1,
+				unitPrice: 100,
+			},
+		],
+		...props,
+	});
+}
 
 interface FindManyArgs {
 	where?: Record<string, unknown>;
@@ -160,7 +187,22 @@ describe("PrismaOrderRepository - findById", () => {
 						specialInstructions: null,
 						cancellationReason: null,
 						cancelledAt: null,
-						items: [],
+						items: [
+							{
+								id: "item-1",
+								orderId: "ord-123",
+								menuItemId: "menu-item-1",
+								itemName: "Burger",
+								variantId: null,
+								variantName: null,
+								quantity: 1,
+								unitPrice: 100,
+								totalPrice: 100,
+								specialInstructions: null,
+								createdAt: fixedDate,
+								addons: [],
+							},
+						],
 						statusHistory: [],
 						createdAt: fixedDate,
 						updatedAt: fixedDate,
@@ -230,7 +272,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 			},
 		} as unknown as PrismaClient;
 
-		const order = new Order({
+		const order = createSampleOrder({
 			id: "ord-123",
 			orderNumber: "SQ-101",
 			restaurantId: "rest-1",
@@ -306,7 +348,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 			},
 		} as unknown as PrismaClient;
 
-		const order = new Order({
+		const order = createSampleOrder({
 			id: "ord-123",
 			orderNumber: "SQ-101",
 			restaurantId: "rest-1",
@@ -350,7 +392,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 			},
 		} as unknown as PrismaClient;
 
-		const order = new Order({
+		const order = createSampleOrder({
 			id: "ord-123",
 			orderNumber: "SQ-101",
 			restaurantId: "rest-1",

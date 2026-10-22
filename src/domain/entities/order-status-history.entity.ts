@@ -29,5 +29,3 @@ export class OrderStatusHistory {
 		this.createdAt = props.createdAt ?? new Date();
 	}
 }
-
-export default OrderStatusHistory;

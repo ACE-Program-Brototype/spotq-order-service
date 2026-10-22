@@ -136,40 +136,35 @@ export const OrderPersistenceMapper = {
 			cancelledAt: record.cancelledAt,
 			createdAt: record.createdAt,
 			updatedAt: record.updatedAt,
-			items:
-				record.items && record.items.length > 0
-					? record.items.map((item) => ({
-							id: item.id,
-							orderId: item.orderId,
-							menuItemId: item.menuItemId,
-							itemName: item.itemName,
-							variantId: item.variantId,
-							variantName: item.variantName,
-							quantity: item.quantity,
-							unitPrice: Number(item.unitPrice),
-							totalPrice: Number(item.totalPrice),
-							specialInstructions: item.specialInstructions,
-							createdAt: item.createdAt,
-							addons: (item.addons ?? []).map((addon) => ({
-								id: addon.id,
-								orderItemId: addon.orderItemId,
-								addonId: addon.addonId,
-								addonName: addon.addonName,
-								price: Number(addon.price),
-							})),
-						}))
-					: undefined,
-			statusHistory: record.statusHistory
-				? record.statusHistory.map((history) => ({
-						id: history.id,
-						orderId: history.orderId,
-						previousStatus: history.previousStatus as OrderStatus | null,
-						currentStatus: history.currentStatus as OrderStatus,
-						changedBy: history.changedBy,
-						notes: history.notes,
-						createdAt: history.createdAt,
-					}))
-				: undefined,
+			items: (record.items ?? []).map((item) => ({
+				id: item.id,
+				orderId: item.orderId,
+				menuItemId: item.menuItemId,
+				itemName: item.itemName,
+				variantId: item.variantId,
+				variantName: item.variantName,
+				quantity: item.quantity,
+				unitPrice: Number(item.unitPrice),
+				totalPrice: Number(item.totalPrice),
+				specialInstructions: item.specialInstructions,
+				createdAt: item.createdAt,
+				addons: (item.addons ?? []).map((addon) => ({
+					id: addon.id,
+					orderItemId: addon.orderItemId,
+					addonId: addon.addonId,
+					addonName: addon.addonName,
+					price: Number(addon.price),
+				})),
+			})),
+			statusHistory: (record.statusHistory ?? []).map((history) => ({
+				id: history.id,
+				orderId: history.orderId,
+				previousStatus: history.previousStatus as OrderStatus | null,
+				currentStatus: history.currentStatus as OrderStatus,
+				changedBy: history.changedBy,
+				notes: history.notes,
+				createdAt: history.createdAt,
+			})),
 		});
 	},
 };

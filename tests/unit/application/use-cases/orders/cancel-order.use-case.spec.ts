@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.use-case.ts";
 import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
-import { Order } from "@domain/entities/order.entity.ts";
+import { Order, type OrderProps } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
+import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import {
 	ForbiddenOrderAccessError,
 	OrderCancellationNotAllowedError,
@@ -11,6 +14,30 @@ import {
 } from "@domain/errors/index.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type { CancelledOrderData } from "@domain/types/order-repository.types";
+
+function createTestOrder(props: Partial<OrderProps> = {}): Order {
+	return new Order({
+		id: props.id ?? "ord-123",
+		orderNumber: props.orderNumber ?? "SQ-101",
+		restaurantId: props.restaurantId ?? "rest-1",
+		userId: props.userId === undefined ? "cust-owner" : props.userId,
+		orderType: props.orderType ?? OrderType.DINE_IN,
+		paymentMode: props.paymentMode ?? PaymentMode.ONLINE,
+		paymentStatus: props.paymentStatus ?? PaymentStatus.PENDING,
+		orderStatus: props.orderStatus ?? OrderStatus.PLACED,
+		cancellationReason: props.cancellationReason ?? null,
+		cancelledAt: props.cancelledAt ?? null,
+		items: props.items ?? [
+			{
+				menuItemId: "item-1",
+				itemName: "Burger",
+				quantity: 1,
+				unitPrice: 100,
+			},
+		],
+		...props,
+	});
+}
 
 function createMockOrderRepo(options: {
 	order?: Order | null;
@@ -55,7 +82,7 @@ describe("CancelOrderUseCase", () => {
 		let capturedPreviousStatus: OrderStatus | undefined;
 
 		const mockRepo = createMockOrderRepo({
-			order: new Order({
+			order: createTestOrder({
 				id: "ord-123",
 				orderNumber: "SQ-101",
 				restaurantId: "rest-1",
@@ -104,7 +131,7 @@ describe("CancelOrderUseCase", () => {
 		let capturedPreviousStatus: OrderStatus | undefined;
 
 		const mockRepo = createMockOrderRepo({
-			order: new Order({
+			order: createTestOrder({
 				id: "ord-456",
 				orderNumber: "SQ-102",
 				restaurantId: "rest-1",
@@ -146,6 +173,31 @@ describe("CancelOrderUseCase", () => {
 		});
 	});
 
+	it("should use empty string as cancellation reason when null is passed", async () => {
+		let capturedOrder: Order | undefined;
+
+		const mockRepo = createMockOrderRepo({
+			order: createTestOrder({
+				id: "ord-123",
+				userId: "cust-owner",
+				orderStatus: OrderStatus.PLACED,
+			}),
+			onCancel: (order) => {
+				capturedOrder = order;
+			},
+		});
+
+		const useCase = new CancelOrderUseCase(mockRepo);
+		await useCase.execute({
+			orderId: "ord-123",
+			customerId: "cust-owner",
+			cancellationReason: null,
+		});
+
+		assert.ok(capturedOrder);
+		assert.equal(capturedOrder.cancellationReason, null);
+	});
+
 	it("should throw OrderNotFoundError when order does not exist", async () => {
 		const mockRepo = createMockOrderRepo({
 			order: null,
@@ -170,7 +222,7 @@ describe("CancelOrderUseCase", () => {
 
 	it("should throw ForbiddenOrderAccessError when customer is not the owner", async () => {
 		const mockRepo = createMockOrderRepo({
-			order: new Order({
+			order: createTestOrder({
 				id: "ord-123",
 				orderNumber: "SQ-101",
 				restaurantId: "rest-1",
@@ -199,7 +251,7 @@ describe("CancelOrderUseCase", () => {
 
 	it("should throw OrderCancellationNotAllowedError when status is PREPARING", async () => {
 		const mockRepo = createMockOrderRepo({
-			order: new Order({
+			order: createTestOrder({
 				id: "ord-123",
 				orderNumber: "SQ-101",
 				restaurantId: "rest-1",
@@ -228,7 +280,7 @@ describe("CancelOrderUseCase", () => {
 
 	it("should throw OrderCancellationNotAllowedError when status is READY", async () => {
 		const mockRepo = createMockOrderRepo({
-			order: new Order({
+			order: createTestOrder({
 				id: "ord-123",
 				orderNumber: "SQ-101",
 				restaurantId: "rest-1",
@@ -257,7 +309,7 @@ describe("CancelOrderUseCase", () => {
 
 	it("should throw OrderCancellationNotAllowedError when status is COMPLETED", async () => {
 		const mockRepo = createMockOrderRepo({
-			order: new Order({
+			order: createTestOrder({
 				id: "ord-123",
 				orderNumber: "SQ-101",
 				restaurantId: "rest-1",
@@ -286,7 +338,7 @@ describe("CancelOrderUseCase", () => {
 
 	it("should throw OrderCancellationNotAllowedError when status is already CANCELLED", async () => {
 		const mockRepo = createMockOrderRepo({
-			order: new Order({
+			order: createTestOrder({
 				id: "ord-123",
 				orderNumber: "SQ-101",
 				restaurantId: "rest-1",
