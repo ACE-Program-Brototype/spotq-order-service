@@ -1,50 +1,24 @@
 import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
+	MenuItemCatalogApiResponse,
+	RemoteMenuItemDto,
 } from "@application/ports/external/menu-item-catalog.port.ts";
-import { HttpStatus } from "@common/constants/http.constants.ts";
+import { HTTP_STATUS } from "@common/constants/http.constants.ts";
 import { RESTAURANT_SERVICE_ENDPOINTS } from "@common/constants/routes.constants.ts";
+import { SERVICES } from "@common/constants/services.constants.ts";
 import env from "@config/env.ts";
 import logger from "@infrastructure/logger/pino.ts";
+import axios, { isAxiosError } from "axios";
 import { injectable } from "inversify";
 import { getS2SInternalHeaders } from "./s2s-headers.ts";
 
-interface ApiResponse<T> {
-	success: boolean;
-	data: T;
-}
-
-interface RemoteVariant {
-	id: string;
-	name: string;
-	price: number;
-	isAvailable?: boolean;
-}
-
-interface RemoteAddon {
-	id: string;
-	addonId?: string;
-	name: string;
-	price: number;
-	isAvailable?: boolean;
-}
-
-interface RemoteMenuItem {
-	id: string;
-	name: string;
-	price: number;
-	isAvailable?: boolean;
-	variants?: RemoteVariant[];
-	addons?: RemoteAddon[];
-}
-
 @injectable()
 export class MenuItemCatalogClient implements IMenuItemCatalogPort {
-	private readonly baseUrl: string;
-
-	constructor() {
-		this.baseUrl = env.RESTAURANT_SERVICE_URL;
-	}
+	private readonly baseUrl: string = env.RESTAURANT_SERVICE_URL;
+	private readonly s2sServiceName: string = env.S2S_SERVICE_NAME;
+	private readonly s2sPrivateKey: string = env.ORDER_S2S_PRIVATE_KEY;
+	private readonly requestTimeoutMs: number = env.RESTAURANT_SERVICE_TIMEOUT_MS;
 
 	public async getItemDetails(
 		restaurantId: string,
@@ -52,64 +26,59 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 		variantId?: string | null,
 		addonIds?: string[],
 	): Promise<CatalogItemDetails | null> {
+		const endpoint = RESTAURANT_SERVICE_ENDPOINTS.INTERNAL_MENU_ITEM(
+			restaurantId,
+			menuItemId,
+		);
+		const url = `${this.baseUrl}${endpoint}`;
+
 		try {
-			const endpoint = RESTAURANT_SERVICE_ENDPOINTS.INTERNAL_MENU_ITEM(
-				restaurantId,
-				menuItemId,
-			);
-			const url = `${this.baseUrl}${endpoint}`;
-			const response = await fetch(url, {
+			const response = await axios.get<
+				MenuItemCatalogApiResponse<RemoteMenuItemDto>
+			>(url, {
 				headers: getS2SInternalHeaders(
-					env.S2S_RESTAURANT_AUDIENCE,
-					env.S2S_PRIVATE_KEY,
-					env.SERVICE_NAME,
+					SERVICES.RESTAURANT_SERVICE,
+					this.s2sPrivateKey,
+					this.s2sServiceName,
 				),
+				timeout: this.requestTimeoutMs,
 			});
 
-			if (response.status === HttpStatus.NOT_FOUND) {
-				return null;
-			}
-
-			if (!response.ok) {
-				logger.error(
-					{ status: response.status, restaurantId, menuItemId },
-					"Restaurant catalog service returned non-OK response",
-				);
-				throw new Error(
-					"Downstream restaurant catalog service is currently unavailable",
-				);
-			}
-
-			const body = (await response.json()) as ApiResponse<RemoteMenuItem>;
-			const item = body.data;
+			const body = response.data;
+			const item = body?.data;
 			if (!item) {
 				return null;
 			}
 
+			const rawItemId = item.menuItemId ?? item.id;
+			if (!rawItemId) {
+				return null;
+			}
+
 			const variant = variantId
-				? item.variants?.find((v) => v.id === variantId)
+				? item.variants?.find((v) => (v.variantId ?? v.id) === variantId)
 				: undefined;
 
 			const addons = (item.addons ?? [])
 				.filter((a) => {
 					const aId = a.addonId ?? a.id;
-					return (addonIds ?? []).includes(aId);
+					return Boolean(aId && (addonIds ?? []).includes(aId));
 				})
 				.map((a) => ({
-					addonId: a.addonId ?? a.id,
+					addonId: (a.addonId ?? a.id) as string,
 					name: a.name,
 					price: Number(a.price),
 					isAvailable: a.isAvailable !== false,
 				}));
 
 			return {
-				menuItemId: item.id,
+				menuItemId: rawItemId,
 				name: item.name,
 				price: Number(item.price),
 				isAvailable: item.isAvailable !== false,
 				variant: variant
 					? {
-							variantId: variant.id,
+							variantId: (variant.variantId ?? variant.id) as string,
 							name: variant.name,
 							price: Number(variant.price),
 							isAvailable: variant.isAvailable !== false,
@@ -118,6 +87,24 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				addons,
 			};
 		} catch (error) {
+			if (isAxiosError(error) && error.response) {
+				if (error.response.status === HTTP_STATUS.NOT_FOUND) {
+					return null;
+				}
+				logger.error(
+					{
+						status: error.response.status,
+						restaurantId,
+						menuItemId,
+						data: error.response.data,
+					},
+					"Restaurant catalog service returned non-OK response",
+				);
+				throw new Error(
+					"Downstream restaurant catalog service is currently unavailable",
+				);
+			}
+
 			logger.error(
 				{ error, restaurantId, menuItemId },
 				"Failed to fetch menu item details from restaurant catalog service",
