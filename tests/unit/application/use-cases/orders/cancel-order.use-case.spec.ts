@@ -18,6 +18,12 @@ function createMockOrderRepo(options: {
 	onCancel?: (order: Order, previousStatus: OrderStatus) => void;
 }): IOrderRepository {
 	return {
+		create: async () => {
+			throw new Error("Not implemented");
+		},
+		findActiveByUserId: async () => {
+			throw new Error("Not implemented");
+		},
 		getOrdersOverview: async () => {
 			throw new Error("Not implemented");
 		},

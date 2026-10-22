@@ -3,6 +3,8 @@ export const AUTH_HEADERS = {
 	RESTAURANT_ID: "x-restaurant-id",
 	USER_ROLE: "x-user-role",
 	USER_EMAIL: "x-user-email",
+	USER_NAME: "x-user-name",
+	USER_PHONE: "x-user-phone",
 	AUTHORIZATION: "authorization",
 } as const;
 

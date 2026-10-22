@@ -136,10 +136,14 @@ export class PrismaCartRepository implements ICartRepository {
 		return this.findById(cartId);
 	}
 
-	public async findActiveByUserId(userId: string): Promise<Cart | null> {
+	public async findActiveByUserId(
+		userId: string,
+		restaurantId?: string,
+	): Promise<Cart | null> {
 		const record = await this.prisma.cart.findFirst({
 			where: {
 				userId,
+				...(restaurantId ? { restaurantId } : {}),
 				expiresAt: {
 					gt: new Date(),
 				},

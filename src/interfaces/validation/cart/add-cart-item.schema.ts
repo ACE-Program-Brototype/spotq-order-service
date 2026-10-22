@@ -1,3 +1,4 @@
+import { CART_LIMITS } from "@common/constants/limits.constants.ts";
 import { CART_MESSAGES } from "@common/constants/message.constants.ts";
 import { REGEX } from "@common/constants/regex.constants.ts";
 import { z } from "zod";
@@ -26,11 +27,13 @@ export const addCartItemBodySchema = z.object({
 	quantity: z
 		.number()
 		.int({ message: CART_MESSAGES.INVALID_QUANTITY })
-		.min(1, { message: CART_MESSAGES.INVALID_QUANTITY })
-		.max(20, { message: CART_MESSAGES.INVALID_QUANTITY }),
+		.min(CART_LIMITS.MIN_QUANTITY, { message: CART_MESSAGES.INVALID_QUANTITY })
+		.max(CART_LIMITS.MAX_QUANTITY, { message: CART_MESSAGES.INVALID_QUANTITY }),
 	specialInstructions: z
 		.string()
-		.max(250, { message: CART_MESSAGES.INVALID_SPECIAL_INSTRUCTIONS })
+		.max(CART_LIMITS.MAX_SPECIAL_INSTRUCTIONS_LENGTH, {
+			message: CART_MESSAGES.INVALID_SPECIAL_INSTRUCTIONS,
+		})
 		.nullable()
 		.optional(),
 });

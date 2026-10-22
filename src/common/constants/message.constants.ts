@@ -69,6 +69,17 @@ export const ORDER_MESSAGES = {
 		"Failed to validate restaurant from restaurant-service",
 	HISTORY_FETCHED_SUCCESS: "Order history retrieved successfully",
 	CANCEL_SUCCESS: "Order cancelled successfully",
+	ORDER_PLACED_SUCCESS: "Order placed successfully",
+	CART_EMPTY: "Cannot place an order with an empty cart",
+	INVALID_PAYMENT_MODE:
+		"Online payment feature is coming soon. Please select Pay at Counter.",
+	INVALID_CART_ID: "Invalid cart ID format",
+	INVALID_PAYMENT_MODE_SELECTION:
+		"Invalid payment mode. Supported modes: ONLINE, PAY_AT_COUNTER",
+	INVALID_SPECIAL_INSTRUCTIONS:
+		"Special instructions cannot exceed 250 characters",
+	INVALID_USER_NAME: "User name cannot exceed 100 characters",
+	INVALID_USER_PHONE: "Invalid phone number format",
 	ORDER_NOT_FOUND: "Order not found",
 	ORDER_ALREADY_IN_PREPARATION:
 		"Order is already in preparation and cannot be cancelled",
@@ -77,7 +88,6 @@ export const ORDER_MESSAGES = {
 	INVALID_ORDER_ID: "Invalid order ID format",
 	INVALID_CANCELLATION_REASON:
 		"Cancellation reason cannot exceed 500 characters",
-	CART_EMPTY: "Cannot place an order with an empty cart",
 	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
 };
 
@@ -98,6 +108,7 @@ export const ORDER_ERROR_CODES = {
 	ORDER_CANNOT_BE_CANCELLED: "ORDER_CANNOT_BE_CANCELLED",
 	INVALID_ORDER_ID: "INVALID_ORDER_ID",
 	CART_EMPTY: "CART_EMPTY",
+	INVALID_PAYMENT_MODE: "INVALID_PAYMENT_MODE",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",

@@ -23,7 +23,10 @@ export interface AddItemInput {
 
 export interface ICartRepository {
 	findById(cartId: string): Promise<Cart | null>;
-	findActiveByUserId(userId: string): Promise<Cart | null>;
+	findActiveByUserId(
+		userId: string,
+		restaurantId?: string,
+	): Promise<Cart | null>;
 	addItem(input: AddItemInput): Promise<Cart>;
 	update(cartId: string, data: UpdateCartInput): Promise<Cart | null>;
 	updateItemQuantity(

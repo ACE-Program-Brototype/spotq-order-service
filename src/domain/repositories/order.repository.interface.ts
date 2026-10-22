@@ -9,13 +9,18 @@ import type {
 } from "@domain/types/order-repository.types.ts";
 
 export interface IOrderRepository {
+	create(order: Order, cartIdToClear?: string): Promise<Order>;
+	findById(orderId: string): Promise<Order | null>;
+	findActiveByUserId(
+		restaurantId: string,
+		userId: string,
+	): Promise<Order | null>;
 	getOrdersOverview(
 		params: GetOrdersOverviewRepoParams,
 	): Promise<GetOrdersOverviewRepoResult>;
 	getCustomerOrderHistory(
 		params: GetCustomerOrderHistoryRepoParams,
 	): Promise<GetCustomerOrderHistoryRepoResult>;
-	findById(orderId: string): Promise<Order | null>;
 	cancelOrder(
 		order: Order,
 		previousStatus: OrderStatus,

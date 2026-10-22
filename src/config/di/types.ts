@@ -16,6 +16,9 @@ export const TYPES = {
 	GetOrderHistoryUseCase: Symbol.for("GetOrderHistoryUseCase"),
 	CancelOrderUseCase: Symbol.for("CancelOrderUseCase"),
 	CustomerOrderController: Symbol.for("CustomerOrderController"),
+	QueueServiceClient: Symbol.for("QueueServiceClient"),
+	PlaceOrderUseCase: Symbol.for("PlaceOrderUseCase"),
+	OrderController: Symbol.for("OrderController"),
 };
 
 export default TYPES;

@@ -14,9 +14,9 @@ function getHeaderValue(
 	header: string | string[] | undefined,
 ): string | undefined {
 	if (Array.isArray(header)) {
-		return header[0];
+		return header[0]?.trim();
 	}
-	return header;
+	return header?.trim();
 }
 
 export function customerAuthMiddleware(
@@ -27,6 +27,8 @@ export function customerAuthMiddleware(
 	const userId = getHeaderValue(req.headers[AUTH_HEADERS.USER_ID]);
 	const role = getHeaderValue(req.headers[AUTH_HEADERS.USER_ROLE]);
 	const email = getHeaderValue(req.headers[AUTH_HEADERS.USER_EMAIL]);
+	const name = getHeaderValue(req.headers[AUTH_HEADERS.USER_NAME]);
+	const phone = getHeaderValue(req.headers[AUTH_HEADERS.USER_PHONE]);
 
 	if (!userId) {
 		sendErrorResponse(
@@ -52,6 +54,8 @@ export function customerAuthMiddleware(
 		userId,
 		role,
 		email,
+		name,
+		phone,
 	};
 
 	next();

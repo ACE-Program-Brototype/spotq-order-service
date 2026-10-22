@@ -9,6 +9,12 @@ describe("GetOrderHistoryUseCase", () => {
 	it("should retrieve customer orders and return mapped order history", async () => {
 		let capturedRepoParams: GetCustomerOrderHistoryRepoParams | undefined;
 		const mockOrderRepo: IOrderRepository = {
+			create: async () => {
+				throw new Error("Not implemented");
+			},
+			findActiveByUserId: async () => {
+				throw new Error("Not implemented");
+			},
 			getOrdersOverview: async () => {
 				throw new Error("Not implemented");
 			},
@@ -71,6 +77,12 @@ describe("GetOrderHistoryUseCase", () => {
 
 	it("should return empty orders when customer has no order history", async () => {
 		const mockOrderRepo: IOrderRepository = {
+			create: async () => {
+				throw new Error("Not implemented");
+			},
+			findActiveByUserId: async () => {
+				throw new Error("Not implemented");
+			},
 			getOrdersOverview: async () => {
 				throw new Error("Not implemented");
 			},

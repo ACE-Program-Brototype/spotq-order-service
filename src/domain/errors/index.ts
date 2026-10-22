@@ -8,6 +8,7 @@ export * from "./forbidden-cart-access.error.ts";
 export * from "./forbidden-order-access.error.ts";
 export * from "./forbidden-restaurant-access.error.ts";
 export * from "./invalid-cart-quantity.error.ts";
+export * from "./invalid-payment-mode.error.ts";
 export * from "./item-unavailable.error.ts";
 export * from "./menu-item-not-found.error.ts";
 export * from "./order-cancellation-not-allowed.error.ts";
