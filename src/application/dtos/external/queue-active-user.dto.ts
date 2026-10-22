@@ -1,5 +1,5 @@
 export interface ActiveQueueDetails {
-	id: string;
+	queueEntryId: string;
 	restaurantId: string;
 	userId: string | null;
 	queueNumber: string;

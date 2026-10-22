@@ -45,17 +45,23 @@ export class QueueServiceClient implements IQueueServiceClient {
 
 			const responseBody = response.data;
 
-			if (responseBody?.success !== true || !responseBody.data) {
-				return null;
+			if (responseBody?.success !== true) {
+				logger.error(
+					{ restaurantId, userId, response: responseBody },
+					"Queue service returned unsuccessful response during active queue check",
+				);
+				throw new Error(
+					responseBody?.message || "Queue service active queue check failed",
+				);
 			}
 
-			return responseBody.data;
+			return responseBody.data ?? null;
 		} catch (error) {
 			if (isAxiosError(error) && error.response) {
 				if (error.response.status === HTTP_STATUS.NOT_FOUND) {
 					return null;
 				}
-				logger.warn(
+				logger.error(
 					{
 						restaurantId,
 						userId,
@@ -64,14 +70,14 @@ export class QueueServiceClient implements IQueueServiceClient {
 					},
 					"Queue service returned error response during active queue check",
 				);
-				return null;
+				throw new Error(`Queue service error: HTTP ${error.response.status}`);
 			}
 
 			logger.error(
 				{ err: error, restaurantId, userId },
 				"Error while communicating with queue-service",
 			);
-			return null;
+			throw error;
 		}
 	}
 }

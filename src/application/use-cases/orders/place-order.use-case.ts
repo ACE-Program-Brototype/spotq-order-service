@@ -146,7 +146,7 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 
 			if (activeQueue?.hasActiveQueue && activeQueue.queueEntry) {
 				priority = OrderPriority.QUEUE;
-				queueEntryId = activeQueue.queueEntry.id;
+				queueEntryId = activeQueue.queueEntry.queueEntryId;
 				orderType = OrderType.PRE_ORDER;
 			}
 		}

@@ -514,7 +514,7 @@ describe("PlaceOrderUseCase", () => {
 		restaurantClient.validationResult.canAccessQueueService = true;
 
 		const activeQueueEntry: ActiveQueueDetails = {
-			id: "queue-entry-777",
+			queueEntryId: "queue-entry-777",
 			restaurantId,
 			userId,
 			queueNumber: "Q-12",
@@ -573,7 +573,7 @@ describe("PlaceOrderUseCase", () => {
 		);
 
 		const activeQueueEntry: ActiveQueueDetails = {
-			id: "queue-entry-777",
+			queueEntryId: "queue-entry-777",
 			restaurantId,
 			userId,
 			queueNumber: "Q-12",

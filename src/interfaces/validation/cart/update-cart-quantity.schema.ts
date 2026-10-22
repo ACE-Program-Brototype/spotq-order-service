@@ -1,3 +1,4 @@
+import { CART_LIMITS } from "@common/constants/limits.constants.ts";
 import { CART_MESSAGES } from "@common/constants/message.constants.ts";
 import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
 import { z } from "zod";
@@ -8,8 +9,12 @@ export const updateCartItemQuantityBodySchema = z.object({
 	quantity: z
 		.number({ message: CART_MESSAGES.INVALID_UPDATE_QUANTITY })
 		.int({ message: CART_MESSAGES.INVALID_UPDATE_QUANTITY })
-		.min(0, { message: CART_MESSAGES.INVALID_UPDATE_QUANTITY })
-		.max(20, { message: CART_MESSAGES.INVALID_UPDATE_QUANTITY }),
+		.min(CART_LIMITS.MIN_UPDATE_QUANTITY, {
+			message: CART_MESSAGES.INVALID_UPDATE_QUANTITY,
+		})
+		.max(CART_LIMITS.MAX_QUANTITY, {
+			message: CART_MESSAGES.INVALID_UPDATE_QUANTITY,
+		}),
 });
 
 export type UpdateCartItemQuantityParam = z.infer<
