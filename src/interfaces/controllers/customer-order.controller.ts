@@ -6,7 +6,7 @@ import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { sendSuccessResponse } from "@common/response/api-response.ts";
 import { TYPES } from "@config/di/types.ts";
 import { OrderRequestMapper } from "@interfaces/mappers/order-request.mapper.ts";
-import type { PlaceOrderBody } from "@interfaces/validation/order/place-order.schema.ts";
+import type { PlaceOrderBody } from "@interfaces/validation/orders/place-order.schema.ts";
 import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 

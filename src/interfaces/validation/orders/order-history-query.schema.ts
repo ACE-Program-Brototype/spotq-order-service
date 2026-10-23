@@ -5,15 +5,21 @@ import { z } from "zod";
 
 export const orderHistoryQuerySchema = z.object({
 	page: z.coerce
-		.number()
-		.int()
-		.min(ORDER_HISTORY_PAGINATION.MIN_PAGE)
+		.number({ message: ORDER_MESSAGES.INVALID_PAGE })
+		.int({ message: ORDER_MESSAGES.INVALID_PAGE })
+		.min(ORDER_HISTORY_PAGINATION.MIN_PAGE, {
+			message: ORDER_MESSAGES.INVALID_PAGE,
+		})
 		.default(ORDER_HISTORY_PAGINATION.DEFAULT_PAGE),
 	limit: z.coerce
-		.number()
-		.int()
-		.min(ORDER_HISTORY_PAGINATION.MIN_LIMIT)
-		.max(ORDER_HISTORY_PAGINATION.MAX_LIMIT)
+		.number({ message: ORDER_MESSAGES.INVALID_LIMIT })
+		.int({ message: ORDER_MESSAGES.INVALID_LIMIT })
+		.min(ORDER_HISTORY_PAGINATION.MIN_LIMIT, {
+			message: ORDER_MESSAGES.INVALID_LIMIT,
+		})
+		.max(ORDER_HISTORY_PAGINATION.MAX_LIMIT, {
+			message: ORDER_MESSAGES.INVALID_LIMIT,
+		})
 		.default(ORDER_HISTORY_PAGINATION.DEFAULT_LIMIT),
 	status: z
 		.enum(
@@ -34,5 +40,3 @@ export const orderHistoryQuerySchema = z.object({
 });
 
 export type OrderHistoryQuery = z.infer<typeof orderHistoryQuerySchema>;
-
-export default orderHistoryQuerySchema;

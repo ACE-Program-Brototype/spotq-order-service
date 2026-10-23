@@ -8,10 +8,12 @@ import {
 	validateRequestParams,
 	validateRequestQuery,
 } from "@interfaces/middleware/validation.middleware.ts";
-import { placeOrderBodySchema } from "@interfaces/validation/order/place-order.schema.ts";
-import { orderHistoryQuerySchema } from "@interfaces/validation/order-history-query.schema.ts";
-import { cancelOrderBodySchema } from "@interfaces/validation/orders/cancel-order-body.schema.ts";
-import { cancelOrderParamSchema } from "@interfaces/validation/orders/cancel-order-param.schema.ts";
+import {
+	cancelOrderBodySchema,
+	cancelOrderParamSchema,
+} from "@interfaces/validation/orders/cancel-order.schema.ts";
+import { orderHistoryQuerySchema } from "@interfaces/validation/orders/order-history-query.schema.ts";
+import { placeOrderBodySchema } from "@interfaces/validation/orders/place-order.schema.ts";
 import { Router } from "express";
 
 const customerOrderRouter: Router = Router();

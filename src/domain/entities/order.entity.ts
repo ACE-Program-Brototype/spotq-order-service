@@ -16,7 +16,6 @@ import {
 
 export interface OrderProps {
 	id?: string;
-	orderId?: string;
 	orderNumber: string;
 	restaurantId: string;
 	restaurantName?: string | null;
@@ -80,12 +79,8 @@ export class Order {
 	public readonly createdAt: Date;
 	public readonly updatedAt: Date;
 
-	public get orderId(): string {
-		return this.id;
-	}
-
 	constructor(props: OrderProps) {
-		this.id = props.orderId ?? props.id ?? crypto.randomUUID();
+		this.id = props.id ?? crypto.randomUUID();
 		this.orderNumber = props.orderNumber;
 		this.restaurantId = props.restaurantId;
 		this.restaurantName = props.restaurantName ?? null;
@@ -162,15 +157,6 @@ export class Order {
 		];
 
 		if (nonCancellableStatuses.includes(this.orderStatus)) {
-			throw new OrderCancellationNotAllowedError(
-				ORDER_MESSAGES.ORDER_ALREADY_IN_PREPARATION,
-			);
-		}
-
-		if (
-			this.orderStatus !== OrderStatus.PLACED &&
-			this.orderStatus !== OrderStatus.CONFIRMED
-		) {
 			throw new OrderCancellationNotAllowedError(
 				ORDER_MESSAGES.ORDER_ALREADY_IN_PREPARATION,
 			);

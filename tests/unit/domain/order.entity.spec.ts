@@ -57,7 +57,6 @@ describe("Order Domain Entity", () => {
 		});
 
 		assert.equal(order.id, "order-1");
-		assert.equal(order.orderId, "order-1");
 		assert.equal(order.orderNumber, "ORD-001");
 		assert.equal(order.restaurantId, restaurantId);
 		assert.equal(order.userId, customerId);

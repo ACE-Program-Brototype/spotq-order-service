@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { orderHistoryQuerySchema } from "@interfaces/validation/order-history-query.schema.ts";
+import { orderHistoryQuerySchema } from "@interfaces/validation/orders/order-history-query.schema.ts";
 
 describe("orderHistoryQuerySchema validation", () => {
 	it("should succeed with defaults when query is empty", () => {
@@ -33,6 +34,12 @@ describe("orderHistoryQuerySchema validation", () => {
 			page: 0,
 		});
 		assert.equal(result.success, false);
+		if (!result.success) {
+			assert.equal(
+				result.error.issues[0]?.message,
+				ORDER_MESSAGES.INVALID_PAGE,
+			);
+		}
 	});
 
 	it("should fail validation when limit is greater than 50", () => {
@@ -40,6 +47,12 @@ describe("orderHistoryQuerySchema validation", () => {
 			limit: 51,
 		});
 		assert.equal(result.success, false);
+		if (!result.success) {
+			assert.equal(
+				result.error.issues[0]?.message,
+				ORDER_MESSAGES.INVALID_LIMIT,
+			);
+		}
 	});
 
 	it("should fail validation when limit is less than 1", () => {
@@ -47,6 +60,12 @@ describe("orderHistoryQuerySchema validation", () => {
 			limit: 0,
 		});
 		assert.equal(result.success, false);
+		if (!result.success) {
+			assert.equal(
+				result.error.issues[0]?.message,
+				ORDER_MESSAGES.INVALID_LIMIT,
+			);
+		}
 	});
 
 	it("should fail validation with invalid status string", () => {
@@ -54,5 +73,11 @@ describe("orderHistoryQuerySchema validation", () => {
 			status: "INVALID_STATUS",
 		});
 		assert.equal(result.success, false);
+		if (!result.success) {
+			assert.equal(
+				result.error.issues[0]?.message,
+				ORDER_MESSAGES.INVALID_ORDER_STATUS,
+			);
+		}
 	});
 });

@@ -86,6 +86,8 @@ export const ORDER_MESSAGES = {
 	ORDER_ALREADY_CANCELLED: "Order is already cancelled",
 	ORDER_FORBIDDEN_CANCEL: "Customers can only cancel their own orders",
 	INVALID_ORDER_ID: "Invalid order ID format",
+	INVALID_PAGE: "Page must be an integer greater than or equal to 1",
+	INVALID_LIMIT: "Limit must be an integer between 1 and 50",
 	INVALID_CANCELLATION_REASON:
 		"Cancellation reason cannot exceed 500 characters",
 	DEFAULT_CANCEL_REASON: "Order cancelled by customer",

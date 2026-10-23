@@ -1,7 +1,40 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { ORDER_LIMITS } from "@common/constants/limits.constants.ts";
 import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
-import { cancelOrderBodySchema } from "@interfaces/validation/orders/cancel-order-body.schema.ts";
+import {
+	cancelOrderBodySchema,
+	cancelOrderParamSchema,
+} from "@interfaces/validation/orders/cancel-order.schema.ts";
+
+describe("cancelOrderParamSchema validation", () => {
+	it("should succeed with a valid UUID orderId", () => {
+		const validUuid = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
+		const result = cancelOrderParamSchema.safeParse({ orderId: validUuid });
+		assert.equal(result.success, true);
+		if (result.success) {
+			assert.equal(result.data.orderId, validUuid);
+		}
+	});
+
+	it("should fail validation with an invalid UUID format", () => {
+		const result = cancelOrderParamSchema.safeParse({
+			orderId: "invalid-uuid",
+		});
+		assert.equal(result.success, false);
+		if (!result.success) {
+			assert.equal(
+				result.error.issues[0]?.message,
+				ORDER_MESSAGES.INVALID_ORDER_ID,
+			);
+		}
+	});
+
+	it("should fail validation when orderId is missing", () => {
+		const result = cancelOrderParamSchema.safeParse({});
+		assert.equal(result.success, false);
+	});
+});
 
 describe("cancelOrderBodySchema validation", () => {
 	it("should succeed with valid cancellation_reason", () => {
@@ -42,8 +75,10 @@ describe("cancelOrderBodySchema validation", () => {
 		}
 	});
 
-	it("should fail validation when cancellation_reason exceeds 500 characters", () => {
-		const longReason = "a".repeat(501);
+	it("should fail validation when cancellation_reason exceeds max length", () => {
+		const longReason = "a".repeat(
+			ORDER_LIMITS.MAX_CANCELLATION_REASON_LENGTH + 1,
+		);
 		const result = cancelOrderBodySchema.safeParse({
 			cancellation_reason: longReason,
 		});

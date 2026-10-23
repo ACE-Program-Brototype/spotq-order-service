@@ -216,7 +216,6 @@ describe("PrismaOrderRepository - findById", () => {
 
 		assert.ok(result instanceof Order);
 		assert.equal(result.id, "ord-123");
-		assert.equal(result.orderId, "ord-123");
 		assert.equal(result.orderNumber, "SQ-101");
 		assert.equal(result.restaurantId, "rest-1");
 		assert.equal(result.userId, "user-1");
