@@ -1,3 +1,5 @@
+import { AUTH_ROLES } from "./auth.constants.ts";
+
 export const messages = {
 	SUCCESS: "Request processed successfully",
 	INTERNAL_SERVER_ERROR: "Internal Server Error",
@@ -65,6 +67,8 @@ export const ORDER_MESSAGES = {
 	INVALID_ORDER_STATUS: "Invalid order status filter provided",
 	RESTAURANT_VALIDATION_FAILED:
 		"Failed to validate restaurant from restaurant-service",
+	HISTORY_FETCHED_SUCCESS: "Order history retrieved successfully",
+	CANCEL_SUCCESS: "Order cancelled successfully",
 	ORDER_PLACED_SUCCESS: "Order placed successfully",
 	CART_EMPTY: "Cannot place an order with an empty cart",
 	INVALID_PAYMENT_MODE:
@@ -77,24 +81,39 @@ export const ORDER_MESSAGES = {
 	INVALID_USER_NAME: "User name cannot exceed 100 characters",
 	INVALID_USER_PHONE: "Invalid phone number format",
 	ORDER_NOT_FOUND: "Order not found",
+	ORDER_ALREADY_IN_PREPARATION:
+		"Order is already in preparation and cannot be cancelled",
+	ORDER_ALREADY_CANCELLED: "Order is already cancelled",
+	ORDER_FORBIDDEN_CANCEL: "Customers can only cancel their own orders",
+	INVALID_ORDER_ID: "Invalid order ID format",
+	INVALID_PAGE: "Page must be an integer greater than or equal to 1",
+	INVALID_LIMIT: "Limit must be an integer between 1 and 50",
+	INVALID_CANCELLATION_REASON:
+		"Cancellation reason cannot exceed 500 characters",
+	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
 };
 
 export const ORDER_DEFAULTS = {
 	ITEM_NAME: "Item",
 	ADDON_NAME: "Addon",
 	AUDIT_NOTE: "Order placed by customer",
+	CANCEL_AUDIT_NOTE: "Order cancelled by customer",
+	CHANGED_BY_CUSTOMER: AUTH_ROLES.CUSTOMER,
 } as const;
 
 export const ORDER_ERROR_CODES = {
 	RESTAURANT_NOT_FOUND: "RESTAURANT_NOT_FOUND",
 	RESTAURANT_NOT_ELIGIBLE: "RESTAURANT_NOT_ELIGIBLE",
 	FORBIDDEN_RESTAURANT_ACCESS: "FORBIDDEN_RESTAURANT_ACCESS",
+	FORBIDDEN: "FORBIDDEN",
+	ORDER_NOT_FOUND: "ORDER_NOT_FOUND",
+	ORDER_CANNOT_BE_CANCELLED: "ORDER_CANNOT_BE_CANCELLED",
+	INVALID_ORDER_ID: "INVALID_ORDER_ID",
+	CART_EMPTY: "CART_EMPTY",
+	INVALID_PAYMENT_MODE: "INVALID_PAYMENT_MODE",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
-	CART_EMPTY: "CART_EMPTY",
-	INVALID_PAYMENT_MODE: "INVALID_PAYMENT_MODE",
-	ORDER_NOT_FOUND: "ORDER_NOT_FOUND",
 };
 
 export default messages;

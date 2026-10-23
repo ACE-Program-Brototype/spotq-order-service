@@ -7,7 +7,7 @@ import {
 	validateRequestParams,
 	validateRequestQuery,
 } from "@interfaces/middleware/validation.middleware.ts";
-import { ordersOverviewQuerySchema } from "@interfaces/validation/orders-overview-query.schema.ts";
+import { ordersOverviewQuerySchema } from "@interfaces/validation/orders/orders-overview-query.schema.ts";
 import { restaurantIdParamSchema } from "@interfaces/validation/restaurant-id-param.schema.ts";
 import { Router } from "express";
 

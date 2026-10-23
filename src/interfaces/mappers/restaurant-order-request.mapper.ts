@@ -1,5 +1,5 @@
 import type { GetOrdersOverviewInputDto } from "@application/dtos/orders/get-orders-overview.dto.ts";
-import type { OrdersOverviewQuery } from "@interfaces/validation/orders-overview-query.schema.ts";
+import type { OrdersOverviewQuery } from "@interfaces/validation/orders/orders-overview-query.schema.ts";
 import type { Request } from "express";
 
 export const RestaurantOrderRequestMapper = {

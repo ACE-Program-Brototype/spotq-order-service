@@ -56,5 +56,3 @@ export const ordersOverviewQuerySchema = z.object({
 });
 
 export type OrdersOverviewQuery = z.infer<typeof ordersOverviewQuerySchema>;
-
-export default ordersOverviewQuerySchema;

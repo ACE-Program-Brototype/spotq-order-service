@@ -1,8 +1,13 @@
-import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
+import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { OrderType } from "@domain/enums/order-type.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import { CartEmptyError } from "../errors/cart-empty.error.ts";
+import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
+import {
+	ForbiddenOrderAccessError,
+	OrderCancellationNotAllowedError,
+} from "@domain/errors/index.ts";
 import { OrderItem, type OrderItemProps } from "./order-item.entity.ts";
 import {
 	OrderStatusHistory,
@@ -34,6 +39,8 @@ export interface OrderProps {
 	grandTotal?: number;
 	estimatedReadyAt?: Date | null;
 	specialInstructions?: string | null;
+	cancellationReason?: string | null;
+	cancelledAt?: Date | null;
 	items: OrderItemProps[];
 	statusHistory?: OrderStatusHistoryProps[];
 	createdAt?: Date;
@@ -56,7 +63,7 @@ export class Order {
 	public readonly orderType: OrderType;
 	public readonly paymentMode: PaymentMode;
 	public readonly paymentStatus: PaymentStatus;
-	public readonly orderStatus: OrderStatus;
+	public orderStatus: OrderStatus;
 	public readonly subtotal: number;
 	public readonly taxAmount: number;
 	public readonly platformFee: number;
@@ -65,6 +72,8 @@ export class Order {
 	public readonly grandTotal: number;
 	public readonly estimatedReadyAt: Date | null;
 	public readonly specialInstructions: string | null;
+	public cancellationReason: string | null;
+	public cancelledAt: Date | null;
 	public readonly items: OrderItem[];
 	public readonly statusHistory: OrderStatusHistory[];
 	public readonly createdAt: Date;
@@ -99,6 +108,8 @@ export class Order {
 		this.grandTotal = props.grandTotal ?? this.calculateGrandTotal();
 		this.estimatedReadyAt = props.estimatedReadyAt ?? null;
 		this.specialInstructions = props.specialInstructions ?? null;
+		this.cancellationReason = props.cancellationReason ?? null;
+		this.cancelledAt = props.cancelledAt ?? null;
 		this.createdAt = props.createdAt ?? new Date();
 		this.updatedAt = props.updatedAt ?? new Date();
 
@@ -123,5 +134,36 @@ export class Order {
 		if (this.items.length === 0) {
 			throw new CartEmptyError();
 		}
+	}
+
+	public cancel(customerId: string, reason?: string | null): void {
+		if (this.userId !== customerId) {
+			throw new ForbiddenOrderAccessError(
+				ORDER_MESSAGES.ORDER_FORBIDDEN_CANCEL,
+			);
+		}
+
+		if (this.orderStatus === OrderStatus.CANCELLED) {
+			throw new OrderCancellationNotAllowedError(
+				ORDER_MESSAGES.ORDER_ALREADY_CANCELLED,
+			);
+		}
+
+		const nonCancellableStatuses = [
+			OrderStatus.PREPARING,
+			OrderStatus.READY,
+			OrderStatus.SERVED,
+			OrderStatus.COMPLETED,
+		];
+
+		if (nonCancellableStatuses.includes(this.orderStatus)) {
+			throw new OrderCancellationNotAllowedError(
+				ORDER_MESSAGES.ORDER_ALREADY_IN_PREPARATION,
+			);
+		}
+
+		this.orderStatus = OrderStatus.CANCELLED;
+		this.cancellationReason = reason ?? null;
+		this.cancelledAt = new Date();
 	}
 }

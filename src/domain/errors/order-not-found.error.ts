@@ -9,3 +9,5 @@ export class OrderNotFoundError extends DomainError {
 		super(message, ORDER_ERROR_CODES.ORDER_NOT_FOUND);
 	}
 }
+
+export default OrderNotFoundError;

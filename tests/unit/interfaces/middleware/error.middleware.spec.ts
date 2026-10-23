@@ -5,7 +5,9 @@ import {
 	CART_ERROR_CODES,
 	CART_MESSAGES,
 	messages,
+	ORDER_ERROR_CODES,
 } from "@common/constants/message.constants.ts";
+import { ForbiddenError, UnauthorizedError } from "@common/errors/index.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import {
 	errorHandler,
@@ -66,6 +68,64 @@ describe("Error Middleware", () => {
 			statusCode: HTTP_STATUS.NOT_FOUND,
 			code: CART_ERROR_CODES.CART_NOT_FOUND,
 			message: CART_MESSAGES.NOT_FOUND,
+			error: undefined,
+		});
+	});
+
+	it("should format response correctly when handling AppError (UnauthorizedError)", () => {
+		const err = new UnauthorizedError();
+		const req = {} as Request;
+		let capturedStatus = 0;
+		let capturedBody: unknown = null;
+
+		const res = {
+			status: (code: number) => {
+				capturedStatus = code;
+				return res;
+			},
+			json: (body: unknown) => {
+				capturedBody = body;
+				return res;
+			},
+		} as unknown as Response;
+
+		errorHandler(err, req, res, () => {});
+
+		assert.equal(capturedStatus, HTTP_STATUS.UNAUTHORIZED);
+		assert.deepEqual(capturedBody, {
+			success: false,
+			statusCode: HTTP_STATUS.UNAUTHORIZED,
+			code: ORDER_ERROR_CODES.UNAUTHORIZED,
+			message: messages.UNAUTHORIZED,
+			error: undefined,
+		});
+	});
+
+	it("should format response correctly when handling AppError (ForbiddenError)", () => {
+		const err = new ForbiddenError();
+		const req = {} as Request;
+		let capturedStatus = 0;
+		let capturedBody: unknown = null;
+
+		const res = {
+			status: (code: number) => {
+				capturedStatus = code;
+				return res;
+			},
+			json: (body: unknown) => {
+				capturedBody = body;
+				return res;
+			},
+		} as unknown as Response;
+
+		errorHandler(err, req, res, () => {});
+
+		assert.equal(capturedStatus, HTTP_STATUS.FORBIDDEN);
+		assert.deepEqual(capturedBody, {
+			success: false,
+			statusCode: HTTP_STATUS.FORBIDDEN,
+			code: ORDER_ERROR_CODES.FORBIDDEN,
+			message: messages.FORBIDDEN,
 			error: undefined,
 		});
 	});

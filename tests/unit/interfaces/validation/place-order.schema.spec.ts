@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { placeOrderBodySchema } from "@interfaces/validation/order/place-order.schema.ts";
+import { placeOrderBodySchema } from "@interfaces/validation/orders/place-order.schema.ts";
 
 describe("placeOrderBodySchema validation", () => {
 	const validRestaurantId = "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e";

@@ -1,10 +1,9 @@
-import { AUTH_HEADERS } from "@common/constants/auth.constants.ts";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
+import { AUTH_HEADERS, AUTH_ROLES } from "@common/constants/auth.constants.ts";
 import {
-	CART_ERROR_CODES,
 	messages,
+	ORDER_ERROR_CODES,
 } from "@common/constants/message.constants.ts";
-import { sendErrorResponse } from "@common/response/api-response.ts";
+import { ForbiddenError, UnauthorizedError } from "@common/errors/index.ts";
 import type { NextFunction, Request, Response } from "express";
 
 export type { AuthenticatedUser } from "@/types/express.d.ts";
@@ -20,7 +19,7 @@ function getHeaderValue(
 
 export function customerAuthMiddleware(
 	req: Request,
-	res: Response,
+	_res: Response,
 	next: NextFunction,
 ): void {
 	const userId = getHeaderValue(req.headers[AUTH_HEADERS.USER_ID]);
@@ -30,13 +29,14 @@ export function customerAuthMiddleware(
 	const phone = getHeaderValue(req.headers[AUTH_HEADERS.USER_PHONE]);
 
 	if (!userId) {
-		sendErrorResponse(
-			res,
+		throw new UnauthorizedError(
 			messages.UNAUTHORIZED,
-			CART_ERROR_CODES.UNAUTHORIZED,
-			HTTP_STATUS.UNAUTHORIZED,
+			ORDER_ERROR_CODES.UNAUTHORIZED,
 		);
-		return;
+	}
+
+	if (role && role.toLocaleLowerCase() !== AUTH_ROLES.CUSTOMER.toLowerCase()) {
+		throw new ForbiddenError(messages.FORBIDDEN, ORDER_ERROR_CODES.FORBIDDEN);
 	}
 
 	req.user = {
