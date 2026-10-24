@@ -1,10 +1,14 @@
+import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
+	CancelledOrderData,
+	GetCustomerOrderHistoryRepoParams,
+	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
-	IOrderRepository,
-} from "@domain/repositories/order.repository.interface.ts";
+} from "@domain/types/order-repository.types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
 import { OrderStatus } from "@generated/prisma/enums.ts";
 import {
@@ -131,10 +135,10 @@ export class PrismaOrderRepository
 		}
 	}
 
-	public override async findById(id: string): Promise<Order | null> {
+	public override async findById(orderId: string): Promise<Order | null> {
 		try {
 			const record = await this.prisma.order.findUnique({
-				where: { id },
+				where: { id: orderId },
 				include: {
 					items: {
 						include: {
@@ -147,7 +151,7 @@ export class PrismaOrderRepository
 
 			return record ? OrderPersistenceMapper.toDomain(record) : null;
 		} catch (error) {
-			this.handlePrismaError(error, id);
+			this.handlePrismaError(error, orderId);
 			throw error;
 		}
 	}
@@ -302,5 +306,104 @@ export class PrismaOrderRepository
 				totalItems: totalFilteredItems,
 			},
 		};
+	}
+
+	public async getCustomerOrderHistory(
+		params: GetCustomerOrderHistoryRepoParams,
+	): Promise<GetCustomerOrderHistoryRepoResult> {
+		const where: Prisma.OrderWhereInput = {
+			userId: params.customerId,
+			...(params.status && { orderStatus: params.status }),
+		};
+
+		const skip = (params.page - 1) * params.limit;
+
+		const [ordersRecords, totalOrders] = await Promise.all([
+			this.prisma.order.findMany({
+				where,
+				skip,
+				take: params.limit,
+				orderBy: {
+					createdAt: "desc",
+				},
+				select: {
+					id: true,
+					orderNumber: true,
+					restaurantId: true,
+					orderStatus: true,
+					grandTotal: true,
+					createdAt: true,
+					_count: {
+						select: {
+							items: true,
+						},
+					},
+				},
+			}),
+			this.prisma.order.count({
+				where,
+			}),
+		]);
+
+		const totalPages = Math.ceil(totalOrders / params.limit) || 0;
+		const hasNext = params.page < totalPages;
+
+		const orders =
+			OrderPersistenceMapper.toCustomerOrderItemList(ordersRecords);
+
+		return {
+			orders,
+			totalOrders,
+			totalPages,
+			currentPage: params.page,
+			hasNext,
+		};
+	}
+
+	public async cancelOrder(
+		order: Order,
+		previousStatus: OrderStatus,
+	): Promise<CancelledOrderData> {
+		try {
+			return await this.prisma.$transaction(async (tx) => {
+				const updated = await tx.order.update({
+					where: {
+						id: order.id,
+						orderStatus: {
+							in: [OrderStatus.PLACED, OrderStatus.CONFIRMED],
+						},
+					},
+					data: {
+						orderStatus: order.orderStatus,
+						cancellationReason: order.cancellationReason,
+						cancelledAt: order.cancelledAt,
+					},
+					select: {
+						id: true,
+						orderNumber: true,
+						orderStatus: true,
+						cancellationReason: true,
+						cancelledAt: true,
+					},
+				});
+
+				await tx.orderStatusHistory.create({
+					data: {
+						orderId: order.id,
+						previousStatus,
+						currentStatus: order.orderStatus,
+						changedBy: order.userId ?? ORDER_DEFAULTS.CHANGED_BY_CUSTOMER,
+						notes:
+							order.cancellationReason?.trim() ||
+							ORDER_DEFAULTS.CANCEL_AUDIT_NOTE,
+					},
+				});
+
+				return OrderPersistenceMapper.toCancelledOrder(updated);
+			});
+		} catch (error) {
+			this.handlePrismaError(error, { orderId: order.id });
+			throw error;
+		}
 	}
 }

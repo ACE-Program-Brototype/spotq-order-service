@@ -1,8 +1,13 @@
-import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
+import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { OrderType } from "@domain/enums/order-type.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import { CartEmptyError } from "../errors/cart-empty.error.ts";
+import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
+import {
+	ForbiddenOrderAccessError,
+	OrderCancellationNotAllowedError,
+} from "@domain/errors/index.ts";
 import { OrderItem, type OrderItemProps } from "./order-item.entity.ts";
 import {
 	OrderStatusHistory,
@@ -34,6 +39,8 @@ export interface OrderProps {
 	grandTotal?: number;
 	estimatedReadyAt?: Date | null;
 	specialInstructions?: string | null;
+	cancellationReason?: string | null;
+	cancelledAt?: Date | null;
 	items: OrderItemProps[];
 	statusHistory?: OrderStatusHistoryProps[];
 	createdAt?: Date;
@@ -56,7 +63,7 @@ export class Order {
 	public readonly orderType: OrderType;
 	public readonly paymentMode: PaymentMode;
 	public readonly paymentStatus: PaymentStatus;
-	public readonly orderStatus: OrderStatus;
+	private _orderStatus: OrderStatus;
 	public readonly subtotal: number;
 	public readonly taxAmount: number;
 	public readonly platformFee: number;
@@ -65,10 +72,24 @@ export class Order {
 	public readonly grandTotal: number;
 	public readonly estimatedReadyAt: Date | null;
 	public readonly specialInstructions: string | null;
+	private _cancellationReason: string | null;
+	private _cancelledAt: Date | null;
 	public readonly items: OrderItem[];
 	public readonly statusHistory: OrderStatusHistory[];
 	public readonly createdAt: Date;
 	public readonly updatedAt: Date;
+
+	public get orderStatus(): OrderStatus {
+		return this._orderStatus;
+	}
+
+	public get cancellationReason(): string | null {
+		return this._cancellationReason;
+	}
+
+	public get cancelledAt(): Date | null {
+		return this._cancelledAt;
+	}
 
 	constructor(props: OrderProps) {
 		this.id = props.id ?? crypto.randomUUID();
@@ -86,7 +107,7 @@ export class Order {
 		this.orderType = props.orderType;
 		this.paymentMode = props.paymentMode;
 		this.paymentStatus = props.paymentStatus;
-		this.orderStatus = props.orderStatus;
+		this._orderStatus = props.orderStatus;
 		this.items = (props.items ?? []).map((item) => new OrderItem(item));
 		this.statusHistory = (props.statusHistory ?? []).map(
 			(history) => new OrderStatusHistory(history),
@@ -99,6 +120,8 @@ export class Order {
 		this.grandTotal = props.grandTotal ?? this.calculateGrandTotal();
 		this.estimatedReadyAt = props.estimatedReadyAt ?? null;
 		this.specialInstructions = props.specialInstructions ?? null;
+		this._cancellationReason = props.cancellationReason ?? null;
+		this._cancelledAt = props.cancelledAt ?? null;
 		this.createdAt = props.createdAt ?? new Date();
 		this.updatedAt = props.updatedAt ?? new Date();
 
@@ -123,5 +146,36 @@ export class Order {
 		if (this.items.length === 0) {
 			throw new CartEmptyError();
 		}
+	}
+
+	public cancel(customerId: string, reason?: string | null): void {
+		if (this.userId !== customerId) {
+			throw new ForbiddenOrderAccessError(
+				ORDER_MESSAGES.ORDER_FORBIDDEN_CANCEL,
+			);
+		}
+
+		if (this._orderStatus === OrderStatus.CANCELLED) {
+			throw new OrderCancellationNotAllowedError(
+				ORDER_MESSAGES.ORDER_ALREADY_CANCELLED,
+			);
+		}
+
+		const nonCancellableStatuses = [
+			OrderStatus.PREPARING,
+			OrderStatus.READY,
+			OrderStatus.SERVED,
+			OrderStatus.COMPLETED,
+		];
+
+		if (nonCancellableStatuses.includes(this._orderStatus)) {
+			throw new OrderCancellationNotAllowedError(
+				ORDER_MESSAGES.ORDER_ALREADY_IN_PREPARATION,
+			);
+		}
+
+		this._orderStatus = OrderStatus.CANCELLED;
+		this._cancellationReason = reason ?? null;
+		this._cancelledAt = new Date();
 	}
 }

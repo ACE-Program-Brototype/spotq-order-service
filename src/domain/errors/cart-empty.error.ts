@@ -9,3 +9,5 @@ export class CartEmptyError extends DomainError {
 		super(message, ORDER_ERROR_CODES.CART_EMPTY);
 	}
 }
+
+export default CartEmptyError;

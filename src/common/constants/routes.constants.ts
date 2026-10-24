@@ -1,4 +1,5 @@
 export const ROUTES = {
+	ROOT: "/",
 	HEALTH: "/health",
 	METRICS: "/metrics",
 	CARTS: "/carts",
@@ -6,15 +7,17 @@ export const ROUTES = {
 	ORDERS: "/orders",
 } as const;
 
+export const ORDER_ROUTES = {
+	PLACE: "/",
+	HISTORY: "/history",
+	CANCEL: "/:orderId/cancel",
+} as const;
+
 export const CART_ROUTES = {
 	ROOT: "/",
 	BY_ID: "/:cartId",
 	ITEMS: "/items",
 	ITEM_BY_ID: "/:cartId/items/:cartItemId",
-} as const;
-
-export const ORDER_ROUTES = {
-	PLACE: "/",
 } as const;
 
 export const RESTAURANT_SERVICE_ENDPOINTS = {

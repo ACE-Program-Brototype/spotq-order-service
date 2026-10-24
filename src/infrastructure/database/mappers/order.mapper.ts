@@ -3,7 +3,11 @@ import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { OrderType } from "@domain/enums/order-type.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import type { OrderOverviewItemData } from "@domain/repositories/order.repository.interface.ts";
+import type {
+	CancelledOrderData,
+	CustomerOrderHistoryItemData,
+	OrderOverviewItemData,
+} from "@domain/types/order-repository.types.ts";
 import type { Prisma } from "@generated/prisma/client.ts";
 
 export interface PrismaOrderOverviewRecord {
@@ -16,6 +20,26 @@ export interface PrismaOrderOverviewRecord {
 		items: number;
 	};
 	createdAt: Date;
+}
+
+export interface PrismaCustomerOrderRecord {
+	id: string;
+	orderNumber: string;
+	restaurantId: string;
+	orderStatus: string;
+	grandTotal: Prisma.Decimal;
+	_count: {
+		items: number;
+	};
+	createdAt: Date;
+}
+
+export interface PrismaCancelledOrderRecord {
+	id: string;
+	orderNumber: string;
+	orderStatus: string;
+	cancellationReason: string | null;
+	cancelledAt: Date | null;
 }
 
 export type PrismaOrderWithRelations = Prisma.OrderGetPayload<{
@@ -50,6 +74,38 @@ export const OrderPersistenceMapper = {
 		);
 	},
 
+	toCustomerOrderItem(
+		record: PrismaCustomerOrderRecord,
+	): CustomerOrderHistoryItemData {
+		return {
+			orderId: record.id,
+			orderNumber: record.orderNumber,
+			restaurantId: record.restaurantId,
+			orderStatus: record.orderStatus,
+			grandTotal: Number(record.grandTotal.toFixed(2)),
+			itemsCount: record._count.items,
+			createdAt: record.createdAt,
+		};
+	},
+
+	toCustomerOrderItemList(
+		records: PrismaCustomerOrderRecord[],
+	): CustomerOrderHistoryItemData[] {
+		return records.map((record) =>
+			OrderPersistenceMapper.toCustomerOrderItem(record),
+		);
+	},
+
+	toCancelledOrder(record: PrismaCancelledOrderRecord): CancelledOrderData {
+		return {
+			orderId: record.id,
+			orderNumber: record.orderNumber,
+			status: record.orderStatus,
+			cancellationReason: record.cancellationReason,
+			cancelledAt: record.cancelledAt,
+		};
+	},
+
 	toDomain(record: PrismaOrderWithRelations): Order {
 		return new Order({
 			id: record.id,
@@ -76,6 +132,8 @@ export const OrderPersistenceMapper = {
 			grandTotal: Number(record.grandTotal),
 			estimatedReadyAt: record.estimatedReadyAt,
 			specialInstructions: record.specialInstructions,
+			cancellationReason: record.cancellationReason,
+			cancelledAt: record.cancelledAt,
 			createdAt: record.createdAt,
 			updatedAt: record.updatedAt,
 			items: (record.items ?? []).map((item) => ({

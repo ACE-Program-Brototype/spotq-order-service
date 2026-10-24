@@ -3,6 +3,7 @@ import {
 	CART_ERROR_CODES,
 	messages,
 } from "@common/constants/message.constants.ts";
+import { AppError } from "@common/errors/index.ts";
 import { sendErrorResponse } from "@common/response/api-response.ts";
 import {
 	DOMAIN_ERROR_HTTP_MAP,
@@ -24,6 +25,15 @@ export function errorHandler(
 		const statusCode = mapDomainErrorToHttpStatus(err.errorCode);
 		logger.warn({ err, errorCode: err.errorCode, statusCode }, err.message);
 		sendErrorResponse(res, err.message, err.errorCode, statusCode);
+		return;
+	}
+
+	if (err instanceof AppError) {
+		logger.warn(
+			{ err, errorCode: err.errorCode, statusCode: err.statusCode },
+			err.message,
+		);
+		sendErrorResponse(res, err.message, err.errorCode, err.statusCode);
 		return;
 	}
 

@@ -1,5 +1,5 @@
 import type { OrdersOverviewResponseDto } from "@application/dtos/orders/get-orders-overview.dto.ts";
-import type { GetOrdersOverviewRepoResult } from "@domain/repositories/order.repository.interface.ts";
+import type { GetOrdersOverviewRepoResult } from "@domain/types/order-repository.types";
 
 export const OrdersOverviewMapper = {
 	toResponseDto(
