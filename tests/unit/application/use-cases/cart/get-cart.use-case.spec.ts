@@ -35,9 +35,16 @@ class MockCartRepository implements ICartRepository {
 		return existing ?? null;
 	}
 
-	public async findActiveByUserId(userId: string): Promise<Cart | null> {
+	public async findActiveByUserId(
+		userId: string,
+		restaurantId?: string,
+	): Promise<Cart | null> {
 		for (const cart of this.carts.values()) {
-			if (cart.userId === userId && !cart.isExpired()) {
+			if (
+				cart.userId === userId &&
+				(!restaurantId || cart.restaurantId === restaurantId) &&
+				!cart.isExpired()
+			) {
 				return cart;
 			}
 		}
@@ -201,5 +208,134 @@ describe("GetCartUseCase", () => {
 				return true;
 			},
 		);
+	});
+
+	it("should retrieve active cart by authenticatedUserId when cartId is not provided", async () => {
+		const repo = new MockCartRepository();
+		const useCase = new GetCartUseCase(repo);
+
+		const cartId = "user-active-cart-1";
+		const userId = "user-789";
+		const restaurantId = "rest-999";
+
+		const testCart = new Cart({
+			id: cartId,
+			restaurantId,
+			userId,
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() + 86400000),
+			items: [
+				new CartItem({
+					id: "item-10",
+					cartId,
+					menuItemId: "menu-10",
+					menuItemName: "Garlic Bread",
+					variantId: null,
+					variantName: null,
+					quantity: 1,
+					unitPrice: 120,
+					specialInstructions: null,
+					addons: [],
+				}),
+			],
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
+
+		repo.carts.set(cartId, testCart);
+
+		const result = await useCase.execute({
+			authenticatedUserId: userId,
+		});
+
+		assert.equal(result.cartId, cartId);
+		assert.equal(result.userId, userId);
+		assert.equal(result.restaurantId, restaurantId);
+		assert.equal(result.itemCount, 1);
+		assert.equal(result.subtotal, 120);
+		assert.equal(result.items.length, 1);
+	});
+
+	it("should retrieve active cart scoped to restaurantId when provided", async () => {
+		const repo = new MockCartRepository();
+		const useCase = new GetCartUseCase(repo);
+
+		const userId = "user-multi-rest";
+		const restA = "rest-a";
+		const restB = "rest-b";
+
+		const cartA = new Cart({
+			id: "cart-a",
+			restaurantId: restA,
+			userId,
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() + 86400000),
+			items: [],
+		});
+
+		const cartB = new Cart({
+			id: "cart-b",
+			restaurantId: restB,
+			userId,
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() + 86400000),
+			items: [],
+		});
+
+		repo.carts.set("cart-a", cartA);
+		repo.carts.set("cart-b", cartB);
+
+		const result = await useCase.execute({
+			authenticatedUserId: userId,
+			restaurantId: restB,
+		});
+
+		assert.equal(result.cartId, "cart-b");
+		assert.equal(result.restaurantId, restB);
+	});
+
+	it("should return empty cart representation when user has no active cart", async () => {
+		const repo = new MockCartRepository();
+		const useCase = new GetCartUseCase(repo);
+
+		const userId = "user-without-cart";
+		const result = await useCase.execute({
+			authenticatedUserId: userId,
+			restaurantId: "rest-xyz",
+		});
+
+		assert.equal(result.cartId, null);
+		assert.equal(result.restaurantId, "rest-xyz");
+		assert.equal(result.userId, userId);
+		assert.equal(result.itemCount, 0);
+		assert.equal(result.subtotal, 0);
+		assert.equal(result.items.length, 0);
+		assert.equal(result.status, CartStatus.ACTIVE);
+	});
+
+	it("should return empty cart representation when user active cart has expired", async () => {
+		const repo = new MockCartRepository();
+		const useCase = new GetCartUseCase(repo);
+
+		const userId = "user-expired-active";
+		const expiredCart = new Cart({
+			id: "expired-user-cart",
+			restaurantId: "rest-expired",
+			userId,
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() - 5000),
+			items: [],
+		});
+
+		repo.carts.set("expired-user-cart", expiredCart);
+
+		const result = await useCase.execute({
+			authenticatedUserId: userId,
+		});
+
+		assert.equal(result.cartId, null);
+		assert.equal(result.userId, userId);
+		assert.equal(result.itemCount, 0);
+		assert.equal(result.items.length, 0);
 	});
 });

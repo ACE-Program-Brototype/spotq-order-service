@@ -17,15 +17,31 @@ export class GetCartUseCase implements IGetCartUseCase {
 	) {}
 
 	public async execute(dto: GetCartRequestDto): Promise<GetCartResponseDto> {
-		const cart = await this.cartRepository.findById(dto.cartId);
+		if (dto.cartId) {
+			const cart = await this.cartRepository.findById(dto.cartId);
 
-		if (!cart) {
-			throw new CartNotFoundError();
+			if (!cart) {
+				throw new CartNotFoundError();
+			}
+
+			cart.validateAccess(dto.authenticatedUserId);
+			cart.validateActive();
+
+			return CartResponseMapper.toDto(cart);
 		}
 
-		cart.validateAccess(dto.authenticatedUserId);
-		cart.validateActive();
+		const activeCart = await this.cartRepository.findActiveByUserId(
+			dto.authenticatedUserId,
+			dto.restaurantId,
+		);
 
-		return CartResponseMapper.toDto(cart);
+		if (!activeCart || activeCart.isExpired()) {
+			return CartResponseMapper.toEmptyDto(
+				dto.authenticatedUserId,
+				dto.restaurantId,
+			);
+		}
+
+		return CartResponseMapper.toDto(activeCart);
 	}
 }

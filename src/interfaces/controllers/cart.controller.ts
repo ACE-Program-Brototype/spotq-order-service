@@ -28,11 +28,13 @@ export class CartController {
 	) {}
 
 	public getCart = async (req: Request, res: Response): Promise<void> => {
-		const cartId = req.params.cartId as string;
+		const cartId = (req.params.cartId as string) || undefined;
+		const restaurantId = (req.query?.restaurantId as string) || undefined;
 		const authenticatedUserId = req.user?.userId as string;
 
 		const cart = await this.getCartUseCase.execute({
 			cartId,
+			restaurantId,
 			authenticatedUserId,
 		});
 

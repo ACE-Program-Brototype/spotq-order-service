@@ -1,5 +1,6 @@
 import type { GetCartResponseDto } from "@application/dtos/cart/get-cart.dto.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
+import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 
 export interface CartMutationResponseDto {
 	cartId: string;
@@ -17,6 +18,21 @@ export interface CartMutationResponseDto {
 }
 
 export const CartResponseMapper = {
+	toEmptyDto(userId: string, restaurantId?: string): GetCartResponseDto {
+		return {
+			cartId: null,
+			restaurantId: restaurantId ?? null,
+			userId,
+			status: CartStatus.ACTIVE,
+			itemCount: 0,
+			subtotal: 0,
+			createdAt: null,
+			updatedAt: null,
+			expiresAt: null,
+			items: [],
+		};
+	},
+
 	toDto(cart: Cart): GetCartResponseDto {
 		return {
 			cartId: cart.id,

@@ -6,16 +6,25 @@ import { customerAuthMiddleware } from "@interfaces/middleware/customer-auth.mid
 import {
 	validateRequestBody,
 	validateRequestParams,
+	validateRequestQuery,
 } from "@interfaces/middleware/validation.middleware.ts";
 import { addCartItemBodySchema } from "@interfaces/validation/cart/add-cart-item.schema.ts";
 import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
 import { cartIdParamSchema } from "@interfaces/validation/cart/cart-param.schema.ts";
+import { getCartQuerySchema } from "@interfaces/validation/cart/get-cart-query.schema.ts";
 import { updateCartItemQuantityBodySchema } from "@interfaces/validation/cart/update-cart-quantity.schema.ts";
 import { Router } from "express";
 
 export const cartRouter: Router = Router();
 
 const cartController = container.get<CartController>(TYPES.CartController);
+
+cartRouter.get(
+	CART_ROUTES.ROOT,
+	customerAuthMiddleware,
+	validateRequestQuery(getCartQuerySchema),
+	cartController.getCart,
+);
 
 cartRouter.get(
 	CART_ROUTES.BY_ID,

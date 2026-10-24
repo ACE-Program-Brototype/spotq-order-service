@@ -111,6 +111,55 @@ describe("CartController", () => {
 		);
 	});
 
+	it("should get active cart by userId and optional query without cartId in params", async () => {
+		let capturedDto: unknown = null;
+		const customGetCartUseCase = {
+			execute: async (dto: unknown) => {
+				capturedDto = dto;
+				return {
+					cartId: "cart-active",
+					restaurantId: "rest-query",
+					userId: "user-1",
+					status: "ACTIVE",
+					itemCount: 1,
+					subtotal: 150,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
+					expiresAt: new Date().toISOString(),
+					items: [],
+				};
+			},
+		} as unknown as IGetCartUseCase;
+
+		const controller = new CartController(
+			customGetCartUseCase,
+			mockAddCartItemUseCase,
+			mockUpdateCartItemQuantityUseCase,
+			mockRemoveCartItemUseCase,
+			mockClearCartUseCase,
+		);
+
+		const req = {
+			params: {},
+			query: { restaurantId: "rest-query" },
+			user: { userId: "user-1" },
+		} as unknown as Request;
+		const { res, getStatus, getBody } = createMockResponse();
+
+		await controller.getCart(req, res);
+
+		assert.equal(getStatus(), HttpStatus.OK);
+		assert.deepEqual(capturedDto, {
+			cartId: undefined,
+			restaurantId: "rest-query",
+			authenticatedUserId: "user-1",
+		});
+		assert.equal(
+			(getBody() as { message: string }).message,
+			CART_MESSAGES.FETCHED_SUCCESS,
+		);
+	});
+
 	it("should add cart item successfully with 201 Created", async () => {
 		const controller = new CartController(
 			mockGetCartUseCase,

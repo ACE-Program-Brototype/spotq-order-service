@@ -1,6 +1,7 @@
 export interface GetCartRequestDto {
-	cartId: string;
 	authenticatedUserId: string;
+	cartId?: string | undefined;
+	restaurantId?: string | undefined;
 }
 
 export interface CartItemAddonResponseDto {
@@ -23,14 +24,14 @@ export interface CartItemResponseDto {
 }
 
 export interface GetCartResponseDto {
-	cartId: string;
-	restaurantId: string;
+	cartId: string | null;
+	restaurantId: string | null;
 	userId: string;
 	status: string;
 	itemCount: number;
 	subtotal: number;
-	createdAt: string;
-	updatedAt: string;
-	expiresAt: string;
+	createdAt: string | null;
+	updatedAt: string | null;
+	expiresAt: string | null;
 	items: CartItemResponseDto[];
 }
