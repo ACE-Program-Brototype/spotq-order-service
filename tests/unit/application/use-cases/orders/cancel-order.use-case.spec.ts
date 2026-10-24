@@ -173,7 +173,7 @@ describe("CancelOrderUseCase", () => {
 		});
 	});
 
-	it("should use empty string as cancellation reason when null is passed", async () => {
+	it("should preserve null cancellation reason when null is passed", async () => {
 		let capturedOrder: Order | undefined;
 
 		const mockRepo = createMockOrderRepo({

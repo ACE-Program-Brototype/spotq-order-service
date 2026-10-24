@@ -369,6 +369,9 @@ export class PrismaOrderRepository
 				const updated = await tx.order.update({
 					where: {
 						id: order.id,
+						orderStatus: {
+							in: [OrderStatus.PLACED, OrderStatus.CONFIRMED],
+						},
 					},
 					data: {
 						orderStatus: order.orderStatus,
@@ -390,7 +393,9 @@ export class PrismaOrderRepository
 						previousStatus,
 						currentStatus: order.orderStatus,
 						changedBy: order.userId ?? ORDER_DEFAULTS.CHANGED_BY_CUSTOMER,
-						notes: order.cancellationReason ?? ORDER_DEFAULTS.CANCEL_AUDIT_NOTE,
+						notes:
+							order.cancellationReason?.trim() ||
+							ORDER_DEFAULTS.CANCEL_AUDIT_NOTE,
 					},
 				});
 

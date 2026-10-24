@@ -45,4 +45,22 @@ describe("CancelOrderMapper", () => {
 			cancelled_at: "2026-10-06T13:52:00.000Z",
 		});
 	});
+
+	it("should defensively handle null cancelledAt without throwing TypeError", () => {
+		const cancelledData: CancelledOrderData = {
+			orderId: "ord_992817203",
+			orderNumber: "SQ-101",
+			status: "CANCELLED",
+			cancellationReason: null,
+			cancelledAt: null,
+		};
+
+		const result = CancelOrderMapper.toResponseDto(cancelledData);
+
+		assert.equal(result.order_id, "ord_992817203");
+		assert.equal(result.order_number, "SQ-101");
+		assert.equal(result.status, "CANCELLED");
+		assert.equal(typeof result.cancelled_at, "string");
+		assert.ok(!Number.isNaN(Date.parse(result.cancelled_at)));
+	});
 });

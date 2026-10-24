@@ -83,5 +83,5 @@ export interface CancelledOrderData {
 	orderNumber: string;
 	status: string;
 	cancellationReason: string | null;
-	cancelledAt: Date;
+	cancelledAt: Date | null;
 }

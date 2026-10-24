@@ -102,7 +102,7 @@ export const OrderPersistenceMapper = {
 			orderNumber: record.orderNumber,
 			status: record.orderStatus,
 			cancellationReason: record.cancellationReason,
-			cancelledAt: record.cancelledAt as Date,
+			cancelledAt: record.cancelledAt,
 		};
 	},
 

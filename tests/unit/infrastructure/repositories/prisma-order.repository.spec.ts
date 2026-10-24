@@ -285,7 +285,12 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 		const result = await repository.cancelOrder(order, OrderStatus.PLACED);
 
 		assert.deepEqual(capturedUpdateArgs, {
-			where: { id: "ord-123" },
+			where: {
+				id: "ord-123",
+				orderStatus: {
+					in: [OrderStatus.PLACED, OrderStatus.CONFIRMED],
+				},
+			},
 			data: {
 				orderStatus: OrderStatus.CANCELLED,
 				cancellationReason: "Changed my mind",
@@ -363,6 +368,50 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 		assert.equal(capturedHistoryNotes, ORDER_DEFAULTS.CANCEL_AUDIT_NOTE);
 	});
 
+	it("should use default cancellation note when cancellationReason is whitespace string", async () => {
+		const fixedDate = new Date("2026-10-06T13:52:00.000Z");
+		let capturedHistoryNotes: string | undefined;
+
+		const mockTx = {
+			order: {
+				update: async () => ({
+					id: "ord-123",
+					orderNumber: "SQ-101",
+					orderStatus: "CANCELLED",
+					cancellationReason: "   ",
+					cancelledAt: fixedDate,
+				}),
+			},
+			orderStatusHistory: {
+				create: async (args: { data?: { notes?: string } }) => {
+					capturedHistoryNotes = args.data?.notes;
+					return { id: "history-1" };
+				},
+			},
+		};
+
+		const mockPrisma = {
+			$transaction: async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
+				return await fn(mockTx);
+			},
+		} as unknown as PrismaClient;
+
+		const order = createSampleOrder({
+			id: "ord-123",
+			orderNumber: "SQ-101",
+			restaurantId: "rest-1",
+			userId: "user-1",
+			orderStatus: OrderStatus.CANCELLED,
+			cancellationReason: "   ",
+			cancelledAt: fixedDate,
+		});
+
+		const repository = new PrismaOrderRepository(mockPrisma);
+		await repository.cancelOrder(order, OrderStatus.PLACED);
+
+		assert.equal(capturedHistoryNotes, ORDER_DEFAULTS.CANCEL_AUDIT_NOTE);
+	});
+
 	it("should fallback changedBy to ORDER_DEFAULTS.CHANGED_BY_CUSTOMER when userId is null", async () => {
 		const fixedDate = new Date("2026-10-06T13:52:00.000Z");
 		let capturedChangedBy: string | undefined;
@@ -405,5 +454,42 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 		await repository.cancelOrder(order, OrderStatus.PLACED);
 
 		assert.equal(capturedChangedBy, ORDER_DEFAULTS.CHANGED_BY_CUSTOMER);
+	});
+
+	it("should map P2025 error through handlePrismaError when order is not found or condition fails", async () => {
+		const mockTx = {
+			order: {
+				update: async () => {
+					const error = new Error("Record not found");
+					(error as unknown as { code: string }).code = "P2025";
+					throw error;
+				},
+			},
+		};
+
+		const mockPrisma = {
+			$transaction: async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
+				return await fn(mockTx);
+			},
+		} as unknown as PrismaClient;
+
+		const order = createSampleOrder({
+			id: "ord-123",
+			orderNumber: "SQ-101",
+			restaurantId: "rest-1",
+			userId: "user-1",
+			orderStatus: OrderStatus.CANCELLED,
+		});
+
+		const repository = new PrismaOrderRepository(mockPrisma);
+		await assert.rejects(
+			async () => {
+				await repository.cancelOrder(order, OrderStatus.PLACED);
+			},
+			{
+				message:
+					/Record not found in database for context: {"orderId":"ord-123"}/,
+			},
+		);
 	});
 });

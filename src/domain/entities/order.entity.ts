@@ -63,7 +63,7 @@ export class Order {
 	public readonly orderType: OrderType;
 	public readonly paymentMode: PaymentMode;
 	public readonly paymentStatus: PaymentStatus;
-	public orderStatus: OrderStatus;
+	private _orderStatus: OrderStatus;
 	public readonly subtotal: number;
 	public readonly taxAmount: number;
 	public readonly platformFee: number;
@@ -72,12 +72,24 @@ export class Order {
 	public readonly grandTotal: number;
 	public readonly estimatedReadyAt: Date | null;
 	public readonly specialInstructions: string | null;
-	public cancellationReason: string | null;
-	public cancelledAt: Date | null;
+	private _cancellationReason: string | null;
+	private _cancelledAt: Date | null;
 	public readonly items: OrderItem[];
 	public readonly statusHistory: OrderStatusHistory[];
 	public readonly createdAt: Date;
 	public readonly updatedAt: Date;
+
+	public get orderStatus(): OrderStatus {
+		return this._orderStatus;
+	}
+
+	public get cancellationReason(): string | null {
+		return this._cancellationReason;
+	}
+
+	public get cancelledAt(): Date | null {
+		return this._cancelledAt;
+	}
 
 	constructor(props: OrderProps) {
 		this.id = props.id ?? crypto.randomUUID();
@@ -95,7 +107,7 @@ export class Order {
 		this.orderType = props.orderType;
 		this.paymentMode = props.paymentMode;
 		this.paymentStatus = props.paymentStatus;
-		this.orderStatus = props.orderStatus;
+		this._orderStatus = props.orderStatus;
 		this.items = (props.items ?? []).map((item) => new OrderItem(item));
 		this.statusHistory = (props.statusHistory ?? []).map(
 			(history) => new OrderStatusHistory(history),
@@ -108,8 +120,8 @@ export class Order {
 		this.grandTotal = props.grandTotal ?? this.calculateGrandTotal();
 		this.estimatedReadyAt = props.estimatedReadyAt ?? null;
 		this.specialInstructions = props.specialInstructions ?? null;
-		this.cancellationReason = props.cancellationReason ?? null;
-		this.cancelledAt = props.cancelledAt ?? null;
+		this._cancellationReason = props.cancellationReason ?? null;
+		this._cancelledAt = props.cancelledAt ?? null;
 		this.createdAt = props.createdAt ?? new Date();
 		this.updatedAt = props.updatedAt ?? new Date();
 
@@ -143,7 +155,7 @@ export class Order {
 			);
 		}
 
-		if (this.orderStatus === OrderStatus.CANCELLED) {
+		if (this._orderStatus === OrderStatus.CANCELLED) {
 			throw new OrderCancellationNotAllowedError(
 				ORDER_MESSAGES.ORDER_ALREADY_CANCELLED,
 			);
@@ -156,14 +168,14 @@ export class Order {
 			OrderStatus.COMPLETED,
 		];
 
-		if (nonCancellableStatuses.includes(this.orderStatus)) {
+		if (nonCancellableStatuses.includes(this._orderStatus)) {
 			throw new OrderCancellationNotAllowedError(
 				ORDER_MESSAGES.ORDER_ALREADY_IN_PREPARATION,
 			);
 		}
 
-		this.orderStatus = OrderStatus.CANCELLED;
-		this.cancellationReason = reason ?? null;
-		this.cancelledAt = new Date();
+		this._orderStatus = OrderStatus.CANCELLED;
+		this._cancellationReason = reason ?? null;
+		this._cancelledAt = new Date();
 	}
 }
