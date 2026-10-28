@@ -140,4 +140,3 @@ describe("PrismaCartRepository.replaceCartItemsBatch", () => {
 		assert.equal(result.calculateSubtotal(), 750);
 	});
 });
-

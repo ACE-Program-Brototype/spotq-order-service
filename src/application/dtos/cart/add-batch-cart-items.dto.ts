@@ -15,4 +15,3 @@ export interface AddBatchCartItemsDTO {
 }
 
 export type AddBatchCartItemsResponseDTO = GetCartResponseDto;
-

@@ -6,4 +6,3 @@ import type {
 export interface IAddBatchCartItemsUseCase {
 	execute(dto: AddBatchCartItemsDTO): Promise<AddBatchCartItemsResponseDTO>;
 }
-

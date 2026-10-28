@@ -83,4 +83,3 @@ describe("addBatchCartItemsBodySchema", () => {
 		assert.equal(parsed.success, false);
 	});
 });
-
