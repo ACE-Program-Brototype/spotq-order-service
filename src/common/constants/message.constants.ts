@@ -15,6 +15,7 @@ export const messages = {
 export const CART_MESSAGES = {
 	FETCHED_SUCCESS: "Cart fetched successfully",
 	ITEM_ADDED_SUCCESS: "Cart item added successfully",
+	ITEMS_BATCH_ADDED_SUCCESS: "Cart items added successfully",
 	ITEM_UPDATED_SUCCESS: "Cart item quantity updated successfully",
 	ITEM_REMOVED_SUCCESS: "Cart item removed successfully",
 	CART_CLEARED_SUCCESS: "Cart cleared successfully",
@@ -30,6 +31,8 @@ export const CART_MESSAGES = {
 	INVALID_VARIANT_ID: "Invalid variant ID format",
 	INVALID_ADDON_ID: "Invalid addon ID format",
 	INVALID_QUANTITY: "Quantity must be an integer between 1 and 20",
+	INVALID_BATCH_ITEMS_MIN: "Batch must contain at least 1 item",
+	INVALID_BATCH_ITEMS_MAX: "Batch cannot exceed 50 items",
 	INVALID_SPECIAL_INSTRUCTIONS:
 		"Special instructions cannot exceed 250 characters",
 	DIFFERENT_RESTAURANT:

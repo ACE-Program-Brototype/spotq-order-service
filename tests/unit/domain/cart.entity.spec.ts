@@ -7,6 +7,7 @@ import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
+import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
 
 describe("Cart Domain Entities", () => {
 	it("should calculate correct line item total with base price, addons, and quantity", () => {
@@ -209,5 +210,52 @@ describe("Cart Domain Entities", () => {
 			"No onions",
 		);
 		assert.equal(noMatch, undefined);
+	});
+
+	it("should merge identical batch item configurations and enforce max quantity", () => {
+		const merged = Cart.mergeBatchItems([
+			{
+				menuItemId: "menu-1",
+				variantId: "var-1",
+				addonIds: ["adn-2", "adn-1"],
+				quantity: 2,
+				specialInstructions: " Extra spicy ",
+			},
+			{
+				menuItemId: "menu-1",
+				variantId: "var-1",
+				addonIds: ["adn-1", "adn-2"],
+				quantity: 3,
+				specialInstructions: "Extra spicy",
+			},
+			{
+				menuItemId: "menu-2",
+				variantId: null,
+				addonIds: [],
+				quantity: 1,
+				specialInstructions: "   ",
+			},
+		]);
+
+		assert.equal(merged.length, 2);
+		assert.equal(merged[0]?.quantity, 5);
+		assert.deepEqual(merged[0]?.addonIds, ["adn-1", "adn-2"]);
+		assert.equal(merged[0]?.specialInstructions, "Extra spicy");
+		assert.equal(merged[1]?.specialInstructions, null);
+
+		assert.throws(
+			() =>
+				Cart.mergeBatchItems([
+					{
+						menuItemId: "menu-1",
+						quantity: 15,
+					},
+					{
+						menuItemId: "menu-1",
+						quantity: 6,
+					},
+				]),
+			InvalidCartQuantityError,
+		);
 	});
 });

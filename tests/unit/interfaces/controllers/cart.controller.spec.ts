@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import type { IAddBatchCartItemsUseCase } from "@application/ports/use-cases/cart/add-batch-cart-items.use-case.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
 import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-cart.use-case.port.ts";
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
@@ -54,6 +55,21 @@ describe("CartController", () => {
 		}),
 	} as unknown as IAddCartItemUseCase;
 
+	const mockAddBatchCartItemsUseCase = {
+		execute: async () => ({
+			cartId: "cart-1",
+			restaurantId: "rest-1",
+			userId: "user-1",
+			status: "ACTIVE",
+			itemCount: 3,
+			subtotal: 850,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			expiresAt: new Date().toISOString(),
+			items: [],
+		}),
+	} as unknown as IAddBatchCartItemsUseCase;
+
 	const mockUpdateCartItemQuantityUseCase = {
 		execute: async () => ({
 			cartId: "cart-1",
@@ -91,6 +107,7 @@ describe("CartController", () => {
 		const controller = new CartController(
 			mockGetCartUseCase,
 			mockAddCartItemUseCase,
+			mockAddBatchCartItemsUseCase,
 			mockUpdateCartItemQuantityUseCase,
 			mockRemoveCartItemUseCase,
 			mockClearCartUseCase,
@@ -115,6 +132,7 @@ describe("CartController", () => {
 		const controller = new CartController(
 			mockGetCartUseCase,
 			mockAddCartItemUseCase,
+			mockAddBatchCartItemsUseCase,
 			mockUpdateCartItemQuantityUseCase,
 			mockRemoveCartItemUseCase,
 			mockClearCartUseCase,
@@ -140,10 +158,44 @@ describe("CartController", () => {
 		);
 	});
 
+	it("should add batch cart items successfully with 201 Created", async () => {
+		const controller = new CartController(
+			mockGetCartUseCase,
+			mockAddCartItemUseCase,
+			mockAddBatchCartItemsUseCase,
+			mockUpdateCartItemQuantityUseCase,
+			mockRemoveCartItemUseCase,
+			mockClearCartUseCase,
+		);
+
+		const req = {
+			user: { userId: "user-1" },
+			body: {
+				restaurantId: "rest-1",
+				items: [
+					{
+						menuItemId: "item-1",
+						quantity: 2,
+					},
+				],
+			},
+		} as unknown as Request;
+		const { res, getStatus, getBody } = createMockResponse();
+
+		await controller.addItemsBatch(req, res);
+
+		assert.equal(getStatus(), HttpStatus.CREATED);
+		assert.equal(
+			(getBody() as { message: string }).message,
+			CART_MESSAGES.ITEMS_BATCH_ADDED_SUCCESS,
+		);
+	});
+
 	it("should update quantity successfully", async () => {
 		const controller = new CartController(
 			mockGetCartUseCase,
 			mockAddCartItemUseCase,
+			mockAddBatchCartItemsUseCase,
 			mockUpdateCartItemQuantityUseCase,
 			mockRemoveCartItemUseCase,
 			mockClearCartUseCase,
@@ -169,6 +221,7 @@ describe("CartController", () => {
 		const controller = new CartController(
 			mockGetCartUseCase,
 			mockAddCartItemUseCase,
+			mockAddBatchCartItemsUseCase,
 			mockUpdateCartItemQuantityUseCase,
 			mockRemoveCartItemUseCase,
 			mockClearCartUseCase,
@@ -193,6 +246,7 @@ describe("CartController", () => {
 		const controller = new CartController(
 			mockGetCartUseCase,
 			mockAddCartItemUseCase,
+			mockAddBatchCartItemsUseCase,
 			mockUpdateCartItemQuantityUseCase,
 			mockRemoveCartItemUseCase,
 			mockClearCartUseCase,
@@ -223,6 +277,7 @@ describe("CartController", () => {
 		const controller = new CartController(
 			failingGetCart,
 			mockAddCartItemUseCase,
+			mockAddBatchCartItemsUseCase,
 			mockUpdateCartItemQuantityUseCase,
 			mockRemoveCartItemUseCase,
 			mockClearCartUseCase,

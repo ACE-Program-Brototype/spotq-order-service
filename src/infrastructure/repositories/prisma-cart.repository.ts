@@ -1,3 +1,4 @@
+import { CART_LIMITS } from "@common/constants/limits.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
@@ -7,11 +8,15 @@ import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.e
 import type {
 	AddItemInput,
 	ICartRepository,
+	ReplaceCartBatchInput,
 	UpdateCartInput,
 } from "@domain/repositories/cart.repository.interface.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
 import { inject, injectable } from "inversify";
-import type { IEntityMapper } from "./prisma-base.repository.ts";
+import {
+	type IEntityMapper,
+	PrismaBaseRepository,
+} from "./prisma-base.repository.ts";
 
 type PrismaCartRecord = {
 	id: string;
@@ -90,11 +95,16 @@ const cartMapper: IEntityMapper<Cart, PrismaCartRecord> = {
 };
 
 @injectable()
-export class PrismaCartRepository implements ICartRepository {
+export class PrismaCartRepository
+	extends PrismaBaseRepository<Cart, PrismaCartRecord>
+	implements ICartRepository
+{
 	constructor(
 		@inject(TYPES.PrismaClient)
 		private readonly prisma: PrismaClient,
-	) {}
+	) {
+		super(prisma.cart, cartMapper);
+	}
 
 	public async findById(cartId: string): Promise<Cart | null> {
 		const record = await this.prisma.cart.findUnique({
@@ -372,6 +382,113 @@ export class PrismaCartRepository implements ICartRepository {
 					},
 				},
 			});
+
+			return cartMapper.toDomain(reloadedRecord as unknown as PrismaCartRecord);
+		});
+
+		return cart;
+	}
+
+	public async replaceCartItemsBatch(
+		input: ReplaceCartBatchInput,
+	): Promise<Cart> {
+		const cart = await this.prisma.$transaction(async (tx) => {
+			const existingUserCarts = await tx.cart.findMany({
+				where: { userId: input.userId },
+				include: {
+					items: {
+						select: { id: true },
+					},
+				},
+			});
+
+			const allExistingItemIds = existingUserCarts.flatMap((existingCart) =>
+				existingCart.items.map((item) => item.id),
+			);
+
+			if (allExistingItemIds.length > 0) {
+				await tx.cartItemAddon.deleteMany({
+					where: { cartItemId: { in: allExistingItemIds } },
+				});
+				await tx.cartItem.deleteMany({
+					where: { id: { in: allExistingItemIds } },
+				});
+			}
+
+			const otherRestaurantCartIds = existingUserCarts
+				.filter(
+					(existingCart) => existingCart.restaurantId !== input.restaurantId,
+				)
+				.map((existingCart) => existingCart.id);
+
+			if (otherRestaurantCartIds.length > 0) {
+				await tx.cart.deleteMany({
+					where: { id: { in: otherRestaurantCartIds } },
+				});
+			}
+
+			const newExpiresAt = new Date(
+				Date.now() + CART_LIMITS.EXPIRATION_WINDOW_MS,
+			);
+
+			const targetCart = await tx.cart.upsert({
+				where: {
+					userId_restaurantId: {
+						userId: input.userId,
+						restaurantId: input.restaurantId,
+					},
+				},
+				create: {
+					userId: input.userId,
+					restaurantId: input.restaurantId,
+					expiresAt: newExpiresAt,
+				},
+				update: {
+					expiresAt: newExpiresAt,
+				},
+			});
+
+			for (const item of input.items) {
+				const createdItem = await tx.cartItem.create({
+					data: {
+						cartId: targetCart.id,
+						menuItemId: item.menuItemId,
+						menuItemName: item.menuItemName,
+						variantId: item.variantId,
+						variantName: item.variantName,
+						unitPrice: item.unitPrice,
+						totalPrice: item.totalPrice,
+						quantity: item.quantity,
+						specialInstructions: item.specialInstructions,
+					},
+				});
+
+				if (item.itemAddons.length > 0) {
+					await tx.cartItemAddon.createMany({
+						data: item.itemAddons.map((addon) => ({
+							cartItemId: createdItem.id,
+							addonId: addon.addonId,
+							addonName: addon.name,
+							price: addon.price,
+						})),
+					});
+				}
+			}
+
+			const reloadedRecord = await tx.cart.findUnique({
+				where: { id: targetCart.id },
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+				},
+			});
+
+			if (!reloadedRecord) {
+				throw new Error("Cart not found in repository");
+			}
 
 			return cartMapper.toDomain(reloadedRecord as unknown as PrismaCartRecord);
 		});

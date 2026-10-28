@@ -43,6 +43,10 @@ class MockCartRepository implements ICartRepository {
 		throw new Error("Not implemented in this test");
 	}
 
+	public async replaceCartItemsBatch(): Promise<Cart> {
+		throw new Error("Not implemented in this test");
+	}
+
 	public async updateItemQuantity(
 		cartId: string,
 		cartItemId: string,

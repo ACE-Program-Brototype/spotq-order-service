@@ -144,6 +144,10 @@ class MockCartRepository implements ICartRepository {
 	public async clearCart(_cartId: string): Promise<Cart> {
 		throw new Error("Not implemented");
 	}
+
+	public async replaceCartItemsBatch(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
 }
 
 class MockCatalogPort implements IMenuItemCatalogPort {

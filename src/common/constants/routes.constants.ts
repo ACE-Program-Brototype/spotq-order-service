@@ -17,6 +17,7 @@ export const CART_ROUTES = {
 	ROOT: "/",
 	BY_ID: "/:cartId",
 	ITEMS: "/items",
+	ITEMS_BATCH: "/items/batch",
 	ITEM_BY_ID: "/:cartId/items/:cartItemId",
 } as const;
 

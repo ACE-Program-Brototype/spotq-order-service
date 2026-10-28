@@ -1,9 +1,15 @@
+import { CART_LIMITS } from "@common/constants/limits.constants.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
-import type { CartProps } from "@domain/types/cart.types.ts";
+import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
+import type {
+	BatchCartItemCandidate,
+	CartProps,
+	MergedBatchCartItem,
+} from "@domain/types/cart.types.ts";
 
 export class Cart {
 	public readonly id: string;
@@ -24,6 +30,68 @@ export class Cart {
 		this.items = (props.items ?? []).map((item) => new CartItem(item));
 		this.createdAt = props.createdAt ?? new Date();
 		this.updatedAt = props.updatedAt ?? new Date();
+	}
+
+	public static mergeBatchItems(
+		candidates: BatchCartItemCandidate[],
+	): MergedBatchCartItem[] {
+		const mergedItems: MergedBatchCartItem[] = [];
+
+		for (const candidate of candidates) {
+			if (
+				candidate.quantity < CART_LIMITS.MIN_QUANTITY ||
+				candidate.quantity > CART_LIMITS.MAX_QUANTITY
+			) {
+				throw new InvalidCartQuantityError();
+			}
+
+			const normalizedVariantId = candidate.variantId ?? null;
+			const normalizedAddonIds = [...(candidate.addonIds ?? [])].sort();
+			const trimmedInstructions = (candidate.specialInstructions ?? "").trim();
+			const normalizedInstructions =
+				trimmedInstructions.length > 0 ? trimmedInstructions : null;
+
+			const existingMatch = mergedItems.find((existing) => {
+				const probeItem = new CartItem({
+					id: "probe",
+					cartId: "probe",
+					menuItemId: existing.menuItemId,
+					variantId: existing.variantId,
+					quantity: existing.quantity,
+					specialInstructions: existing.specialInstructions,
+					addons: existing.addonIds.map((addonId) => ({
+						id: "probe",
+						cartItemId: "probe",
+						addonId,
+					})),
+				});
+
+				return probeItem.matchesConfiguration(
+					candidate.menuItemId,
+					normalizedVariantId,
+					normalizedAddonIds,
+					normalizedInstructions,
+				);
+			});
+
+			if (existingMatch) {
+				const nextQuantity = existingMatch.quantity + candidate.quantity;
+				if (nextQuantity > CART_LIMITS.MAX_QUANTITY) {
+					throw new InvalidCartQuantityError();
+				}
+				existingMatch.quantity = nextQuantity;
+			} else {
+				mergedItems.push({
+					menuItemId: candidate.menuItemId,
+					variantId: normalizedVariantId,
+					addonIds: normalizedAddonIds,
+					quantity: candidate.quantity,
+					specialInstructions: normalizedInstructions,
+				});
+			}
+		}
+
+		return mergedItems;
 	}
 
 	public isExpired(now: Date = new Date()): boolean {
