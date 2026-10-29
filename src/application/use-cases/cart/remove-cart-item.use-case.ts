@@ -1,6 +1,6 @@
 import type {
-	RemoveCartItemRequestDto,
-	RemoveCartItemResponseDto,
+	RemoveCartItemRequestDTO,
+	RemoveCartItemResponseDTO,
 } from "@application/dtos/cart/remove-cart-item.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
@@ -20,8 +20,8 @@ export class RemoveCartItemUseCase implements IRemoveCartItemUseCase {
 	) {}
 
 	public async execute(
-		dto: RemoveCartItemRequestDto,
-	): Promise<RemoveCartItemResponseDto> {
+		dto: RemoveCartItemRequestDTO,
+	): Promise<RemoveCartItemResponseDTO> {
 		const cart = await this.cartRepository.findById(dto.cartId);
 
 		if (!cart) {

@@ -1,10 +1,11 @@
-import type { OrdersOverviewResponseDto } from "@application/dtos/orders/get-orders-overview.dto.ts";
+import type {
+	OrdersOverviewResponseDTO,
+	OrdersOverviewResponseDto,
+} from "@application/dtos/orders/get-orders-overview.dto.ts";
 import type { GetOrdersOverviewRepoResult } from "@domain/types/order-repository.types";
 
 export const OrdersOverviewMapper = {
-	toResponseDto(
-		repoResult: GetOrdersOverviewRepoResult,
-	): OrdersOverviewResponseDto {
+	toDTO(repoResult: GetOrdersOverviewRepoResult): OrdersOverviewResponseDTO {
 		return {
 			summary: {
 				total_orders: repoResult.summary.totalOrders,
@@ -30,5 +31,11 @@ export const OrdersOverviewMapper = {
 				total_items: repoResult.pagination.totalItems,
 			},
 		};
+	},
+
+	toResponseDto(
+		repoResult: GetOrdersOverviewRepoResult,
+	): OrdersOverviewResponseDto {
+		return this.toDTO(repoResult);
 	},
 };

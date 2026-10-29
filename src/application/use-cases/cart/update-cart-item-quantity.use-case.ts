@@ -1,6 +1,6 @@
 import type {
-	UpdateCartItemQuantityRequestDto,
-	UpdateCartItemQuantityResponseDto,
+	UpdateCartItemQuantityRequestDTO,
+	UpdateCartItemQuantityResponseDTO,
 } from "@application/dtos/cart/update-cart-item-quantity.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
@@ -26,8 +26,8 @@ export class UpdateCartItemQuantityUseCase
 	) {}
 
 	public async execute(
-		dto: UpdateCartItemQuantityRequestDto,
-	): Promise<UpdateCartItemQuantityResponseDto> {
+		dto: UpdateCartItemQuantityRequestDTO,
+	): Promise<UpdateCartItemQuantityResponseDTO> {
 		const cart = await this.cartRepository.findById(dto.cartId);
 
 		if (!cart) {

@@ -1,4 +1,4 @@
-export interface RestaurantValidationResultDto {
+export interface RestaurantValidationResultDTO {
 	restaurantId: string;
 	restaurantName: string;
 	verificationStatus: string;
@@ -9,3 +9,6 @@ export interface RestaurantValidationResultDto {
 	subscriptionEndsAt: string | null;
 	canAccessQueueService: boolean;
 }
+
+// Backwards-compatible alias
+export type RestaurantValidationResultDto = RestaurantValidationResultDTO;
