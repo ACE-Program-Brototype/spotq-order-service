@@ -28,9 +28,9 @@ import type { IOrderRepository } from "@domain/repositories/i-order.repository.t
 import prisma from "@infrastructure/database/prisma.ts";
 import { PrismaCartRepository } from "@infrastructure/database/repositories/prisma-cart.repository.ts";
 import { PrismaOrderRepository } from "@infrastructure/database/repositories/prisma-order.repository.ts";
-import { MenuItemCatalogClient } from "@infrastructure/external/menu-item-catalog.client.ts";
-import { QueueServiceClient } from "@infrastructure/external/queue-service.client.ts";
-import { RestaurantServiceClient } from "@infrastructure/external/restaurant-service.client.ts";
+import { MenuItemCatalogClient } from "@infrastructure/services/menu-item-catalog.client.ts";
+import { QueueServiceClient } from "@infrastructure/services/queue-service.client.ts";
+import { RestaurantServiceClient } from "@infrastructure/services/restaurant-service.client.ts";
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
 import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
 import { RestaurantOrderController } from "@presentation/http/controllers/restaurant-order.controller.ts";

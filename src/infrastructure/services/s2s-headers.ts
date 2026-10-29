@@ -1,5 +1,5 @@
 import env from "@config/env.ts";
-import logger from "@infrastructure/logger/pino.ts";
+import logger from "@infrastructure/observability/logger.ts";
 import { generateToken, type TokenIssuerConfig } from "@spotq-org/s2s-core";
 
 interface CachedToken {

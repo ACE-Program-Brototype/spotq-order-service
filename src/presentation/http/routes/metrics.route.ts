@@ -1,4 +1,4 @@
-import prometheusClient from "@infrastructure/metrics/prom-client.ts";
+import prometheusClient from "@infrastructure/observability/metrics.ts";
 import { Router } from "express";
 
 const metricsRouter: Router = Router();

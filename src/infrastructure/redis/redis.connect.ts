@@ -1,4 +1,4 @@
-import logger from "@infrastructure/logger/pino.ts";
+import logger from "@infrastructure/observability/logger.ts";
 import redisConnection from "./redis.ts";
 
 export const connectRedis = async (): Promise<void> => {

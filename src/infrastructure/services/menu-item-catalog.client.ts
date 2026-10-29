@@ -5,7 +5,7 @@ import type {
 	RemoteMenuItemDto,
 } from "@application/ports/external/menu-item-catalog.port.ts";
 import env from "@config/env.ts";
-import logger from "@infrastructure/logger/pino.ts";
+import logger from "@infrastructure/observability/logger.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
 import { RESTAURANT_SERVICE_ENDPOINTS } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";

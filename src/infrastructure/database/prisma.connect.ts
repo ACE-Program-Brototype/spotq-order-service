@@ -1,4 +1,4 @@
-import logger from "@infrastructure/logger/pino.ts";
+import logger from "@infrastructure/observability/logger.ts";
 import prisma from "./prisma.ts";
 
 export const connectDatabase = async (): Promise<void> => {
