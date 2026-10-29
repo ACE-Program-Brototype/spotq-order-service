@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { PrismaClient } from "@generated/prisma/client.ts";
-import { PrismaCartRepository } from "@infrastructure/repositories/prisma-cart.repository.ts";
+import { PrismaCartRepository } from "@infrastructure/database/repositories/prisma-cart.repository.ts";
 
 describe("PrismaCartRepository.replaceCartItemsBatch", () => {
 	it("should clear previous user cart items, remove carts from other restaurants, and insert batch items atomically", async () => {

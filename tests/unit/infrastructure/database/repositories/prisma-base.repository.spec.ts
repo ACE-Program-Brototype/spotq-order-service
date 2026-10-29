@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
 	type IEntityMapper,
 	PrismaBaseRepository,
-} from "@infrastructure/repositories/prisma-base.repository.ts";
+} from "@infrastructure/database/repositories/prisma-base.repository.ts";
 
 interface TestEntity {
 	id: string;
