@@ -1,5 +1,5 @@
 import swaggerSpec from "@config/swagger.ts";
-import httpLogger from "@infrastructure/logger/pino-http.ts";
+import httpLogger from "@infrastructure/observability/pino-http.ts";
 import { errorHandler } from "@presentation/http/middleware/error.middleware.ts";
 import { cartRouter } from "@presentation/http/routes/cart.route.ts";
 import customerOrderRouter from "@presentation/http/routes/customer-order.route.ts";

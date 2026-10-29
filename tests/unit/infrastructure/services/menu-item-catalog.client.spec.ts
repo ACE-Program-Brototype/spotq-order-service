@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { MenuItemCatalogClient } from "@infrastructure/external/menu-item-catalog.client.ts";
+import { MenuItemCatalogClient } from "@infrastructure/services/menu-item-catalog.client.ts";
 import axios, {
 	AxiosError,
 	type AxiosRequestConfig,

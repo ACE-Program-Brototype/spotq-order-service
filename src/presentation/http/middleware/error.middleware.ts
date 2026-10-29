@@ -1,5 +1,5 @@
 import { DomainError } from "@domain/errors/domain.error.ts";
-import logger from "@infrastructure/logger/pino.ts";
+import logger from "@infrastructure/observability/logger.ts";
 import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
 import { messages } from "@shared/constants/message.constants.ts";

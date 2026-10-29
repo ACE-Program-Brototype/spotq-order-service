@@ -11,7 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import env from "@config/env.ts";
 import { PrismaClient } from "@generated/prisma/client.ts";
-import logger from "@infrastructure/logger/pino.ts";
+import logger from "@infrastructure/observability/logger.ts";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg, { type PoolConfig } from "pg";
 

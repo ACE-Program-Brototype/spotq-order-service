@@ -1,5 +1,5 @@
 import { pinoHttp } from "pino-http";
-import logger from "./pino.ts";
+import logger from "./logger.ts";
 
 const httpLogger = pinoHttp({
 	logger,
