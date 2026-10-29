@@ -7,6 +7,7 @@ import {
 	validateRequestBody,
 	validateRequestParams,
 } from "@interfaces/middleware/validation.middleware.ts";
+import { addBatchCartItemsBodySchema } from "@interfaces/validation/cart/add-batch-cart-items.schema.ts";
 import { addCartItemBodySchema } from "@interfaces/validation/cart/add-cart-item.schema.ts";
 import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
 import { cartIdParamSchema } from "@interfaces/validation/cart/cart-param.schema.ts";
@@ -29,6 +30,13 @@ cartRouter.delete(
 	customerAuthMiddleware,
 	validateRequestParams(cartIdParamSchema),
 	cartController.clearCart,
+);
+
+cartRouter.post(
+	CART_ROUTES.ITEMS_BATCH,
+	customerAuthMiddleware,
+	validateRequestBody(addBatchCartItemsBodySchema),
+	cartController.addItemsBatch,
 );
 
 cartRouter.post(

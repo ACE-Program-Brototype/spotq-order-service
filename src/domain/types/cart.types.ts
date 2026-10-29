@@ -34,3 +34,19 @@ export interface CartProps {
 	createdAt?: Date | undefined;
 	updatedAt?: Date | undefined;
 }
+
+export interface BatchCartItemCandidate {
+	menuItemId: string;
+	variantId?: string | null | undefined;
+	addonIds?: string[] | undefined;
+	quantity: number;
+	specialInstructions?: string | null | undefined;
+}
+
+export interface MergedBatchCartItem {
+	menuItemId: string;
+	variantId: string | null;
+	addonIds: string[];
+	quantity: number;
+	specialInstructions: string | null;
+}

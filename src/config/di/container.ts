@@ -2,6 +2,7 @@ import "reflect-metadata";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
+import type { IAddBatchCartItemsUseCase } from "@application/ports/use-cases/cart/add-batch-cart-items.use-case.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
 import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-cart.use-case.port.ts";
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
@@ -11,6 +12,7 @@ import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/ca
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
+import { AddBatchCartItemsUseCase } from "@application/use-cases/cart/add-batch-cart-items.use-case.ts";
 import { AddCartItemUseCase } from "@application/use-cases/cart/add-cart-item.use-case.ts";
 import { ClearCartUseCase } from "@application/use-cases/cart/clear-cart.use-case.ts";
 import { GetCartUseCase } from "@application/use-cases/cart/get-cart.use-case.ts";
@@ -56,6 +58,11 @@ container
 container
 	.bind<IAddCartItemUseCase>(TYPES.AddCartItemUseCase)
 	.to(AddCartItemUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IAddBatchCartItemsUseCase>(TYPES.AddBatchCartItemsUseCase)
+	.to(AddBatchCartItemsUseCase)
 	.inSingletonScope();
 
 container

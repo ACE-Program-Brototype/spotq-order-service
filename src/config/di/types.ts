@@ -4,6 +4,7 @@ export const TYPES = {
 	MenuItemCatalogPort: Symbol.for("MenuItemCatalogPort"),
 	GetCartUseCase: Symbol.for("GetCartUseCase"),
 	AddCartItemUseCase: Symbol.for("AddCartItemUseCase"),
+	AddBatchCartItemsUseCase: Symbol.for("AddBatchCartItemsUseCase"),
 	UpdateCartItemQuantityUseCase: Symbol.for("UpdateCartItemQuantityUseCase"),
 	RemoveCartItemUseCase: Symbol.for("RemoveCartItemUseCase"),
 	ClearCartUseCase: Symbol.for("ClearCartUseCase"),
