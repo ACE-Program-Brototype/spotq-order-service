@@ -31,9 +31,9 @@ import { PrismaOrderRepository } from "@infrastructure/database/repositories/pri
 import { MenuItemCatalogClient } from "@infrastructure/external/menu-item-catalog.client.ts";
 import { QueueServiceClient } from "@infrastructure/external/queue-service.client.ts";
 import { RestaurantServiceClient } from "@infrastructure/external/restaurant-service.client.ts";
-import { CartController } from "@interfaces/controllers/cart.controller.ts";
-import { CustomerOrderController } from "@interfaces/controllers/customer-order.controller.ts";
-import { RestaurantOrderController } from "@interfaces/controllers/restaurant-order.controller.ts";
+import { CartController } from "@presentation/http/controllers/cart.controller.ts";
+import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
+import { RestaurantOrderController } from "@presentation/http/controllers/restaurant-order.controller.ts";
 import { Container } from "inversify";
 
 const container = new Container();
