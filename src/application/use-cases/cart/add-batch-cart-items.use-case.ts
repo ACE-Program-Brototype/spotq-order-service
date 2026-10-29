@@ -51,25 +51,6 @@ export class AddBatchCartItemsUseCase implements IAddBatchCartItemsUseCase {
 					price: addon.price,
 				}));
 
-				const pricedItemEntity = new CartItem({
-					id: "draft-item",
-					cartId: "draft-cart",
-					menuItemId: item.menuItemId,
-					menuItemName: catalogItem.name,
-					variantId: item.variantId,
-					variantName: catalogItem.variant?.name ?? null,
-					quantity: item.quantity,
-					unitPrice,
-					specialInstructions: item.specialInstructions,
-					addons: itemAddons.map((addon) => ({
-						id: "draft-addon",
-						cartItemId: "draft-item",
-						addonId: addon.addonId,
-						addonName: addon.name,
-						price: addon.price,
-					})),
-				});
-
 				return {
 					menuItemId: item.menuItemId,
 					menuItemName: catalogItem.name,
@@ -78,7 +59,11 @@ export class AddBatchCartItemsUseCase implements IAddBatchCartItemsUseCase {
 					quantity: item.quantity,
 					specialInstructions: item.specialInstructions,
 					unitPrice,
-					totalPrice: pricedItemEntity.calculateLineTotal(),
+					totalPrice: CartItem.calculateLineTotal(
+						unitPrice,
+						itemAddons,
+						item.quantity,
+					),
 					itemAddons,
 				};
 			}),

@@ -32,12 +32,27 @@ export class CartItem {
 		this.updatedAt = props.updatedAt ?? new Date();
 	}
 
-	public calculateLineTotal(): number {
-		const addonsTotal = this.addons.reduce(
-			(sum, addon) => sum + addon.price,
+	public static calculateLineTotal(
+		unitPrice: number,
+		addonPrices: Array<{ price: number } | number>,
+		quantity: number,
+	): number {
+		const addonsTotal: number = addonPrices.reduce<number>(
+			(sum: number, item) => {
+				const price = typeof item === "number" ? item : item.price;
+				return sum + price;
+			},
 			0,
 		);
-		return Number(((this.unitPrice + addonsTotal) * this.quantity).toFixed(2));
+		return Number(((unitPrice + addonsTotal) * quantity).toFixed(2));
+	}
+
+	public calculateLineTotal(): number {
+		return CartItem.calculateLineTotal(
+			this.unitPrice,
+			this.addons,
+			this.quantity,
+		);
 	}
 
 	public matchesConfiguration(
