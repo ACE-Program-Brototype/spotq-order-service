@@ -1,5 +1,5 @@
-import { CART_MESSAGES } from "@common/constants/message.constants.ts";
-import { REGEX } from "@common/constants/regex.constants.ts";
+import { CART_MESSAGES } from "@shared/constants/message.constants.ts";
+import { REGEX } from "@shared/constants/regex.constants.ts";
 import { z } from "zod";
 
 export const cartIdParamSchema = z.object({

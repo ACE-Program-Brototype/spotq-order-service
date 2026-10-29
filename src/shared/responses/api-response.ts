@@ -1,11 +1,9 @@
+import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
 import {
-	HTTP_STATUS,
+	HttpStatus,
 	type HttpStatusCode,
-} from "@common/constants/http.constants.ts";
-import {
-	CART_ERROR_CODES,
-	messages,
-} from "@common/constants/message.constants.ts";
+} from "@shared/constants/http.constants.ts";
+import { messages } from "@shared/constants/message.constants.ts";
 import type { Response } from "express";
 
 export interface ApiResponseSuccess<T = unknown> {
@@ -27,7 +25,7 @@ export const ApiResponse = {
 	ok<T>(
 		data: T,
 		message: string = messages.SUCCESS,
-		statusCode: HttpStatusCode = HTTP_STATUS.OK,
+		statusCode: HttpStatusCode = HttpStatus.OK,
 	): ApiResponseSuccess<T> {
 		return {
 			success: true,
@@ -39,8 +37,8 @@ export const ApiResponse = {
 
 	error(
 		message: string,
-		code = CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
-		statusCode: HttpStatusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR,
+		code: string = COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+		statusCode: HttpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR,
 		error?: unknown,
 	): ApiResponseError {
 		return {
@@ -57,7 +55,7 @@ export function sendSuccessResponse<T>(
 	res: Response,
 	data: T,
 	message: string = messages.SUCCESS,
-	statusCode: HttpStatusCode = HTTP_STATUS.OK,
+	statusCode: HttpStatusCode = HttpStatus.OK,
 ): Response {
 	return res.status(statusCode).json(ApiResponse.ok(data, message, statusCode));
 }
@@ -65,8 +63,8 @@ export function sendSuccessResponse<T>(
 export function sendErrorResponse(
 	res: Response,
 	message: string,
-	code = CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
-	statusCode: HttpStatusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR,
+	code: string = COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+	statusCode: HttpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR,
 	error?: unknown,
 ): Response {
 	return res

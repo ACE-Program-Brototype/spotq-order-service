@@ -6,10 +6,10 @@ import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
-import { HttpStatus } from "@common/constants/http.constants.ts";
-import { CART_MESSAGES } from "@common/constants/message.constants.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import { CartController } from "@interfaces/controllers/cart.controller.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { CART_MESSAGES } from "@shared/constants/message.constants.ts";
 import type { Request, Response } from "express";
 
 function createMockResponse() {

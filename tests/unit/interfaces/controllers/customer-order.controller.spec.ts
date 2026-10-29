@@ -7,8 +7,6 @@ import type {
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { OrderPriority } from "@domain/enums/order-priority.enum.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
@@ -17,6 +15,8 @@ import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
 import { InvalidPaymentModeError } from "@domain/errors/invalid-payment-mode.error.ts";
 import { CustomerOrderController } from "@interfaces/controllers/customer-order.controller.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import type { Request, Response } from "express";
 
 function createMockResponse() {
@@ -106,7 +106,7 @@ describe("CustomerOrderController", () => {
 
 			await controller.placeOrder(req, res);
 
-			assert.equal(getStatus(), HTTP_STATUS.CREATED);
+			assert.equal(getStatus(), HttpStatus.CREATED);
 			const body = getBody() as {
 				success: boolean;
 				message: string;
@@ -152,7 +152,7 @@ describe("CustomerOrderController", () => {
 
 			await controller.placeOrder(req, res);
 
-			assert.equal(getStatus(), HTTP_STATUS.CREATED);
+			assert.equal(getStatus(), HttpStatus.CREATED);
 			assert.equal(
 				(capturedDto as unknown as PlaceOrderInputDto)?.userName,
 				"John Fallback",
@@ -263,7 +263,7 @@ describe("CustomerOrderController", () => {
 
 			await controller.getOrderHistory(req, res);
 
-			assert.equal(getStatus(), HTTP_STATUS.OK);
+			assert.equal(getStatus(), HttpStatus.OK);
 			assert.deepEqual(capturedInput, {
 				customerId: "user-cust-1",
 				page: 1,
@@ -272,7 +272,7 @@ describe("CustomerOrderController", () => {
 			});
 			assert.deepEqual(getBody(), {
 				success: true,
-				statusCode: HTTP_STATUS.OK,
+				statusCode: HttpStatus.OK,
 				message: ORDER_MESSAGES.HISTORY_FETCHED_SUCCESS,
 				data: mockResponseData,
 			});
@@ -315,7 +315,7 @@ describe("CustomerOrderController", () => {
 
 			await controller.cancelOrder(req, res);
 
-			assert.equal(getStatus(), HTTP_STATUS.OK);
+			assert.equal(getStatus(), HttpStatus.OK);
 			assert.deepEqual(capturedCancelDto, {
 				orderId: "ord-123",
 				customerId: "user-cust-1",
@@ -323,7 +323,7 @@ describe("CustomerOrderController", () => {
 			});
 			assert.deepEqual(getBody(), {
 				success: true,
-				statusCode: HTTP_STATUS.OK,
+				statusCode: HttpStatus.OK,
 				message: ORDER_MESSAGES.CANCEL_SUCCESS,
 				data: mockCancelledData,
 			});

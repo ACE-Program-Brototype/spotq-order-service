@@ -1,12 +1,12 @@
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
-import { sendSuccessResponse } from "@common/response/api-response.ts";
 import { TYPES } from "@config/di/types.ts";
 import { OrderRequestMapper } from "@interfaces/mappers/order-request.mapper.ts";
 import type { PlaceOrderBody } from "@interfaces/validation/orders/place-order.schema.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
+import { sendSuccessResponse } from "@shared/response/api-response.ts";
 import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 
@@ -39,7 +39,7 @@ export class CustomerOrderController {
 			res,
 			result,
 			ORDER_MESSAGES.ORDER_PLACED_SUCCESS,
-			HTTP_STATUS.CREATED,
+			HttpStatus.CREATED,
 		);
 	};
 
@@ -54,7 +54,7 @@ export class CustomerOrderController {
 			res,
 			result,
 			ORDER_MESSAGES.HISTORY_FETCHED_SUCCESS,
-			HTTP_STATUS.OK,
+			HttpStatus.OK,
 		);
 	};
 
@@ -66,7 +66,7 @@ export class CustomerOrderController {
 			res,
 			result,
 			ORDER_MESSAGES.CANCEL_SUCCESS,
-			HTTP_STATUS.OK,
+			HttpStatus.OK,
 		);
 	};
 }

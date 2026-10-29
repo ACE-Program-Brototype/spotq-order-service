@@ -4,13 +4,13 @@ import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
-import { HttpStatus } from "@common/constants/http.constants.ts";
-import { CART_MESSAGES } from "@common/constants/message.constants.ts";
-import { sendSuccessResponse } from "@common/response/api-response.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { AddBatchCartItemsBody } from "@interfaces/validation/cart/add-batch-cart-items.schema.ts";
 import type { AddCartItemBody } from "@interfaces/validation/cart/add-cart-item.schema.ts";
 import type { UpdateCartItemQuantityBody } from "@interfaces/validation/cart/update-cart-quantity.schema.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { CART_MESSAGES } from "@shared/constants/message.constants.ts";
+import { sendSuccessResponse } from "@shared/response/api-response.ts";
 import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 

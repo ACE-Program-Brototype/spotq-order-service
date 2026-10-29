@@ -1,5 +1,5 @@
-import { HEALTH_STATUS } from "@common/constants/health-status.constants.ts";
-import { STATUS } from "@common/constants/http.constants.ts";
+import { HEALTH_STATUS } from "@shared/constants/health-status.constants.ts";
+import { STATUS } from "@shared/constants/http.constants.ts";
 import express, { type Router } from "express";
 
 const healthRouter: Router = express.Router();

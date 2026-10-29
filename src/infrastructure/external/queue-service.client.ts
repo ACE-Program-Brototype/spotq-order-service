@@ -1,11 +1,11 @@
 import type { ActiveQueueUserResponseDto } from "@application/dtos/external/queue-active-user.dto.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import { QUEUE_SERVICE_ROUTES } from "@common/constants/routes.constants.ts";
-import { SERVICES } from "@common/constants/services.constants.ts";
 import env from "@config/env.ts";
 import { getS2SInternalHeaders } from "@infrastructure/external/s2s-headers.ts";
 import logger from "@infrastructure/logger/pino.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { QUEUE_SERVICE_ROUTES } from "@shared/constants/routes.constants.ts";
+import { SERVICES } from "@shared/constants/services.constants.ts";
 import axios, { isAxiosError } from "axios";
 import { injectable } from "inversify";
 
@@ -58,7 +58,7 @@ export class QueueServiceClient implements IQueueServiceClient {
 			return responseBody.data ?? null;
 		} catch (error) {
 			if (isAxiosError(error) && error.response) {
-				if (error.response.status === HTTP_STATUS.NOT_FOUND) {
+				if (error.response.status === HttpStatus.NOT_FOUND) {
 					return null;
 				}
 				logger.error(

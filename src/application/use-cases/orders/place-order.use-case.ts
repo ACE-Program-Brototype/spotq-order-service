@@ -9,7 +9,6 @@ import type { IRestaurantServiceClient } from "@application/ports/external/resta
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { generateOrderNumber } from "@application/utils/order-number.util.ts";
-import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { Order } from "@domain/entities/order.entity.ts";
@@ -23,8 +22,9 @@ import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import { InvalidPaymentModeError } from "@domain/errors/invalid-payment-mode.error.ts";
-import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
-import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import type { ICartRepository } from "@domain/repositories/i-cart.repository.ts";
+import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()

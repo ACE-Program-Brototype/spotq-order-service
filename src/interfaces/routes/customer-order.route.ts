@@ -1,4 +1,3 @@
-import { ORDER_ROUTES } from "@common/constants/routes.constants.ts";
 import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { CustomerOrderController } from "@interfaces/controllers/customer-order.controller.ts";
@@ -14,6 +13,7 @@ import {
 } from "@interfaces/validation/orders/cancel-order.schema.ts";
 import { orderHistoryQuerySchema } from "@interfaces/validation/orders/order-history-query.schema.ts";
 import { placeOrderBodySchema } from "@interfaces/validation/orders/place-order.schema.ts";
+import { ORDER_ROUTES } from "@shared/constants/routes.constants.ts";
 import { Router } from "express";
 
 const customerOrderRouter: Router = Router();

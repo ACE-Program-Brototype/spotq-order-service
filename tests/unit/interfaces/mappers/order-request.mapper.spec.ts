@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ORDER_HISTORY_PAGINATION } from "@common/constants/pagination.constants.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderRequestMapper } from "@interfaces/mappers/order-request.mapper.ts";
+import { ORDER_HISTORY_PAGINATION } from "@shared/constants/pagination.constants.ts";
 import type { Request } from "express";
 
 describe("OrderRequestMapper", () => {

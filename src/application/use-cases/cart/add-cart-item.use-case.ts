@@ -11,7 +11,7 @@ import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
 import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
-import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
+import type { ICartRepository } from "@domain/repositories/i-cart.repository.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()

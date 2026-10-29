@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ORDER_LIMITS } from "@common/constants/limits.constants.ts";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import {
 	cancelOrderBodySchema,
 	cancelOrderParamSchema,
 } from "@interfaces/validation/orders/cancel-order.schema.ts";
+import { ORDER_LIMITS } from "@shared/constants/limits.constants.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 
 describe("cancelOrderParamSchema validation", () => {
 	it("should succeed with a valid UUID orderId", () => {

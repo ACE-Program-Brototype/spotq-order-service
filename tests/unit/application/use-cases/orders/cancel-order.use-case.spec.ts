@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.use-case.ts";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { Order, type OrderProps } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
@@ -12,8 +11,9 @@ import {
 	OrderCancellationNotAllowedError,
 	OrderNotFoundError,
 } from "@domain/errors/index.ts";
-import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
 import type { CancelledOrderData } from "@domain/types/order-repository.types";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 
 function createTestOrder(props: Partial<OrderProps> = {}): Order {
 	return new Order({

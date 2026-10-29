@@ -4,11 +4,11 @@ import type {
 	MenuItemCatalogApiResponse,
 	RemoteMenuItemDto,
 } from "@application/ports/external/menu-item-catalog.port.ts";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import { RESTAURANT_SERVICE_ENDPOINTS } from "@common/constants/routes.constants.ts";
-import { SERVICES } from "@common/constants/services.constants.ts";
 import env from "@config/env.ts";
 import logger from "@infrastructure/logger/pino.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { RESTAURANT_SERVICE_ENDPOINTS } from "@shared/constants/routes.constants.ts";
+import { SERVICES } from "@shared/constants/services.constants.ts";
 import axios, { isAxiosError } from "axios";
 import { injectable } from "inversify";
 import { getS2SInternalHeaders } from "./s2s-headers.ts";
@@ -88,7 +88,7 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 			};
 		} catch (error) {
 			if (isAxiosError(error) && error.response) {
-				if (error.response.status === HTTP_STATUS.NOT_FOUND) {
+				if (error.response.status === HttpStatus.NOT_FOUND) {
 					return null;
 				}
 				logger.error(

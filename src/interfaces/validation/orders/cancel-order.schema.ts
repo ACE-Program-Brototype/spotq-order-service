@@ -1,6 +1,6 @@
-import { ORDER_LIMITS } from "@common/constants/limits.constants.ts";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
-import { REGEX } from "@common/constants/regex.constants.ts";
+import { ORDER_LIMITS } from "@shared/constants/limits.constants.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
+import { REGEX } from "@shared/constants/regex.constants.ts";
 import { z } from "zod";
 
 export const cancelOrderParamSchema = z.object({

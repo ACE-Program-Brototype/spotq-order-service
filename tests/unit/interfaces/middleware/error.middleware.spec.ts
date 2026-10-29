@@ -1,45 +1,45 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import {
-	CART_ERROR_CODES,
-	CART_MESSAGES,
-	messages,
-	ORDER_ERROR_CODES,
-} from "@common/constants/message.constants.ts";
-import { ForbiddenError, UnauthorizedError } from "@common/errors/index.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
 import {
 	errorHandler,
 	mapDomainErrorToHttpStatus,
 } from "@interfaces/middleware/error.middleware.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import {
+	CART_ERROR_CODES,
+	CART_MESSAGES,
+	messages,
+	ORDER_ERROR_CODES,
+} from "@shared/constants/message.constants.ts";
+import { ForbiddenError, UnauthorizedError } from "@shared/errors/index.ts";
 import type { Request, Response } from "express";
 
 describe("Error Middleware", () => {
 	it("should map domain error codes to correct HTTP status codes", () => {
 		assert.equal(
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.CART_NOT_FOUND),
-			HTTP_STATUS.NOT_FOUND,
+			HttpStatus.NOT_FOUND,
 		);
 		assert.equal(
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.CART_EXPIRED),
-			HTTP_STATUS.GONE,
+			HttpStatus.GONE,
 		);
 		assert.equal(
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.FORBIDDEN_CART_ACCESS),
-			HTTP_STATUS.FORBIDDEN,
+			HttpStatus.FORBIDDEN,
 		);
 		assert.equal(
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.DIFFERENT_RESTAURANT_CART),
-			HTTP_STATUS.CONFLICT,
+			HttpStatus.CONFLICT,
 		);
 		assert.equal(
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.ITEM_UNAVAILABLE),
-			HTTP_STATUS.CONFLICT,
+			HttpStatus.CONFLICT,
 		);
 		assert.equal(
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.VALIDATION_ERROR),
-			HTTP_STATUS.UNPROCESSABLE_ENTITY,
+			HttpStatus.UNPROCESSABLE_ENTITY,
 		);
 	});
 
@@ -62,10 +62,10 @@ describe("Error Middleware", () => {
 
 		errorHandler(err, req, res, () => {});
 
-		assert.equal(capturedStatus, HTTP_STATUS.NOT_FOUND);
+		assert.equal(capturedStatus, HttpStatus.NOT_FOUND);
 		assert.deepEqual(capturedBody, {
 			success: false,
-			statusCode: HTTP_STATUS.NOT_FOUND,
+			statusCode: HttpStatus.NOT_FOUND,
 			code: CART_ERROR_CODES.CART_NOT_FOUND,
 			message: CART_MESSAGES.NOT_FOUND,
 			error: undefined,
@@ -91,10 +91,10 @@ describe("Error Middleware", () => {
 
 		errorHandler(err, req, res, () => {});
 
-		assert.equal(capturedStatus, HTTP_STATUS.UNAUTHORIZED);
+		assert.equal(capturedStatus, HttpStatus.UNAUTHORIZED);
 		assert.deepEqual(capturedBody, {
 			success: false,
-			statusCode: HTTP_STATUS.UNAUTHORIZED,
+			statusCode: HttpStatus.UNAUTHORIZED,
 			code: ORDER_ERROR_CODES.UNAUTHORIZED,
 			message: messages.UNAUTHORIZED,
 			error: undefined,
@@ -120,10 +120,10 @@ describe("Error Middleware", () => {
 
 		errorHandler(err, req, res, () => {});
 
-		assert.equal(capturedStatus, HTTP_STATUS.FORBIDDEN);
+		assert.equal(capturedStatus, HttpStatus.FORBIDDEN);
 		assert.deepEqual(capturedBody, {
 			success: false,
-			statusCode: HTTP_STATUS.FORBIDDEN,
+			statusCode: HttpStatus.FORBIDDEN,
 			code: ORDER_ERROR_CODES.FORBIDDEN,
 			message: messages.FORBIDDEN,
 			error: undefined,
@@ -149,10 +149,10 @@ describe("Error Middleware", () => {
 
 		errorHandler(err, req, res, () => {});
 
-		assert.equal(capturedStatus, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+		assert.equal(capturedStatus, HttpStatus.INTERNAL_SERVER_ERROR);
 		assert.deepEqual(capturedBody, {
 			success: false,
-			statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+			statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
 			code: CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
 			message: messages.INTERNAL_SERVER_ERROR,
 			error: undefined,

@@ -1,8 +1,6 @@
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import {
-	messages,
-	ORDER_ERROR_CODES,
-} from "@common/constants/message.constants.ts";
+import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { messages } from "@shared/constants/message.constants.ts";
 
 export abstract class AppError extends Error {
 	public readonly statusCode: number;
@@ -24,17 +22,17 @@ export abstract class AppError extends Error {
 export class UnauthorizedError extends AppError {
 	constructor(
 		message: string = messages.UNAUTHORIZED,
-		errorCode: string = ORDER_ERROR_CODES.UNAUTHORIZED,
+		errorCode: string = COMMON_ERROR_CODES.UNAUTHORIZED,
 	) {
-		super(message, HTTP_STATUS.UNAUTHORIZED, errorCode);
+		super(message, HttpStatus.UNAUTHORIZED, errorCode);
 	}
 }
 
 export class ForbiddenError extends AppError {
 	constructor(
 		message: string = messages.FORBIDDEN,
-		errorCode: string = ORDER_ERROR_CODES.FORBIDDEN,
+		errorCode: string = COMMON_ERROR_CODES.FORBIDDEN,
 	) {
-		super(message, HTTP_STATUS.FORBIDDEN, errorCode);
+		super(message, HttpStatus.FORBIDDEN, errorCode);
 	}
 }

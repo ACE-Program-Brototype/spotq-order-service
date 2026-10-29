@@ -1,4 +1,3 @@
-import { CART_ROUTES } from "@common/constants/routes.constants.ts";
 import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { CartController } from "@interfaces/controllers/cart.controller.ts";
@@ -12,6 +11,7 @@ import { addCartItemBodySchema } from "@interfaces/validation/cart/add-cart-item
 import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
 import { cartIdParamSchema } from "@interfaces/validation/cart/cart-param.schema.ts";
 import { updateCartItemQuantityBodySchema } from "@interfaces/validation/cart/update-cart-quantity.schema.ts";
+import { CART_ROUTES } from "@shared/constants/routes.constants.ts";
 import { Router } from "express";
 
 export const cartRouter: Router = Router();

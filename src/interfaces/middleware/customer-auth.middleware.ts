@@ -1,9 +1,9 @@
-import { AUTH_HEADERS, AUTH_ROLES } from "@common/constants/auth.constants.ts";
+import { AUTH_HEADERS, AUTH_ROLES } from "@shared/constants/auth.constants.ts";
 import {
 	messages,
 	ORDER_ERROR_CODES,
-} from "@common/constants/message.constants.ts";
-import { ForbiddenError, UnauthorizedError } from "@common/errors/index.ts";
+} from "@shared/constants/message.constants.ts";
+import { ForbiddenError, UnauthorizedError } from "@shared/errors/index.ts";
 import type { NextFunction, Request, Response } from "express";
 
 export type { AuthenticatedUser } from "@/types/express.d.ts";

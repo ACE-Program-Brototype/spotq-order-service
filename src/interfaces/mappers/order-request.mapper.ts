@@ -1,11 +1,11 @@
 import type { CancelOrderInputDto } from "@application/dtos/orders/cancel-order.dto.ts";
 import type { GetOrderHistoryInputDto } from "@application/dtos/orders/get-order-history.dto.ts";
-import { ORDER_HISTORY_PAGINATION } from "@common/constants/pagination.constants.ts";
 import type {
 	CancelOrderBody,
 	CancelOrderParam,
 } from "@interfaces/validation/orders/cancel-order.schema.ts";
 import type { OrderHistoryQuery } from "@interfaces/validation/orders/order-history-query.schema.ts";
+import { ORDER_HISTORY_PAGINATION } from "@shared/constants/pagination.constants.ts";
 import type { Request } from "express";
 
 export const OrderRequestMapper = {
