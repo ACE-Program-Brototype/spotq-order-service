@@ -1,8 +1,8 @@
 import type {
-	RemoveCartItemRequestDto,
-	RemoveCartItemResponseDto,
+	RemoveCartItemRequestDTO,
+	RemoveCartItemResponseDTO,
 } from "@application/dtos/cart/remove-cart-item.dto.ts";
 
 export interface IRemoveCartItemUseCase {
-	execute(dto: RemoveCartItemRequestDto): Promise<RemoveCartItemResponseDto>;
+	execute(dto: RemoveCartItemRequestDTO): Promise<RemoveCartItemResponseDTO>;
 }

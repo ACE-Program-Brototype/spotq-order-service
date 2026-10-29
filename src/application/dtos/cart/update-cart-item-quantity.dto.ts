@@ -1,11 +1,11 @@
-export interface UpdateCartItemQuantityRequestDto {
+export interface UpdateCartItemQuantityRequestDTO {
 	cartId: string;
 	cartItemId: string;
 	quantity: number;
 	authenticatedUserId: string;
 }
 
-export interface UpdateCartItemQuantityResponseItemDto {
+export interface UpdateCartItemQuantityResponseItemDTO {
 	cartItemId: string;
 	menuItemId: string;
 	quantity: number;
@@ -13,11 +13,18 @@ export interface UpdateCartItemQuantityResponseItemDto {
 	totalPrice: number;
 }
 
-export interface UpdateCartItemQuantityResponseDto {
+export interface UpdateCartItemQuantityResponseDTO {
 	cartId: string;
 	restaurantId: string;
 	itemCount: number;
 	subtotal: number;
 	updatedAt: string;
-	items: UpdateCartItemQuantityResponseItemDto[];
+	items: UpdateCartItemQuantityResponseItemDTO[];
 }
+
+// Backwards-compatible aliases
+export type UpdateCartItemQuantityRequestDto = UpdateCartItemQuantityRequestDTO;
+export type UpdateCartItemQuantityResponseItemDto =
+	UpdateCartItemQuantityResponseItemDTO;
+export type UpdateCartItemQuantityResponseDto =
+	UpdateCartItemQuantityResponseDTO;

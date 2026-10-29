@@ -1,14 +1,15 @@
 import type {
-	OrderHistoryItemDto,
+	OrderHistoryItemDTO,
+	OrderHistoryResponseDTO,
 	OrderHistoryResponseDto,
 } from "@application/dtos/orders/get-order-history.dto.ts";
 import type { GetCustomerOrderHistoryRepoResult } from "@domain/types/order-repository.types";
 
 export const OrderHistoryMapper = {
-	toResponseDto(
+	toDTO(
 		repoResult: GetCustomerOrderHistoryRepoResult,
-	): OrderHistoryResponseDto {
-		const orders: OrderHistoryItemDto[] = repoResult.orders.map((order) => ({
+	): OrderHistoryResponseDTO {
+		const orders: OrderHistoryItemDTO[] = repoResult.orders.map((order) => ({
 			order_id: order.orderId,
 			order_number: order.orderNumber,
 			restaurant_id: order.restaurantId,
@@ -27,6 +28,12 @@ export const OrderHistoryMapper = {
 				has_next: repoResult.hasNext,
 			},
 		};
+	},
+
+	toResponseDto(
+		repoResult: GetCustomerOrderHistoryRepoResult,
+	): OrderHistoryResponseDto {
+		return this.toDTO(repoResult);
 	},
 };
 

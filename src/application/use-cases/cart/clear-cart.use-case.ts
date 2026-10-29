@@ -1,6 +1,6 @@
 import type {
-	ClearCartRequestDto,
-	ClearCartResponseDto,
+	ClearCartRequestDTO,
+	ClearCartResponseDTO,
 } from "@application/dtos/cart/clear-cart.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-cart.use-case.port.ts";
@@ -17,8 +17,8 @@ export class ClearCartUseCase implements IClearCartUseCase {
 	) {}
 
 	public async execute(
-		dto: ClearCartRequestDto,
-	): Promise<ClearCartResponseDto> {
+		dto: ClearCartRequestDTO,
+	): Promise<ClearCartResponseDTO> {
 		const cart = await this.cartRepository.findById(dto.cartId);
 
 		if (!cart) {

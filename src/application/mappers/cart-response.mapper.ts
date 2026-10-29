@@ -1,7 +1,7 @@
-import type { GetCartResponseDto } from "@application/dtos/cart/get-cart.dto.ts";
+import type { GetCartResponseDTO } from "@application/dtos/cart/get-cart.dto.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 
-export interface CartMutationResponseDto {
+export interface CartMutationResponseDTO {
 	cartId: string;
 	restaurantId: string;
 	itemCount: number;
@@ -16,8 +16,10 @@ export interface CartMutationResponseDto {
 	}>;
 }
 
+export type CartMutationResponseDto = CartMutationResponseDTO;
+
 export const CartResponseMapper = {
-	toDto(cart: Cart): GetCartResponseDto {
+	toDTO(cart: Cart): GetCartResponseDTO {
 		return {
 			cartId: cart.id,
 			restaurantId: cart.restaurantId,
@@ -47,7 +49,11 @@ export const CartResponseMapper = {
 		};
 	},
 
-	toMutationDto(cart: Cart): CartMutationResponseDto {
+	toDto(cart: Cart): GetCartResponseDTO {
+		return CartResponseMapper.toDTO(cart);
+	},
+
+	toMutationDTO(cart: Cart): CartMutationResponseDTO {
 		return {
 			cartId: cart.id,
 			restaurantId: cart.restaurantId,
@@ -62,5 +68,9 @@ export const CartResponseMapper = {
 				totalPrice: item.totalPrice,
 			})),
 		};
+	},
+
+	toMutationDto(cart: Cart): CartMutationResponseDTO {
+		return CartResponseMapper.toMutationDTO(cart);
 	},
 };

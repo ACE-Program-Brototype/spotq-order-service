@@ -1,6 +1,6 @@
 import type {
-	CancelOrderInputDto,
-	CancelOrderResponseDto,
+	CancelOrderInputDTO,
+	CancelOrderResponseDTO,
 } from "@application/dtos/orders/cancel-order.dto.ts";
 import { CancelOrderMapper } from "@application/mappers/cancel-order.mapper.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
@@ -18,8 +18,8 @@ export class CancelOrderUseCase implements ICancelOrderUseCase {
 	) {}
 
 	public async execute(
-		dto: CancelOrderInputDto,
-	): Promise<CancelOrderResponseDto> {
+		dto: CancelOrderInputDTO,
+	): Promise<CancelOrderResponseDTO> {
 		const order = await this.orderRepository.findById(dto.orderId);
 
 		if (!order) {
@@ -35,7 +35,7 @@ export class CancelOrderUseCase implements ICancelOrderUseCase {
 			previousStatus,
 		);
 
-		return CancelOrderMapper.toResponseDto(cancelledOrder);
+		return CancelOrderMapper.toDTO(cancelledOrder);
 	}
 }
 

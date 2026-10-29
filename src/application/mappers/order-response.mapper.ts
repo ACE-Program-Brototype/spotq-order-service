@@ -1,8 +1,8 @@
-import type { OrderResponseDto } from "@application/dtos/orders/place-order.dto.ts";
+import type { OrderResponseDTO } from "@application/dtos/orders/place-order.dto.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 
 export const OrderResponseMapper = {
-	toDto(order: Order): OrderResponseDto {
+	toDTO(order: Order): OrderResponseDTO {
 		return {
 			id: order.id,
 			orderNumber: order.orderNumber,
@@ -44,5 +44,9 @@ export const OrderResponseMapper = {
 			})),
 			createdAt: order.createdAt.toISOString(),
 		};
+	},
+
+	toDto(order: Order): OrderResponseDTO {
+		return OrderResponseMapper.toDTO(order);
 	},
 };

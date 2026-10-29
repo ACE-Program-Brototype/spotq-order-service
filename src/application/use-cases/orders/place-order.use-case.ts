@@ -1,6 +1,6 @@
 import type {
-	OrderResponseDto,
-	PlaceOrderInputDto,
+	OrderResponseDTO,
+	PlaceOrderInputDTO,
 } from "@application/dtos/orders/place-order.dto.ts";
 import { OrderResponseMapper } from "@application/mappers/order-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
@@ -42,7 +42,7 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		private readonly queueServiceClient: IQueueServiceClient,
 	) {}
 
-	public async execute(dto: PlaceOrderInputDto): Promise<OrderResponseDto> {
+	public async execute(dto: PlaceOrderInputDTO): Promise<OrderResponseDTO> {
 		if (dto.paymentMode === PaymentMode.ONLINE) {
 			throw new InvalidPaymentModeError();
 		}

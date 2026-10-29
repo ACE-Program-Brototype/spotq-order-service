@@ -1,12 +1,13 @@
 import type {
-	AddCartItemRequestDto,
-	AddCartItemResponseDto,
+	AddCartItemRequestDTO,
+	AddCartItemResponseDTO,
 } from "@application/dtos/cart/add-cart-item.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { TYPES } from "@config/di/types.ts";
+import { CART_LIMITS } from "@domain/constants/cart.constants.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
@@ -24,8 +25,8 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 	) {}
 
 	public async execute(
-		dto: AddCartItemRequestDto,
-	): Promise<AddCartItemResponseDto> {
+		dto: AddCartItemRequestDTO,
+	): Promise<AddCartItemResponseDTO> {
 		let cart = dto.cartId
 			? await this.cartRepository.findById(dto.cartId)
 			: null;
@@ -50,7 +51,10 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 				dto.addonIds,
 				dto.specialInstructions,
 			);
-			if (matchingItem && matchingItem.quantity + dto.quantity > 20) {
+			if (
+				matchingItem &&
+				matchingItem.quantity + dto.quantity > CART_LIMITS.MAX_QUANTITY
+			) {
 				throw new InvalidCartQuantityError();
 			}
 		} else {

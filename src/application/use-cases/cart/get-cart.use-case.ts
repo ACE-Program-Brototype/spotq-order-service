@@ -1,6 +1,6 @@
 import type {
-	GetCartRequestDto,
-	GetCartResponseDto,
+	GetCartRequestDTO,
+	GetCartResponseDTO,
 } from "@application/dtos/cart/get-cart.dto.ts";
 import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
@@ -16,7 +16,7 @@ export class GetCartUseCase implements IGetCartUseCase {
 		private readonly cartRepository: ICartRepository,
 	) {}
 
-	public async execute(dto: GetCartRequestDto): Promise<GetCartResponseDto> {
+	public async execute(dto: GetCartRequestDTO): Promise<GetCartResponseDTO> {
 		const cart = await this.cartRepository.findById(dto.cartId);
 
 		if (!cart) {
