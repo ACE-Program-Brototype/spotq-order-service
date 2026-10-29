@@ -6,7 +6,7 @@ import { OrderType } from "@domain/enums/order-type.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
-import { PrismaOrderRepository } from "@infrastructure/repositories/prisma-order.repository.ts";
+import { PrismaOrderRepository } from "@infrastructure/database/repositories/prisma-order.repository.ts";
 import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 
 function createSampleOrder(props: Partial<OrderProps> = {}): Order {

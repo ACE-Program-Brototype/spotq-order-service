@@ -1,5 +1,6 @@
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
+import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
 import type {
 	CancelledOrderData,
@@ -9,12 +10,11 @@ import type {
 	GetOrdersOverviewRepoResult,
 } from "@domain/types/order-repository.types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
-import { OrderStatus } from "@generated/prisma/enums.ts";
 import {
 	OrderPersistenceMapper,
 	type PrismaOrderWithRelations,
 } from "@infrastructure/database/mappers/order.mapper.ts";
-import { PrismaBaseRepository } from "@infrastructure/repositories/prisma-base.repository.ts";
+import { PrismaBaseRepository } from "@infrastructure/database/repositories/prisma-base.repository.ts";
 import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 

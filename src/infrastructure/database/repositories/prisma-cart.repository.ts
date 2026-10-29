@@ -1,7 +1,7 @@
 import { TYPES } from "@config/di/types.ts";
-import { Cart } from "@domain/entities/cart.entity.ts";
+import { CART_LIMITS } from "@domain/constants/cart.constants.ts";
+import type { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
-import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
 import type {
@@ -11,88 +11,12 @@ import type {
 	UpdateCartInput,
 } from "@domain/repositories/i-cart.repository.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
-import { CART_LIMITS } from "@shared/constants/limits.constants.ts";
-import { inject, injectable } from "inversify";
 import {
-	type IEntityMapper,
-	PrismaBaseRepository,
-} from "./prisma-base.repository.ts";
-
-type PrismaCartRecord = {
-	id: string;
-	restaurantId: string;
-	userId: string;
-	expiresAt: Date;
-	createdAt: Date;
-	updatedAt: Date;
-	items?: Array<{
-		id: string;
-		cartId: string;
-		menuItemId: string;
-		menuItemName?: string | null;
-		variantId?: string | null;
-		variantName?: string | null;
-		quantity: number;
-		unitPrice: unknown;
-		totalPrice: unknown;
-		specialInstructions?: string | null;
-		addons?: Array<{
-			id: string;
-			cartItemId: string;
-			addonId: string;
-			addonName?: string | null;
-			price: unknown;
-		}>;
-		createdAt: Date;
-		updatedAt: Date;
-	}>;
-};
-
-const cartMapper: IEntityMapper<Cart, PrismaCartRecord> = {
-	toDomain(record: PrismaCartRecord): Cart {
-		const isExpired = Date.now() > record.expiresAt.getTime();
-		const status = isExpired ? CartStatus.EXPIRED : CartStatus.ACTIVE;
-
-		const items = (record.items ?? []).map(
-			(item) =>
-				new CartItem({
-					id: item.id,
-					cartId: item.cartId,
-					menuItemId: item.menuItemId,
-					menuItemName: item.menuItemName ?? undefined,
-					variantId: item.variantId ?? null,
-					variantName: item.variantName ?? null,
-					quantity: item.quantity,
-					unitPrice: Number(item.unitPrice),
-					totalPrice: Number(item.totalPrice),
-					specialInstructions: item.specialInstructions ?? null,
-					addons: (item.addons ?? []).map(
-						(addon) =>
-							new CartItemAddon({
-								id: addon.id,
-								cartItemId: addon.cartItemId,
-								addonId: addon.addonId,
-								addonName: addon.addonName ?? undefined,
-								price: Number(addon.price),
-							}),
-					),
-					createdAt: item.createdAt,
-					updatedAt: item.updatedAt,
-				}),
-		);
-
-		return new Cart({
-			id: record.id,
-			restaurantId: record.restaurantId,
-			userId: record.userId,
-			status,
-			expiresAt: record.expiresAt,
-			items,
-			createdAt: record.createdAt,
-			updatedAt: record.updatedAt,
-		});
-	},
-};
+	CartPersistenceMapper,
+	type PrismaCartRecord,
+} from "@infrastructure/database/mappers/cart.mapper.ts";
+import { PrismaBaseRepository } from "@infrastructure/database/repositories/prisma-base.repository.ts";
+import { inject, injectable } from "inversify";
 
 @injectable()
 export class PrismaCartRepository
@@ -103,7 +27,7 @@ export class PrismaCartRepository
 		@inject(TYPES.PrismaClient)
 		private readonly prisma: PrismaClient,
 	) {
-		super(prisma.cart, cartMapper);
+		super(prisma.cart, CartPersistenceMapper);
 	}
 
 	public async findById(cartId: string): Promise<Cart | null> {
@@ -122,7 +46,9 @@ export class PrismaCartRepository
 			return null;
 		}
 
-		return cartMapper.toDomain(record as unknown as PrismaCartRecord);
+		return CartPersistenceMapper.toDomain(
+			record as unknown as PrismaCartRecord,
+		);
 	}
 
 	public async update(
@@ -174,7 +100,9 @@ export class PrismaCartRepository
 			return null;
 		}
 
-		return cartMapper.toDomain(record as unknown as PrismaCartRecord);
+		return CartPersistenceMapper.toDomain(
+			record as unknown as PrismaCartRecord,
+		);
 	}
 
 	public async addItem(input: AddItemInput): Promise<Cart> {
@@ -207,7 +135,9 @@ export class PrismaCartRepository
 					},
 				});
 
-				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+				const newExpiresAt = new Date(
+					Date.now() + CART_LIMITS.EXPIRATION_WINDOW_MS,
+				);
 
 				if (existingByPair) {
 					const isExpired = existingByPair.expiresAt < new Date();
@@ -261,7 +191,9 @@ export class PrismaCartRepository
 				existingRecord.restaurantId !== input.restaurantId
 			) {
 				await tx.cart.delete({ where: { id: existingRecord.id } });
-				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+				const newExpiresAt = new Date(
+					Date.now() + CART_LIMITS.EXPIRATION_WINDOW_MS,
+				);
 				existingRecord = await tx.cart.upsert({
 					where: {
 						userId_restaurantId: {
@@ -293,7 +225,7 @@ export class PrismaCartRepository
 			}
 
 			const targetCartId = existingRecord.id;
-			const existingCart = cartMapper.toDomain(
+			const existingCart = CartPersistenceMapper.toDomain(
 				existingRecord as unknown as PrismaCartRecord,
 			);
 			const matchingItem = existingCart.findMatchingItem(
@@ -305,14 +237,14 @@ export class PrismaCartRepository
 
 			if (matchingItem) {
 				const newQuantity = matchingItem.quantity + input.quantity;
-				if (newQuantity > 20) {
+				if (newQuantity > CART_LIMITS.MAX_QUANTITY) {
 					throw new InvalidCartQuantityError();
 				}
-				const updatedItem = new CartItem({
-					...matchingItem,
-					quantity: newQuantity,
-				});
-				const newTotal = updatedItem.calculateLineTotal();
+				const newTotal = CartItem.calculateLineTotal(
+					matchingItem.unitPrice,
+					matchingItem.addons,
+					newQuantity,
+				);
 
 				await tx.cartItem.update({
 					where: { id: matchingItem.id },
@@ -322,25 +254,11 @@ export class PrismaCartRepository
 					},
 				});
 			} else {
-				const newItemEntity = new CartItem({
-					id: "temp",
-					cartId: targetCartId,
-					menuItemId: input.menuItemId,
-					menuItemName: input.menuItemName,
-					variantId: input.variantId ?? null,
-					variantName: input.variantName ?? null,
-					quantity: input.quantity,
-					unitPrice: input.unitPrice,
-					specialInstructions: input.specialInstructions ?? null,
-					addons: (input.itemAddons ?? []).map((addon) => ({
-						id: "temp",
-						cartItemId: "temp",
-						addonId: addon.addonId,
-						addonName: addon.name,
-						price: addon.price,
-					})),
-				});
-				const lineTotal = newItemEntity.calculateLineTotal();
+				const lineTotal = CartItem.calculateLineTotal(
+					input.unitPrice,
+					input.itemAddons ?? [],
+					input.quantity,
+				);
 
 				const createdItem = await tx.cartItem.create({
 					data: {
@@ -368,7 +286,9 @@ export class PrismaCartRepository
 				}
 			}
 
-			const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+			const newExpiresAt = new Date(
+				Date.now() + CART_LIMITS.EXPIRATION_WINDOW_MS,
+			);
 			const reloadedRecord = await tx.cart.update({
 				where: { id: targetCartId },
 				data: {
@@ -383,7 +303,9 @@ export class PrismaCartRepository
 				},
 			});
 
-			return cartMapper.toDomain(reloadedRecord as unknown as PrismaCartRecord);
+			return CartPersistenceMapper.toDomain(
+				reloadedRecord as unknown as PrismaCartRecord,
+			);
 		});
 
 		return cart;
@@ -490,7 +412,9 @@ export class PrismaCartRepository
 				throw new Error("Cart not found in repository");
 			}
 
-			return cartMapper.toDomain(reloadedRecord as unknown as PrismaCartRecord);
+			return CartPersistenceMapper.toDomain(
+				reloadedRecord as unknown as PrismaCartRecord,
+			);
 		});
 
 		return cart;
@@ -517,7 +441,7 @@ export class PrismaCartRepository
 				throw new Error("Cart not found in repository");
 			}
 
-			const existingCart = cartMapper.toDomain(
+			const existingCart = CartPersistenceMapper.toDomain(
 				existingRecord as unknown as PrismaCartRecord,
 			);
 			const existingItem = existingCart.items.find(
@@ -535,11 +459,11 @@ export class PrismaCartRepository
 					where: { id: cartItemId },
 				});
 			} else {
-				const updatedItem = new CartItem({
-					...existingItem,
+				const newTotalPrice = CartItem.calculateLineTotal(
+					existingItem.unitPrice,
+					existingItem.addons,
 					quantity,
-				});
-				const newTotalPrice = updatedItem.calculateLineTotal();
+				);
 
 				await tx.cartItem.update({
 					where: { id: cartItemId },
@@ -550,7 +474,9 @@ export class PrismaCartRepository
 				});
 			}
 
-			const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+			const newExpiresAt = new Date(
+				Date.now() + CART_LIMITS.EXPIRATION_WINDOW_MS,
+			);
 			const reloadedRecord = await tx.cart.update({
 				where: { id: cartId },
 				data: {
@@ -565,7 +491,9 @@ export class PrismaCartRepository
 				},
 			});
 
-			return cartMapper.toDomain(reloadedRecord as unknown as PrismaCartRecord);
+			return CartPersistenceMapper.toDomain(
+				reloadedRecord as unknown as PrismaCartRecord,
+			);
 		});
 
 		return cart;
@@ -599,7 +527,9 @@ export class PrismaCartRepository
 					where: { cartId },
 				});
 
-				const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+				const newExpiresAt = new Date(
+					Date.now() + CART_LIMITS.EXPIRATION_WINDOW_MS,
+				);
 				const reloadedRecord = await tx.cart.update({
 					where: { id: cartId },
 					data: {
@@ -613,12 +543,11 @@ export class PrismaCartRepository
 						},
 					},
 				});
-				return cartMapper.toDomain(
+				return CartPersistenceMapper.toDomain(
 					reloadedRecord as unknown as PrismaCartRecord,
 				);
 			}
 
-			// Cart is already empty: idempotent no-op without unnecessary expiresAt rewrite
 			const emptyCartRecord = await tx.cart.findUnique({
 				where: { id: cartId },
 				include: {
@@ -629,7 +558,7 @@ export class PrismaCartRepository
 					},
 				},
 			});
-			return cartMapper.toDomain(
+			return CartPersistenceMapper.toDomain(
 				emptyCartRecord as unknown as PrismaCartRecord,
 			);
 		});
