@@ -47,30 +47,16 @@ export class Cart {
 
 			const normalizedVariantId = candidate.variantId ?? null;
 			const normalizedAddonIds = [...(candidate.addonIds ?? [])].sort();
-			const trimmedInstructions = (candidate.specialInstructions ?? "").trim();
 			const normalizedInstructions =
-				trimmedInstructions.length > 0 ? trimmedInstructions : null;
+				candidate.specialInstructions?.trim() || null;
+			const normalizedAddonKey = normalizedAddonIds.join(",");
 
 			const existingMatch = mergedItems.find((existing) => {
-				const probeItem = new CartItem({
-					id: "probe",
-					cartId: "probe",
-					menuItemId: existing.menuItemId,
-					variantId: existing.variantId,
-					quantity: existing.quantity,
-					specialInstructions: existing.specialInstructions,
-					addons: existing.addonIds.map((addonId) => ({
-						id: "probe",
-						cartItemId: "probe",
-						addonId,
-					})),
-				});
-
-				return probeItem.matchesConfiguration(
-					candidate.menuItemId,
-					normalizedVariantId,
-					normalizedAddonIds,
-					normalizedInstructions,
+				return (
+					existing.menuItemId === candidate.menuItemId &&
+					existing.variantId === normalizedVariantId &&
+					existing.specialInstructions === normalizedInstructions &&
+					existing.addonIds.join(",") === normalizedAddonKey
 				);
 			});
 
