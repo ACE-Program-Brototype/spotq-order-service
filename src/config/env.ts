@@ -31,6 +31,7 @@ const envSchema = z.object({
 		.default("http://localhost:3004"),
 	QUEUE_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
 	S2S_QUEUE_AUDIENCE: z.string().default("queue-service"),
+	TAX_PERCENT: z.coerce.number().min(0).max(100).default(5),
 });
 
 const env = envSchema.parse(process.env);

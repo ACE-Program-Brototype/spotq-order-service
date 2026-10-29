@@ -33,6 +33,8 @@ app.use(ROUTES.METRICS, metricsRouter);
 
 app.use(ROUTES.CARTS, cartRouter);
 
+app.use(ROUTES.ORDERS, customerOrderRouter);
+
 app.use(ROUTES.ROOT, customerOrderRouter);
 
 app.use(ROUTES.RESTAURANTS, restaurantOrderRouter);

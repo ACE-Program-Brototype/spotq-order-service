@@ -73,6 +73,7 @@ export const ORDER_MESSAGES = {
 	HISTORY_FETCHED_SUCCESS: "Order history retrieved successfully",
 	CANCEL_SUCCESS: "Order cancelled successfully",
 	ORDER_PLACED_SUCCESS: "Order placed successfully",
+	CHECKOUT_DETAILS_FETCHED_SUCCESS: "Checkout details retrieved successfully",
 	CART_EMPTY: "Cannot place an order with an empty cart",
 	INVALID_PAYMENT_MODE:
 		"Online payment feature is coming soon. Please select Pay at Counter.",
