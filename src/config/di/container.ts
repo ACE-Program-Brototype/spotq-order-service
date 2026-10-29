@@ -23,8 +23,8 @@ import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-
 import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orders-overview.use-case.ts";
 import { PlaceOrderUseCase } from "@application/use-cases/orders/place-order.use-case.ts";
 import { TYPES } from "@config/di/types.ts";
-import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
-import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import type { ICartRepository } from "@domain/repositories/i-cart.repository.ts";
+import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
 import prisma from "@infrastructure/database/prisma.ts";
 import { MenuItemCatalogClient } from "@infrastructure/external/menu-item-catalog.client.ts";
 import { QueueServiceClient } from "@infrastructure/external/queue-service.client.ts";

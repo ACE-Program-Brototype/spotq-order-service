@@ -1,6 +1,6 @@
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
-import { ORDER_HISTORY_PAGINATION } from "@common/constants/pagination.constants.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
+import { ORDER_HISTORY_PAGINATION } from "@shared/constants/pagination.constants.ts";
 import { z } from "zod";
 
 export const orderHistoryQuerySchema = z.object({

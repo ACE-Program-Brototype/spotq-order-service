@@ -1,9 +1,7 @@
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import {
-	CART_ERROR_CODES,
-	messages,
-} from "@common/constants/message.constants.ts";
-import { sendErrorResponse } from "@common/response/api-response.ts";
+import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { messages } from "@shared/constants/message.constants.ts";
+import { sendErrorResponse } from "@shared/response/api-response.ts";
 import type { NextFunction, Request, Response } from "express";
 import { type ZodType, z } from "zod";
 
@@ -26,8 +24,8 @@ export function validateRequestParams(schema: ZodType) {
 				sendErrorResponse(
 					res,
 					messages.VALIDATION_ERROR,
-					CART_ERROR_CODES.VALIDATION_ERROR,
-					HTTP_STATUS.UNPROCESSABLE_ENTITY,
+					COMMON_ERROR_CODES.VALIDATION_ERROR,
+					HttpStatus.UNPROCESSABLE_ENTITY,
 					formattedErrors,
 				);
 				return;
@@ -35,8 +33,8 @@ export function validateRequestParams(schema: ZodType) {
 			sendErrorResponse(
 				res,
 				messages.INTERNAL_SERVER_ERROR,
-				CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
-				HTTP_STATUS.INTERNAL_SERVER_ERROR,
+				COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+				HttpStatus.INTERNAL_SERVER_ERROR,
 			);
 		}
 	};
@@ -60,8 +58,8 @@ export function validateRequestBody(schema: ZodType) {
 				sendErrorResponse(
 					res,
 					messages.VALIDATION_ERROR,
-					CART_ERROR_CODES.VALIDATION_ERROR,
-					HTTP_STATUS.UNPROCESSABLE_ENTITY,
+					COMMON_ERROR_CODES.VALIDATION_ERROR,
+					HttpStatus.UNPROCESSABLE_ENTITY,
 					formattedErrors,
 				);
 				return;
@@ -69,8 +67,8 @@ export function validateRequestBody(schema: ZodType) {
 			sendErrorResponse(
 				res,
 				messages.INTERNAL_SERVER_ERROR,
-				CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
-				HTTP_STATUS.INTERNAL_SERVER_ERROR,
+				COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+				HttpStatus.INTERNAL_SERVER_ERROR,
 			);
 		}
 	};
@@ -100,8 +98,8 @@ export function validateRequestQuery(schema: ZodType) {
 				sendErrorResponse(
 					res,
 					messages.VALIDATION_ERROR,
-					CART_ERROR_CODES.VALIDATION_ERROR,
-					HTTP_STATUS.UNPROCESSABLE_ENTITY,
+					COMMON_ERROR_CODES.VALIDATION_ERROR,
+					HttpStatus.UNPROCESSABLE_ENTITY,
 					formattedErrors,
 				);
 				return;
@@ -109,8 +107,8 @@ export function validateRequestQuery(schema: ZodType) {
 			sendErrorResponse(
 				res,
 				messages.INTERNAL_SERVER_ERROR,
-				CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
-				HTTP_STATUS.INTERNAL_SERVER_ERROR,
+				COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+				HttpStatus.INTERNAL_SERVER_ERROR,
 			);
 		}
 	};

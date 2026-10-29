@@ -1,4 +1,3 @@
-import { CART_LIMITS } from "@common/constants/limits.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
@@ -10,8 +9,9 @@ import type {
 	ICartRepository,
 	ReplaceCartBatchInput,
 	UpdateCartInput,
-} from "@domain/repositories/cart.repository.interface.ts";
+} from "@domain/repositories/i-cart.repository.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
+import { CART_LIMITS } from "@shared/constants/limits.constants.ts";
 import { inject, injectable } from "inversify";
 import {
 	type IEntityMapper,

@@ -1,11 +1,12 @@
-import { AUTH_HEADERS, AUTH_ROLES } from "@common/constants/auth.constants.ts";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
+import { AUTH_HEADERS, AUTH_ROLES } from "@shared/constants/auth.constants.ts";
+import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
 import {
 	messages,
 	ORDER_ERROR_CODES,
 	ORDER_MESSAGES,
-} from "@common/constants/message.constants.ts";
-import { sendErrorResponse } from "@common/response/api-response.ts";
+} from "@shared/constants/message.constants.ts";
+import { sendErrorResponse } from "@shared/response/api-response.ts";
 import type { NextFunction, Request, Response } from "express";
 
 export type { AuthenticatedRestaurantAdmin } from "@/types/express.d.ts";
@@ -37,8 +38,8 @@ export function restaurantAdminAuthMiddleware(
 		sendErrorResponse(
 			res,
 			messages.UNAUTHORIZED,
-			ORDER_ERROR_CODES.UNAUTHORIZED,
-			HTTP_STATUS.UNAUTHORIZED,
+			COMMON_ERROR_CODES.UNAUTHORIZED,
+			HttpStatus.UNAUTHORIZED,
 		);
 		return;
 	}
@@ -50,7 +51,7 @@ export function restaurantAdminAuthMiddleware(
 			res,
 			messages.FORBIDDEN,
 			ORDER_ERROR_CODES.FORBIDDEN_RESTAURANT_ACCESS,
-			HTTP_STATUS.FORBIDDEN,
+			HttpStatus.FORBIDDEN,
 		);
 		return;
 	}
@@ -60,7 +61,7 @@ export function restaurantAdminAuthMiddleware(
 			res,
 			ORDER_MESSAGES.FORBIDDEN_RESTAURANT_ACCESS,
 			ORDER_ERROR_CODES.FORBIDDEN_RESTAURANT_ACCESS,
-			HTTP_STATUS.FORBIDDEN,
+			HttpStatus.FORBIDDEN,
 		);
 		return;
 	}

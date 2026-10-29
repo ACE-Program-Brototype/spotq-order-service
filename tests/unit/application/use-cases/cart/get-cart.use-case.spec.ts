@@ -11,7 +11,7 @@ import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.e
 import type {
 	ICartRepository,
 	UpdateCartInput,
-} from "@domain/repositories/cart.repository.interface.ts";
+} from "@domain/repositories/i-cart.repository.ts";
 
 class MockCartRepository implements ICartRepository {
 	public carts: Map<string, Cart> = new Map();

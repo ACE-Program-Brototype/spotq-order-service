@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { orderHistoryQuerySchema } from "@interfaces/validation/orders/order-history-query.schema.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 
 describe("orderHistoryQuerySchema validation", () => {
 	it("should succeed with defaults when query is empty", () => {

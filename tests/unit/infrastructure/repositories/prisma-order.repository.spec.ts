@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
 import { Order, type OrderProps } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
@@ -8,6 +7,7 @@ import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
 import { PrismaOrderRepository } from "@infrastructure/repositories/prisma-order.repository.ts";
+import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 
 function createSampleOrder(props: Partial<OrderProps> = {}): Order {
 	return new Order({

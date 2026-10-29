@@ -1,16 +1,14 @@
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
-import {
-	CART_ERROR_CODES,
-	messages,
-} from "@common/constants/message.constants.ts";
-import { AppError } from "@common/errors/index.ts";
-import { sendErrorResponse } from "@common/response/api-response.ts";
+import { DomainError } from "@domain/errors/domain.error.ts";
+import logger from "@infrastructure/logger/pino.ts";
+import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { messages } from "@shared/constants/message.constants.ts";
+import { AppError } from "@shared/errors/index.ts";
+import { sendErrorResponse } from "@shared/response/api-response.ts";
 import {
 	DOMAIN_ERROR_HTTP_MAP,
 	mapDomainErrorToHttpStatus,
-} from "@common/utils/domain-error-mapper.util.ts";
-import { DomainError } from "@domain/errors/domain.error.ts";
-import logger from "@infrastructure/logger/pino.ts";
+} from "@shared/utils/domain-error-mapper.util.ts";
 import type { NextFunction, Request, Response } from "express";
 
 export { DOMAIN_ERROR_HTTP_MAP, mapDomainErrorToHttpStatus };
@@ -44,7 +42,7 @@ export function errorHandler(
 	sendErrorResponse(
 		res,
 		messages.INTERNAL_SERVER_ERROR,
-		CART_ERROR_CODES.INTERNAL_SERVER_ERROR,
-		HTTP_STATUS.INTERNAL_SERVER_ERROR,
+		COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+		HttpStatus.INTERNAL_SERVER_ERROR,
 	);
 }

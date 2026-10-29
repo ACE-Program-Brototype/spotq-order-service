@@ -6,7 +6,7 @@ import { OrdersOverviewMapper } from "@application/mappers/orders-overview.mappe
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import { TYPES } from "@config/di/types.ts";
-import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()

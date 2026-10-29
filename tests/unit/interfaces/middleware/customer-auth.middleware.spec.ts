@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AUTH_HEADERS, AUTH_ROLES } from "@common/constants/auth.constants.ts";
-import { HTTP_STATUS } from "@common/constants/http.constants.ts";
+import { customerAuthMiddleware } from "@interfaces/middleware/customer-auth.middleware.ts";
+import { AUTH_HEADERS, AUTH_ROLES } from "@shared/constants/auth.constants.ts";
+import { HttpStatus } from "@shared/constants/http.constants.ts";
 import {
 	messages,
 	ORDER_ERROR_CODES,
-} from "@common/constants/message.constants.ts";
-import { ForbiddenError, UnauthorizedError } from "@common/errors/index.ts";
-import { customerAuthMiddleware } from "@interfaces/middleware/customer-auth.middleware.ts";
+} from "@shared/constants/message.constants.ts";
+import { ForbiddenError, UnauthorizedError } from "@shared/errors/index.ts";
 import type { NextFunction, Request, Response } from "express";
 
 describe("Customer Auth Middleware", () => {
@@ -47,7 +47,7 @@ describe("Customer Auth Middleware", () => {
 			() => customerAuthMiddleware(req, res, next),
 			(err: unknown) => {
 				assert.ok(err instanceof UnauthorizedError);
-				assert.equal(err.statusCode, HTTP_STATUS.UNAUTHORIZED);
+				assert.equal(err.statusCode, HttpStatus.UNAUTHORIZED);
 				assert.equal(err.errorCode, ORDER_ERROR_CODES.UNAUTHORIZED);
 				assert.equal(err.message, messages.UNAUTHORIZED);
 				return true;
@@ -72,7 +72,7 @@ describe("Customer Auth Middleware", () => {
 			() => customerAuthMiddleware(req, res, next),
 			(err: unknown) => {
 				assert.ok(err instanceof UnauthorizedError);
-				assert.equal(err.statusCode, HTTP_STATUS.UNAUTHORIZED);
+				assert.equal(err.statusCode, HttpStatus.UNAUTHORIZED);
 				assert.equal(err.errorCode, ORDER_ERROR_CODES.UNAUTHORIZED);
 				assert.equal(err.message, messages.UNAUTHORIZED);
 				return true;
@@ -98,7 +98,7 @@ describe("Customer Auth Middleware", () => {
 			() => customerAuthMiddleware(req, res, next),
 			(err: unknown) => {
 				assert.ok(err instanceof ForbiddenError);
-				assert.equal(err.statusCode, HTTP_STATUS.FORBIDDEN);
+				assert.equal(err.statusCode, HttpStatus.FORBIDDEN);
 				assert.equal(err.errorCode, ORDER_ERROR_CODES.FORBIDDEN);
 				assert.equal(err.message, messages.FORBIDDEN);
 				return true;

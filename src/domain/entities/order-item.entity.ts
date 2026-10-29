@@ -1,7 +1,7 @@
 import {
 	OrderItemAddon,
 	type OrderItemAddonProps,
-} from "./order-item-addon.entity.ts";
+} from "@domain/entities/order-item-addon.entity.ts";
 
 export interface OrderItemProps {
 	id?: string;

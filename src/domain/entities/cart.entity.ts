@@ -1,4 +1,4 @@
-import { CART_LIMITS } from "@common/constants/limits.constants.ts";
+import { CART_LIMITS } from "@domain/constants/cart.constants.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";

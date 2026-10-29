@@ -1,4 +1,4 @@
-import type { IBaseRepository } from "@domain/repositories/base.repository.interface.ts";
+import type { IBaseRepository } from "@domain/repositories/i-base.repository.ts";
 import { injectable } from "inversify";
 
 export interface IEntityMapper<TDomain, TModel> {

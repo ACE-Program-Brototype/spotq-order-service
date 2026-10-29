@@ -1,6 +1,6 @@
-import { CART_LIMITS } from "@common/constants/limits.constants.ts";
-import { CART_MESSAGES } from "@common/constants/message.constants.ts";
 import { cartItemParamSchema } from "@interfaces/validation/cart/cart-item-param.schema.ts";
+import { CART_LIMITS } from "@shared/constants/limits.constants.ts";
+import { CART_MESSAGES } from "@shared/constants/message.constants.ts";
 import { z } from "zod";
 
 export const updateCartItemQuantityParamSchema = cartItemParamSchema;

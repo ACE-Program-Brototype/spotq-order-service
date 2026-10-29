@@ -1,7 +1,6 @@
-import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
-import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
 import type {
 	CancelledOrderData,
 	GetCustomerOrderHistoryRepoParams,
@@ -16,6 +15,7 @@ import {
 	type PrismaOrderWithRelations,
 } from "@infrastructure/database/mappers/order.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/repositories/prisma-base.repository.ts";
+import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
