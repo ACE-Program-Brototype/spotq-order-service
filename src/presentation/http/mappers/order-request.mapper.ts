@@ -1,5 +1,5 @@
-import type { CancelOrderInputDto } from "@application/dtos/orders/cancel-order.dto.ts";
-import type { GetOrderHistoryInputDto } from "@application/dtos/orders/get-order-history.dto.ts";
+import type { CancelOrderInputDTO } from "@application/dtos/orders/cancel-order.dto.ts";
+import type { GetOrderHistoryInputDTO } from "@application/dtos/orders/get-order-history.dto.ts";
 import type {
 	CancelOrderBody,
 	CancelOrderParam,
@@ -9,7 +9,7 @@ import { ORDER_HISTORY_PAGINATION } from "@shared/constants/pagination.constants
 import type { Request } from "express";
 
 export const OrderRequestMapper = {
-	toOrderHistoryInputDto(req: Request): GetOrderHistoryInputDto {
+	toOrderHistoryInputDTO(req: Request): GetOrderHistoryInputDTO {
 		const query = req.query as unknown as OrderHistoryQuery;
 		return {
 			customerId: req.user?.userId as string,
@@ -19,7 +19,7 @@ export const OrderRequestMapper = {
 		};
 	},
 
-	toCancelOrderInputDto(req: Request): CancelOrderInputDto {
+	toCancelOrderInputDTO(req: Request): CancelOrderInputDTO {
 		const params = req.params as unknown as CancelOrderParam;
 		const body = req.body as unknown as CancelOrderBody;
 		return {
@@ -27,6 +27,15 @@ export const OrderRequestMapper = {
 			customerId: req.user?.userId as string,
 			cancellationReason: body?.cancellation_reason ?? null,
 		};
+	},
+
+	// Backwards-compatible aliases for caller migration
+	toOrderHistoryInputDto(req: Request): GetOrderHistoryInputDTO {
+		return this.toOrderHistoryInputDTO(req);
+	},
+
+	toCancelOrderInputDto(req: Request): CancelOrderInputDTO {
+		return this.toCancelOrderInputDTO(req);
 	},
 };
 

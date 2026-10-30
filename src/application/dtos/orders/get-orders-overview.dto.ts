@@ -41,10 +41,3 @@ export interface OrdersOverviewResponseDTO {
 	orders: OrderOverviewItemDTO[];
 	pagination: OrderOverviewPaginationDTO;
 }
-
-// Backwards-compatible aliases
-export type GetOrdersOverviewInputDto = GetOrdersOverviewInputDTO;
-export type OrderSummaryDto = OrderSummaryDTO;
-export type OrderOverviewItemDto = OrderOverviewItemDTO;
-export type OrderOverviewPaginationDto = OrderOverviewPaginationDTO;
-export type OrdersOverviewResponseDto = OrdersOverviewResponseDTO;

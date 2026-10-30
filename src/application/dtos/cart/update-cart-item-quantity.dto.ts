@@ -21,10 +21,3 @@ export interface UpdateCartItemQuantityResponseDTO {
 	updatedAt: string;
 	items: UpdateCartItemQuantityResponseItemDTO[];
 }
-
-// Backwards-compatible aliases
-export type UpdateCartItemQuantityRequestDto = UpdateCartItemQuantityRequestDTO;
-export type UpdateCartItemQuantityResponseItemDto =
-	UpdateCartItemQuantityResponseItemDTO;
-export type UpdateCartItemQuantityResponseDto =
-	UpdateCartItemQuantityResponseDTO;

@@ -1,4 +1,4 @@
-import type { RestaurantValidationResultDto } from "@application/dtos/external/restaurant-validation.dto.ts";
+import type { RestaurantValidationResultDTO } from "@application/dtos/external/restaurant-validation.dto.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
 import env from "@config/env.ts";
 import { DomainError } from "@domain/errors/domain.error.ts";
@@ -29,12 +29,12 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 
 	public async validateRestaurant(
 		restaurantId: string,
-	): Promise<RestaurantValidationResultDto> {
+	): Promise<RestaurantValidationResultDTO> {
 		const targetUrl = `${this.baseUrl}${RESTAURANT_SERVICE_ROUTES.VALIDATION(restaurantId)}`;
 
 		try {
 			const response = await axios.get<
-				ApiResponseEnvelope<RestaurantValidationResultDto>
+				ApiResponseEnvelope<RestaurantValidationResultDTO>
 			>(targetUrl, {
 				headers: getS2SInternalHeaders(
 					SERVICES.RESTAURANT_SERVICE,

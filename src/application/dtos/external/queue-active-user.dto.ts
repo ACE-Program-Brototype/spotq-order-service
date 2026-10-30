@@ -14,6 +14,3 @@ export interface ActiveQueueUserResponseDTO {
 	hasActiveQueue: boolean;
 	queueEntry: ActiveQueueDetails | null;
 }
-
-// Backwards-compatible alias
-export type ActiveQueueUserResponseDto = ActiveQueueUserResponseDTO;

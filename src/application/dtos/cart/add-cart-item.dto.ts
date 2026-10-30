@@ -25,8 +25,3 @@ export interface AddCartItemResponseDTO {
 	updatedAt: string;
 	items: AddCartItemResponseItemDTO[];
 }
-
-// Backwards-compatible aliases
-export type AddCartItemRequestDto = AddCartItemRequestDTO;
-export type AddCartItemResponseItemDto = AddCartItemResponseItemDTO;
-export type AddCartItemResponseDto = AddCartItemResponseDTO;

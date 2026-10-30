@@ -28,8 +28,3 @@ export interface MenuItemCatalogApiResponse<T> {
 	success: boolean;
 	data: T;
 }
-
-// Backwards-compatible aliases
-export type RemoteAddonDto = RemoteAddonDTO;
-export type RemoteVariantDto = RemoteVariantDTO;
-export type RemoteMenuItemDto = RemoteMenuItemDTO;

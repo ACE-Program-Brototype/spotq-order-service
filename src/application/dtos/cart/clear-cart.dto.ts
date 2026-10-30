@@ -6,7 +6,3 @@ export interface ClearCartRequestDTO {
 }
 
 export type ClearCartResponseDTO = CartMutationResponseDTO;
-
-// Backwards-compatible aliases
-export type ClearCartRequestDto = ClearCartRequestDTO;
-export type ClearCartResponseDto = ClearCartResponseDTO;

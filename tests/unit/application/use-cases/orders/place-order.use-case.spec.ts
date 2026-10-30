@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
 	ActiveQueueDetails,
-	ActiveQueueUserResponseDto,
+	ActiveQueueUserResponseDTO,
 } from "@application/dtos/external/queue-active-user.dto.ts";
-import type { RestaurantValidationResultDto } from "@application/dtos/external/restaurant-validation.dto.ts";
+import type { RestaurantValidationResultDTO } from "@application/dtos/external/restaurant-validation.dto.ts";
 import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
@@ -153,7 +153,7 @@ class MockOrderRepository implements IOrderRepository {
 }
 
 class MockRestaurantServiceClient implements IRestaurantServiceClient {
-	public validationResult: RestaurantValidationResultDto = {
+	public validationResult: RestaurantValidationResultDTO = {
 		restaurantId: "rest-1",
 		restaurantName: "SpotQ Test Kitchen",
 		verificationStatus: "ACTIVE",
@@ -168,7 +168,7 @@ class MockRestaurantServiceClient implements IRestaurantServiceClient {
 
 	public async validateRestaurant(
 		_restaurantId: string,
-	): Promise<RestaurantValidationResultDto> {
+	): Promise<RestaurantValidationResultDTO> {
 		if (this.shouldThrowError) {
 			throw this.shouldThrowError;
 		}
@@ -205,12 +205,12 @@ class MockMenuItemCatalogPort implements IMenuItemCatalogPort {
 }
 
 class MockQueueServiceClient implements IQueueServiceClient {
-	public activeQueue: ActiveQueueUserResponseDto | null = null;
+	public activeQueue: ActiveQueueUserResponseDTO | null = null;
 
 	public async checkUserActiveQueue(
 		_restaurantId: string,
 		_userId: string,
-	): Promise<ActiveQueueUserResponseDto | null> {
+	): Promise<ActiveQueueUserResponseDTO | null> {
 		return this.activeQueue;
 	}
 }

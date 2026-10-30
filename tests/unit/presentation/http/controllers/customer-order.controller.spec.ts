@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
-	OrderResponseDto,
-	PlaceOrderInputDto,
+	OrderResponseDTO,
+	PlaceOrderInputDTO,
 } from "@application/dtos/orders/place-order.dto.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
@@ -36,7 +36,7 @@ function createMockResponse() {
 }
 
 describe("CustomerOrderController", () => {
-	const mockOrderResponse: OrderResponseDto = {
+	const mockOrderResponse: OrderResponseDTO = {
 		id: "order-123",
 		orderNumber: "ORD-ABC-123",
 		restaurantId: "rest-123",
@@ -80,9 +80,9 @@ describe("CustomerOrderController", () => {
 
 	describe("placeOrder", () => {
 		it("should place order successfully with 201 Created and forward user details from req.body", async () => {
-			let capturedDto: PlaceOrderInputDto | null = null;
+			let capturedDto: PlaceOrderInputDTO | null = null;
 			const mockPlaceOrderUseCase: IPlaceOrderUseCase = {
-				execute: async (dto: PlaceOrderInputDto) => {
+				execute: async (dto: PlaceOrderInputDTO) => {
 					capturedDto = dto;
 					return mockOrderResponse;
 				},
@@ -116,19 +116,19 @@ describe("CustomerOrderController", () => {
 			assert.equal(body.message, ORDER_MESSAGES.ORDER_PLACED_SUCCESS);
 			assert.equal(body.data.id, "order-123");
 			assert.equal(
-				(capturedDto as unknown as PlaceOrderInputDto)?.userName,
+				(capturedDto as unknown as PlaceOrderInputDTO)?.userName,
 				"Jane Customer",
 			);
 			assert.equal(
-				(capturedDto as unknown as PlaceOrderInputDto)?.userPhone,
+				(capturedDto as unknown as PlaceOrderInputDTO)?.userPhone,
 				"+919876543210",
 			);
 		});
 
 		it("should fallback to req.user for userName and userPhone when omitted from req.body", async () => {
-			let capturedDto: PlaceOrderInputDto | null = null;
+			let capturedDto: PlaceOrderInputDTO | null = null;
 			const mockPlaceOrderUseCase: IPlaceOrderUseCase = {
-				execute: async (dto: PlaceOrderInputDto) => {
+				execute: async (dto: PlaceOrderInputDTO) => {
 					capturedDto = dto;
 					return mockOrderResponse;
 				},
@@ -154,11 +154,11 @@ describe("CustomerOrderController", () => {
 
 			assert.equal(getStatus(), HttpStatus.CREATED);
 			assert.equal(
-				(capturedDto as unknown as PlaceOrderInputDto)?.userName,
+				(capturedDto as unknown as PlaceOrderInputDTO)?.userName,
 				"John Fallback",
 			);
 			assert.equal(
-				(capturedDto as unknown as PlaceOrderInputDto)?.userPhone,
+				(capturedDto as unknown as PlaceOrderInputDTO)?.userPhone,
 				"+919999999999",
 			);
 		});

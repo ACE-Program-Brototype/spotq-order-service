@@ -28,9 +28,3 @@ export interface OrderHistoryResponseDTO {
 	orders: OrderHistoryItemDTO[];
 	pagination: OrderHistoryPaginationDTO;
 }
-
-// Backwards-compatible aliases
-export type GetOrderHistoryInputDto = GetOrderHistoryInputDTO;
-export type OrderHistoryItemDto = OrderHistoryItemDTO;
-export type OrderHistoryPaginationDto = OrderHistoryPaginationDTO;
-export type OrderHistoryResponseDto = OrderHistoryResponseDTO;

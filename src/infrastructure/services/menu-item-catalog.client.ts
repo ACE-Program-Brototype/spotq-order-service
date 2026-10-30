@@ -2,7 +2,9 @@ import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
 	MenuItemCatalogApiResponse,
-	RemoteMenuItemDto,
+	RemoteAddonDTO,
+	RemoteMenuItemDTO,
+	RemoteVariantDTO,
 } from "@application/ports/external/menu-item-catalog.port.ts";
 import env from "@config/env.ts";
 import logger from "@infrastructure/observability/logger.ts";
@@ -34,7 +36,7 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 
 		try {
 			const response = await axios.get<
-				MenuItemCatalogApiResponse<RemoteMenuItemDto>
+				MenuItemCatalogApiResponse<RemoteMenuItemDTO>
 			>(url, {
 				headers: getS2SInternalHeaders(
 					SERVICES.RESTAURANT_SERVICE,
@@ -56,15 +58,17 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 			}
 
 			const variant = variantId
-				? item.variants?.find((v) => (v.variantId ?? v.id) === variantId)
+				? item.variants?.find(
+						(v: RemoteVariantDTO) => (v.variantId ?? v.id) === variantId,
+					)
 				: undefined;
 
 			const addons = (item.addons ?? [])
-				.filter((a) => {
+				.filter((a: RemoteAddonDTO) => {
 					const aId = a.addonId ?? a.id;
 					return Boolean(aId && (addonIds ?? []).includes(aId));
 				})
-				.map((a) => ({
+				.map((a: RemoteAddonDTO) => ({
 					addonId: (a.addonId ?? a.id) as string,
 					name: a.name,
 					price: Number(a.price),

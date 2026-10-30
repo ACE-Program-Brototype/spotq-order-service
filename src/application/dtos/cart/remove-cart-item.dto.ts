@@ -20,8 +20,3 @@ export interface RemoveCartItemResponseDTO {
 	updatedAt: string;
 	items: RemoveCartItemResponseItemDTO[];
 }
-
-// Backwards-compatible aliases
-export type RemoveCartItemRequestDto = RemoveCartItemRequestDTO;
-export type RemoveCartItemResponseItemDto = RemoveCartItemResponseItemDTO;
-export type RemoveCartItemResponseDto = RemoveCartItemResponseDTO;

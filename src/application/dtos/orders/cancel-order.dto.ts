@@ -11,7 +11,3 @@ export interface CancelOrderResponseDTO {
 	cancellation_reason: string | null;
 	cancelled_at: string;
 }
-
-// Backwards-compatible aliases
-export type CancelOrderInputDto = CancelOrderInputDTO;
-export type CancelOrderResponseDto = CancelOrderResponseDTO;

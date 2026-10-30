@@ -1,4 +1,4 @@
-import type { ActiveQueueUserResponseDto } from "@application/dtos/external/queue-active-user.dto.ts";
+import type { ActiveQueueUserResponseDTO } from "@application/dtos/external/queue-active-user.dto.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import env from "@config/env.ts";
 import logger from "@infrastructure/observability/logger.ts";
@@ -25,7 +25,7 @@ export class QueueServiceClient implements IQueueServiceClient {
 	public async checkUserActiveQueue(
 		restaurantId: string,
 		userId: string,
-	): Promise<ActiveQueueUserResponseDto | null> {
+	): Promise<ActiveQueueUserResponseDTO | null> {
 		const targetUrl = `${this.baseUrl}${QUEUE_SERVICE_ROUTES.ACTIVE_USER_QUEUE(
 			restaurantId,
 			userId,
@@ -33,7 +33,7 @@ export class QueueServiceClient implements IQueueServiceClient {
 
 		try {
 			const response = await axios.get<
-				ApiResponseEnvelope<ActiveQueueUserResponseDto>
+				ApiResponseEnvelope<ActiveQueueUserResponseDTO>
 			>(targetUrl, {
 				headers: getS2SInternalHeaders(
 					SERVICES.QUEUE_SERVICE,

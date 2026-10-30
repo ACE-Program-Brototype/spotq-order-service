@@ -59,9 +59,3 @@ export interface OrderResponseDTO {
 	items: OrderItemResponseDTO[];
 	createdAt: string;
 }
-
-// Backwards-compatible aliases
-export type PlaceOrderInputDto = PlaceOrderInputDTO;
-export type OrderItemAddonResponseDto = OrderItemAddonResponseDTO;
-export type OrderItemResponseDto = OrderItemResponseDTO;
-export type OrderResponseDto = OrderResponseDTO;

@@ -1,7 +1,4 @@
-import type {
-	OrdersOverviewResponseDTO,
-	OrdersOverviewResponseDto,
-} from "@application/dtos/orders/get-orders-overview.dto.ts";
+import type { OrdersOverviewResponseDTO } from "@application/dtos/orders/get-orders-overview.dto.ts";
 import type { GetOrdersOverviewRepoResult } from "@domain/types/order-repository.types";
 
 export const OrdersOverviewMapper = {
@@ -35,7 +32,7 @@ export const OrdersOverviewMapper = {
 
 	toResponseDto(
 		repoResult: GetOrdersOverviewRepoResult,
-	): OrdersOverviewResponseDto {
+	): OrdersOverviewResponseDTO {
 		return this.toDTO(repoResult);
 	},
 };

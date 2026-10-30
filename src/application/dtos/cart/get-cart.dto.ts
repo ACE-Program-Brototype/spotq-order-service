@@ -34,9 +34,3 @@ export interface GetCartResponseDTO {
 	expiresAt: string;
 	items: CartItemResponseDTO[];
 }
-
-// Backwards-compatible aliases
-export type GetCartRequestDto = GetCartRequestDTO;
-export type CartItemAddonResponseDto = CartItemAddonResponseDTO;
-export type CartItemResponseDto = CartItemResponseDTO;
-export type GetCartResponseDto = GetCartResponseDTO;

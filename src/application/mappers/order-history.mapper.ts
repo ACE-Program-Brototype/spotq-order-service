@@ -1,7 +1,6 @@
 import type {
 	OrderHistoryItemDTO,
 	OrderHistoryResponseDTO,
-	OrderHistoryResponseDto,
 } from "@application/dtos/orders/get-order-history.dto.ts";
 import type { GetCustomerOrderHistoryRepoResult } from "@domain/types/order-repository.types";
 
@@ -32,7 +31,7 @@ export const OrderHistoryMapper = {
 
 	toResponseDto(
 		repoResult: GetCustomerOrderHistoryRepoResult,
-	): OrderHistoryResponseDto {
+	): OrderHistoryResponseDTO {
 		return this.toDTO(repoResult);
 	},
 };
