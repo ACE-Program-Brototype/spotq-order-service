@@ -14,7 +14,7 @@ describe("CancelOrderMapper", () => {
 			cancelledAt: fixedDate,
 		};
 
-		const result = CancelOrderMapper.toResponseDto(cancelledData);
+		const result = CancelOrderMapper.toDTO(cancelledData);
 
 		assert.deepEqual(result, {
 			order_id: "ord_992817203",
@@ -35,7 +35,7 @@ describe("CancelOrderMapper", () => {
 			cancelledAt: fixedDate,
 		};
 
-		const result = CancelOrderMapper.toResponseDto(cancelledData);
+		const result = CancelOrderMapper.toDTO(cancelledData);
 
 		assert.deepEqual(result, {
 			order_id: "ord_992817203",
@@ -55,7 +55,7 @@ describe("CancelOrderMapper", () => {
 			cancelledAt: null,
 		};
 
-		const result = CancelOrderMapper.toResponseDto(cancelledData);
+		const result = CancelOrderMapper.toDTO(cancelledData);
 
 		assert.equal(result.order_id, "ord_992817203");
 		assert.equal(result.order_number, "SQ-101");

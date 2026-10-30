@@ -28,12 +28,6 @@ export const OrderHistoryMapper = {
 			},
 		};
 	},
-
-	toResponseDto(
-		repoResult: GetCustomerOrderHistoryRepoResult,
-	): OrderHistoryResponseDTO {
-		return this.toDTO(repoResult);
-	},
 };
 
 export default OrderHistoryMapper;

@@ -49,10 +49,6 @@ export const CartResponseMapper = {
 		};
 	},
 
-	toDto(cart: Cart): GetCartResponseDTO {
-		return CartResponseMapper.toDTO(cart);
-	},
-
 	toMutationDTO(cart: Cart): CartMutationResponseDTO {
 		return {
 			cartId: cart.id,
@@ -68,9 +64,5 @@ export const CartResponseMapper = {
 				totalPrice: item.totalPrice,
 			})),
 		};
-	},
-
-	toMutationDto(cart: Cart): CartMutationResponseDTO {
-		return CartResponseMapper.toMutationDTO(cart);
 	},
 };

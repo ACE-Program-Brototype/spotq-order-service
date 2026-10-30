@@ -75,6 +75,6 @@ export class AddBatchCartItemsUseCase implements IAddBatchCartItemsUseCase {
 			items: preparedItems,
 		});
 
-		return CartResponseMapper.toDto(syncedCart);
+		return CartResponseMapper.toDTO(syncedCart);
 	}
 }

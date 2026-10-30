@@ -29,10 +29,4 @@ export const OrdersOverviewMapper = {
 			},
 		};
 	},
-
-	toResponseDto(
-		repoResult: GetOrdersOverviewRepoResult,
-	): OrdersOverviewResponseDTO {
-		return this.toDTO(repoResult);
-	},
 };

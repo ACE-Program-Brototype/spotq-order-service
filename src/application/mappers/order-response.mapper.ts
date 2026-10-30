@@ -45,8 +45,4 @@ export const OrderResponseMapper = {
 			createdAt: order.createdAt.toISOString(),
 		};
 	},
-
-	toDto(order: Order): OrderResponseDTO {
-		return OrderResponseMapper.toDTO(order);
-	},
 };

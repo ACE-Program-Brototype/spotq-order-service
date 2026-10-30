@@ -196,6 +196,6 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 
 		const createdOrder = await this.orderRepository.create(order, cart.id);
 
-		return OrderResponseMapper.toDto(createdOrder);
+		return OrderResponseMapper.toDTO(createdOrder);
 	}
 }

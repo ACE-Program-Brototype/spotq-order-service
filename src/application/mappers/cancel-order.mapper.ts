@@ -11,10 +11,6 @@ export const CancelOrderMapper = {
 			cancelled_at: (order.cancelledAt ?? new Date()).toISOString(),
 		};
 	},
-
-	toResponseDto(order: CancelledOrderData): CancelOrderResponseDTO {
-		return CancelOrderMapper.toDTO(order);
-	},
 };
 
 export default CancelOrderMapper;

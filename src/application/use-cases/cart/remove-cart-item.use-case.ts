@@ -49,6 +49,6 @@ export class RemoveCartItemUseCase implements IRemoveCartItemUseCase {
 			dto.cartItemId,
 		);
 
-		return CartResponseMapper.toMutationDto(updatedCart);
+		return CartResponseMapper.toMutationDTO(updatedCart);
 	}
 }

@@ -106,6 +106,6 @@ export class AddCartItemUseCase implements IAddCartItemUseCase {
 			itemAddons,
 		});
 
-		return CartResponseMapper.toMutationDto(updatedCart);
+		return CartResponseMapper.toMutationDTO(updatedCart);
 	}
 }

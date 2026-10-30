@@ -26,6 +26,6 @@ export class GetCartUseCase implements IGetCartUseCase {
 		cart.validateAccess(dto.authenticatedUserId);
 		cart.validateActive();
 
-		return CartResponseMapper.toDto(cart);
+		return CartResponseMapper.toDTO(cart);
 	}
 }

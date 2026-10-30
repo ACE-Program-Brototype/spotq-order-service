@@ -28,11 +28,11 @@ export class ClearCartUseCase implements IClearCartUseCase {
 		cart.validateAccess(dto.authenticatedUserId);
 
 		if (cart.items.length === 0) {
-			return CartResponseMapper.toMutationDto(cart);
+			return CartResponseMapper.toMutationDTO(cart);
 		}
 
 		const updatedCart = await this.cartRepository.clearCart(cart.id);
 
-		return CartResponseMapper.toMutationDto(updatedCart);
+		return CartResponseMapper.toMutationDTO(updatedCart);
 	}
 }

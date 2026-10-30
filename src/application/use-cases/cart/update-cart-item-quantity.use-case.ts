@@ -72,6 +72,6 @@ export class UpdateCartItemQuantityUseCase
 			dto.quantity,
 		);
 
-		return CartResponseMapper.toMutationDto(updatedCart);
+		return CartResponseMapper.toMutationDTO(updatedCart);
 	}
 }

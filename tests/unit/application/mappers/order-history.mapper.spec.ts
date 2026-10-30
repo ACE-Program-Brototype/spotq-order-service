@@ -24,7 +24,7 @@ describe("OrderHistoryMapper", () => {
 			hasNext: true,
 		};
 
-		const result = OrderHistoryMapper.toResponseDto(repoResult);
+		const result = OrderHistoryMapper.toDTO(repoResult);
 
 		assert.deepEqual(result, {
 			orders: [
