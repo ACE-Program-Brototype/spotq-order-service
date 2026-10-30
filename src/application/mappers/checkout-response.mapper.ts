@@ -1,12 +1,17 @@
-import type { CheckoutDetailsResponseDto } from "@application/dtos/orders/checkout-details.dto.ts";
+import type { CheckoutDetailsResponseDTO } from "@application/dtos/orders/checkout-details.dto.ts";
 import type { CheckoutDetails } from "@domain/entities/checkout.entity.ts";
+import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 
 export const CheckoutResponseMapper = {
-	toDto(checkout: CheckoutDetails): CheckoutDetailsResponseDto {
+	toDto(checkout: CheckoutDetails): CheckoutDetailsResponseDTO {
 		return {
 			cartId: checkout.cartId,
 			restaurantId: checkout.restaurantId,
 			restaurantName: checkout.restaurantName,
+			payment: {
+				mode: PaymentMode.ONLINE,
+				paymentRequired: true,
+			},
 			itemCount: checkout.itemCount,
 			subtotal: checkout.subtotal,
 			taxPercent: checkout.taxPercent,

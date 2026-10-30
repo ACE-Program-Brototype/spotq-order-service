@@ -1,10 +1,10 @@
 import type {
-	CheckoutDetailsResponseDto,
+	CheckoutDetailsResponseDTO,
 	GetCheckoutDetailsInputDto,
 } from "@application/dtos/orders/checkout-details.dto.ts";
 import { CheckoutResponseMapper } from "@application/mappers/checkout-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
-import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
+import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port.ts";
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
@@ -12,10 +12,10 @@ import { TYPES } from "@config/di/types.ts";
 import env from "@config/env.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { CheckoutDetails } from "@domain/entities/checkout.entity.ts";
-import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
+import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -32,7 +32,7 @@ export class GetCheckoutDetailsUseCase implements IGetCheckoutDetailsUseCase {
 
 	public async execute(
 		dto: GetCheckoutDetailsInputDto,
-	): Promise<CheckoutDetailsResponseDto> {
+	): Promise<CheckoutDetailsResponseDTO> {
 		let cart: Cart | null = null;
 		if (dto.cartId) {
 			cart = await this.cartRepository.findById(dto.cartId);
@@ -54,11 +54,6 @@ export class GetCheckoutDetailsUseCase implements IGetCheckoutDetailsUseCase {
 		}
 
 		if (cart.isExpired()) {
-			if (cart.status !== CartStatus.EXPIRED) {
-				await this.cartRepository.update(cart.id, {
-					status: CartStatus.EXPIRED,
-				});
-			}
 			throw new CartExpiredError();
 		}
 
@@ -85,8 +80,10 @@ export class GetCheckoutDetailsUseCase implements IGetCheckoutDetailsUseCase {
 					addonIds,
 				);
 
-				const unitPrice =
-					catalogItem.variant?.price ?? catalogItem.price ?? cartItem.unitPrice;
+				const unitPrice = catalogItem.variant?.price ?? catalogItem.price;
+				if (unitPrice === undefined || unitPrice === null) {
+					throw new ItemUnavailableError();
+				}
 				const itemName =
 					catalogItem.name ?? cartItem.menuItemName ?? ORDER_DEFAULTS.ITEM_NAME;
 				const variantName =
@@ -97,11 +94,17 @@ export class GetCheckoutDetailsUseCase implements IGetCheckoutDetailsUseCase {
 
 				const addons = cartItem.addons.map((a) => {
 					const catalogAddon = catalogAddonsMap.get(a.addonId);
+					if (
+						!catalogAddon ||
+						catalogAddon.price === undefined ||
+						catalogAddon.price === null
+					) {
+						throw new ItemUnavailableError();
+					}
 					return {
 						addonId: a.addonId,
-						name:
-							catalogAddon?.name ?? a.addonName ?? ORDER_DEFAULTS.ADDON_NAME,
-						price: catalogAddon?.price ?? a.price,
+						name: catalogAddon.name ?? a.addonName ?? ORDER_DEFAULTS.ADDON_NAME,
+						price: catalogAddon.price,
 					};
 				});
 

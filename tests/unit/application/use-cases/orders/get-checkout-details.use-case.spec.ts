@@ -12,6 +12,7 @@ import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
+import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
 import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
 import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
@@ -231,6 +232,10 @@ describe("GetCheckoutDetailsUseCase", () => {
 		assert.equal(result.cartId, "cart-uuid-1");
 		assert.equal(result.restaurantId, "rest-uuid-1");
 		assert.equal(result.restaurantName, "The Gourmet Kitchen");
+		assert.deepEqual(result.payment, {
+			mode: PaymentMode.ONLINE,
+			paymentRequired: true,
+		});
 		assert.equal(result.itemCount, 2);
 		assert.equal(result.subtotal, 300);
 		assert.equal(result.taxPercent, env.TAX_PERCENT);
@@ -365,7 +370,7 @@ describe("GetCheckoutDetailsUseCase", () => {
 		);
 	});
 
-	it("should mark expired cart in repository and throw CartExpiredError", async () => {
+	it("should throw CartExpiredError when cart has expired without mutating repository", async () => {
 		const cartRepo = new MockCartRepository();
 		const restaurantClient = new MockRestaurantServiceClient();
 		const catalogPort = new MockMenuItemCatalogPort();
@@ -394,10 +399,7 @@ describe("GetCheckoutDetailsUseCase", () => {
 			},
 		);
 
-		assert.equal(
-			cartRepo.updatedCarts.get(cart.id)?.status,
-			CartStatus.EXPIRED,
-		);
+		assert.equal(cartRepo.updatedCarts.size, 0);
 	});
 
 	it("should throw CartEmptyError when cart contains no items", async () => {
@@ -519,5 +521,177 @@ describe("GetCheckoutDetailsUseCase", () => {
 				return true;
 			},
 		);
+	});
+
+	it("should throw ItemUnavailableError when menu item price is absent from catalog", async () => {
+		const cartRepo = new MockCartRepository();
+		const restaurantClient = new MockRestaurantServiceClient();
+		const catalogPort = new MockMenuItemCatalogPort();
+
+		const cart = createSampleCart({
+			items: [
+				new CartItem({
+					id: "item-uuid-1",
+					cartId: "cart-uuid-1",
+					menuItemId: "menu-item-1",
+					menuItemName: "Burger",
+					variantId: null,
+					variantName: null,
+					quantity: 1,
+					unitPrice: 100,
+					totalPrice: 100,
+					specialInstructions: null,
+					addons: [],
+				}),
+			],
+		});
+		cartRepo.carts.set(cart.id, cart);
+
+		catalogPort.catalog.set("menu-item-1", {
+			menuItemId: "menu-item-1",
+			name: "Burger",
+			price: undefined as unknown as number,
+			isAvailable: true,
+			addons: [],
+		});
+
+		const useCase = new GetCheckoutDetailsUseCase(
+			cartRepo,
+			restaurantClient,
+			catalogPort,
+		);
+
+		await assert.rejects(
+			async () =>
+				useCase.execute({
+					userId: "user-uuid-1",
+					cartId: cart.id,
+				}),
+			(err: unknown) => {
+				assert.ok(err instanceof ItemUnavailableError);
+				return true;
+			},
+		);
+	});
+
+	it("should throw ItemUnavailableError when addon price is absent from catalog", async () => {
+		const cartRepo = new MockCartRepository();
+		const restaurantClient = new MockRestaurantServiceClient();
+		const catalogPort = new MockMenuItemCatalogPort();
+
+		const cart = createSampleCart();
+		cartRepo.carts.set(cart.id, cart);
+
+		catalogPort.catalog.set("menu-item-1", {
+			menuItemId: "menu-item-1",
+			name: "Burger",
+			price: 100,
+			isAvailable: true,
+			variant: {
+				variantId: "variant-1",
+				name: "Double",
+				price: 120,
+				isAvailable: true,
+			},
+			addons: [
+				{
+					addonId: "addon-1",
+					name: "Cheese",
+					price: undefined as unknown as number,
+					isAvailable: true,
+				},
+			],
+		});
+
+		const useCase = new GetCheckoutDetailsUseCase(
+			cartRepo,
+			restaurantClient,
+			catalogPort,
+		);
+
+		await assert.rejects(
+			async () =>
+				useCase.execute({
+					userId: "user-uuid-1",
+					cartId: cart.id,
+				}),
+			(err: unknown) => {
+				assert.ok(err instanceof ItemUnavailableError);
+				return true;
+			},
+		);
+	});
+
+	it("should calculate pricing authoritatively from catalog and ignore tampered cart prices", async () => {
+		const cartRepo = new MockCartRepository();
+		const restaurantClient = new MockRestaurantServiceClient();
+		const catalogPort = new MockMenuItemCatalogPort();
+
+		// Cart item has fake / tampered unitPrice = 1 and addon price = 1
+		const cart = createSampleCart({
+			items: [
+				new CartItem({
+					id: "item-uuid-1",
+					cartId: "cart-uuid-1",
+					menuItemId: "menu-item-1",
+					menuItemName: "Burger",
+					variantId: "variant-1",
+					variantName: "Double",
+					quantity: 2,
+					unitPrice: 1,
+					totalPrice: 2,
+					specialInstructions: null,
+					addons: [
+						new CartItemAddon({
+							id: "addon-row-1",
+							cartItemId: "item-uuid-1",
+							addonId: "addon-1",
+							addonName: "Cheese",
+							price: 1,
+						}),
+					],
+				}),
+			],
+		});
+		cartRepo.carts.set(cart.id, cart);
+
+		// Catalog has authoritative unitPrice = 150 and addon price = 50
+		catalogPort.catalog.set("menu-item-1", {
+			menuItemId: "menu-item-1",
+			name: "Burger Deluxe",
+			price: 100,
+			isAvailable: true,
+			variant: {
+				variantId: "variant-1",
+				name: "Double Deluxe",
+				price: 150,
+				isAvailable: true,
+			},
+			addons: [
+				{
+					addonId: "addon-1",
+					name: "Cheddar Cheese",
+					price: 50,
+					isAvailable: true,
+				},
+			],
+		});
+
+		const useCase = new GetCheckoutDetailsUseCase(
+			cartRepo,
+			restaurantClient,
+			catalogPort,
+		);
+
+		const result = await useCase.execute({
+			userId: "user-uuid-1",
+			cartId: cart.id,
+		});
+
+		// Authoritative line total: (150 + 50) * 2 = 400
+		assert.equal(result.items[0]?.unitPrice, 150);
+		assert.equal(result.items[0]?.addons[0]?.price, 50);
+		assert.equal(result.items[0]?.totalPrice, 400);
+		assert.equal(result.subtotal, 400);
 	});
 });

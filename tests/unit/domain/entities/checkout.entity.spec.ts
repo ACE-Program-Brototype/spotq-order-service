@@ -5,6 +5,7 @@ import {
 	CheckoutItem,
 } from "@domain/entities/checkout.entity.ts";
 import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
+import { InvalidTaxPercentError } from "@domain/errors/invalid-tax-percent.error.ts";
 
 describe("Checkout Domain Entity", () => {
 	it("should calculate line total for CheckoutItem correctly with addons and quantity", () => {
@@ -85,7 +86,7 @@ describe("Checkout Domain Entity", () => {
 		);
 	});
 
-	it("should throw error when tax percent is negative", () => {
+	it("should throw InvalidTaxPercentError when tax percent is negative", () => {
 		assert.throws(
 			() =>
 				new CheckoutDetails({
@@ -103,7 +104,10 @@ describe("Checkout Domain Entity", () => {
 						},
 					],
 				}),
-			/Tax percent cannot be negative/,
+			(err: unknown) => {
+				assert.ok(err instanceof InvalidTaxPercentError);
+				return true;
+			},
 		);
 	});
 

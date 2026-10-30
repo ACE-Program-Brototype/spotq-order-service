@@ -340,6 +340,10 @@ describe("CustomerOrderController", () => {
 				cartId: "cart-123",
 				restaurantId: "rest-456",
 				restaurantName: "Tasty Bytes",
+				payment: {
+					mode: PaymentMode.ONLINE,
+					paymentRequired: true,
+				},
 				itemCount: 2,
 				subtotal: 100,
 				taxPercent: 5,
