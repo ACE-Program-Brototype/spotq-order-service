@@ -104,6 +104,13 @@ export const ORDER_DEFAULTS = {
 	CHANGED_BY_CUSTOMER: AUTH_ROLES.CUSTOMER,
 } as const;
 
+export const REPOSITORY_MESSAGES = {
+	CART_NOT_FOUND: "Cart not found in repository",
+	CART_ITEM_NOT_FOUND: "Cart item not found in repository",
+	DELEGATE_NO_CREATE: "Delegate does not support create operation",
+	FOREIGN_KEY_FAILED: "Foreign key constraint failed in database operation",
+} as const;
+
 export const ORDER_ERROR_CODES = {
 	RESTAURANT_NOT_FOUND: "RESTAURANT_NOT_FOUND",
 	RESTAURANT_NOT_ELIGIBLE: "RESTAURANT_NOT_ELIGIBLE",

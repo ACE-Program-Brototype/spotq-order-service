@@ -1,4 +1,5 @@
 import type { IBaseRepository } from "@domain/repositories/base.repository.interface.ts";
+import { REPOSITORY_MESSAGES } from "@shared/constants/message.constants.ts";
 import { injectable } from "inversify";
 
 export interface IEntityMapper<TDomain, TModel> {
@@ -73,7 +74,7 @@ export abstract class PrismaBaseRepository<
 	public async create(data: TCreateInput): Promise<TDomain> {
 		try {
 			if (!this.delegate?.create) {
-				throw new Error("Delegate does not support create operation");
+				throw new Error(REPOSITORY_MESSAGES.DELEGATE_NO_CREATE);
 			}
 			const record = (await this.delegate.create({
 				data: data as Record<string, unknown>,
@@ -150,7 +151,7 @@ export abstract class PrismaBaseRepository<
 		}
 
 		if (code === "P2003") {
-			throw new Error("Foreign key constraint failed in database operation");
+			throw new Error(REPOSITORY_MESSAGES.FOREIGN_KEY_FAILED);
 		}
 	}
 }

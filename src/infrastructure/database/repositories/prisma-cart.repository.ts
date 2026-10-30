@@ -16,6 +16,7 @@ import {
 	type PrismaCartRecord,
 } from "@infrastructure/database/mappers/cart.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/database/repositories/prisma-base.repository.ts";
+import { REPOSITORY_MESSAGES } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -221,7 +222,7 @@ export class PrismaCartRepository
 			}
 
 			if (!existingRecord) {
-				throw new Error("Cart not found in repository");
+				throw new Error(REPOSITORY_MESSAGES.CART_NOT_FOUND);
 			}
 
 			const targetCartId = existingRecord.id;
@@ -409,7 +410,7 @@ export class PrismaCartRepository
 			});
 
 			if (!reloadedRecord) {
-				throw new Error("Cart not found in repository");
+				throw new Error(REPOSITORY_MESSAGES.CART_NOT_FOUND);
 			}
 
 			return CartPersistenceMapper.toDomain(
@@ -438,7 +439,7 @@ export class PrismaCartRepository
 			});
 
 			if (!existingRecord) {
-				throw new Error("Cart not found in repository");
+				throw new Error(REPOSITORY_MESSAGES.CART_NOT_FOUND);
 			}
 
 			const existingCart = CartPersistenceMapper.toDomain(
@@ -448,7 +449,7 @@ export class PrismaCartRepository
 				(item) => item.id === cartItemId,
 			);
 			if (!existingItem) {
-				throw new Error("Cart item not found in repository");
+				throw new Error(REPOSITORY_MESSAGES.CART_ITEM_NOT_FOUND);
 			}
 
 			if (quantity === 0) {
@@ -515,7 +516,7 @@ export class PrismaCartRepository
 			});
 
 			if (!existingRecord) {
-				throw new Error("Cart not found in repository");
+				throw new Error(REPOSITORY_MESSAGES.CART_NOT_FOUND);
 			}
 
 			const itemIds = existingRecord.items.map((item) => item.id);
