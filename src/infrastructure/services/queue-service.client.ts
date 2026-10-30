@@ -3,7 +3,7 @@ import type { IQueueServiceClient } from "@application/ports/external/queue-serv
 import env from "@config/env.ts";
 import logger from "@infrastructure/observability/logger.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
-import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { HTTP_STATUS } from "@shared/constants/http.constants.ts";
 import { QUEUE_SERVICE_ROUTES } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";
 import axios, { isAxiosError } from "axios";
@@ -58,7 +58,7 @@ export class QueueServiceClient implements IQueueServiceClient {
 			return responseBody.data ?? null;
 		} catch (error) {
 			if (isAxiosError(error) && error.response) {
-				if (error.response.status === HttpStatus.NOT_FOUND) {
+				if (error.response.status === HTTP_STATUS.NOT_FOUND) {
 					return null;
 				}
 				logger.error(

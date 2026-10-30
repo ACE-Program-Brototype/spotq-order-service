@@ -9,7 +9,7 @@ import {
 } from "@domain/errors/order.errors.ts";
 import logger from "@infrastructure/observability/logger.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
-import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { HTTP_STATUS } from "@shared/constants/http.constants.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { RESTAURANT_SERVICE_ROUTES } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";
@@ -87,15 +87,15 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 			if (isAxiosError(error) && error.response) {
 				const status = error.response.status;
 
-				if (status === HttpStatus.NOT_FOUND) {
+				if (status === HTTP_STATUS.NOT_FOUND) {
 					throw new RestaurantNotFoundError(
 						`${ORDER_MESSAGES.RESTAURANT_NOT_FOUND}: ${restaurantId}`,
 					);
 				}
 
 				if (
-					status === HttpStatus.FORBIDDEN ||
-					status === HttpStatus.UNAUTHORIZED
+					status === HTTP_STATUS.FORBIDDEN ||
+					status === HTTP_STATUS.UNAUTHORIZED
 				) {
 					logger.warn(
 						{ restaurantId, status },
