@@ -2,7 +2,7 @@ import type {
 	CancelOrderInputDTO,
 	CancelOrderResponseDTO,
 } from "@application/dtos/orders/cancel-order.dto.ts";
-import { CancelOrderMapper } from "@application/mappers/cancel-order.mapper.ts";
+import { CancelOrderMapper } from "@application/mappers/orders/cancel-order.mapper.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { OrderNotFoundError } from "@domain/errors/index.ts";

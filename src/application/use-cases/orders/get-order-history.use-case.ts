@@ -2,7 +2,7 @@ import type {
 	GetOrderHistoryInputDTO,
 	OrderHistoryResponseDTO,
 } from "@application/dtos/orders/get-order-history.dto.ts";
-import { OrderHistoryMapper } from "@application/mappers/order-history.mapper.ts";
+import { OrderHistoryMapper } from "@application/mappers/orders/order-history.mapper.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";

@@ -2,7 +2,7 @@ import type {
 	AddCartItemRequestDTO,
 	AddCartItemResponseDTO,
 } from "@application/dtos/cart/add-cart-item.dto.ts";
-import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
+import { CartResponseMapper } from "@application/mappers/cart/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";

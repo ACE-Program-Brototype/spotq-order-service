@@ -2,7 +2,7 @@ import type {
 	RemoveCartItemRequestDTO,
 	RemoveCartItemResponseDTO,
 } from "@application/dtos/cart/remove-cart-item.dto.ts";
-import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
+import { CartResponseMapper } from "@application/mappers/cart/cart-response.mapper.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";

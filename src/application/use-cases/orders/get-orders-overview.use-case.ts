@@ -2,7 +2,7 @@ import type {
 	GetOrdersOverviewInputDTO,
 	OrdersOverviewResponseDTO,
 } from "@application/dtos/orders/get-orders-overview.dto.ts";
-import { OrdersOverviewMapper } from "@application/mappers/orders-overview.mapper.ts";
+import { OrdersOverviewMapper } from "@application/mappers/orders/orders-overview.mapper.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import { TYPES } from "@config/di/types.ts";

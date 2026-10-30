@@ -2,7 +2,7 @@ import type {
 	OrderResponseDTO,
 	PlaceOrderInputDTO,
 } from "@application/dtos/orders/place-order.dto.ts";
-import { OrderResponseMapper } from "@application/mappers/order-response.mapper.ts";
+import { OrderResponseMapper } from "@application/mappers/orders/order-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port.ts";

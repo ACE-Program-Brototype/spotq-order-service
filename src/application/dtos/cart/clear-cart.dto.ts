@@ -1,4 +1,4 @@
-import type { CartMutationResponseDTO } from "@application/mappers/cart-response.mapper.ts";
+import type { CartMutationResponseDTO } from "@application/mappers/cart/cart-response.mapper.ts";
 
 export interface ClearCartRequestDTO {
 	cartId: string;

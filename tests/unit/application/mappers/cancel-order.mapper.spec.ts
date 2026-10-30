@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { CancelOrderMapper } from "@application/mappers/cancel-order.mapper.ts";
+import { CancelOrderMapper } from "@application/mappers/orders/cancel-order.mapper.ts";
 import type { CancelledOrderData } from "@domain/types/order-repository.types";
 
 describe("CancelOrderMapper", () => {

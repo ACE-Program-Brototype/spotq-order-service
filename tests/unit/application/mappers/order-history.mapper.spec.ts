@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { OrderHistoryMapper } from "@application/mappers/order-history.mapper.ts";
+import { OrderHistoryMapper } from "@application/mappers/orders/order-history.mapper.ts";
 import type { GetCustomerOrderHistoryRepoResult } from "@domain/types/order-repository.types";
 
 describe("OrderHistoryMapper", () => {
