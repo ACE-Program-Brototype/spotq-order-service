@@ -11,6 +11,7 @@ export const ORDER_ROUTES = {
 	PLACE: "/",
 	HISTORY: "/history",
 	CANCEL: "/:orderId/cancel",
+	CHECKOUT: "/checkout",
 } as const;
 
 export const CART_ROUTES = {

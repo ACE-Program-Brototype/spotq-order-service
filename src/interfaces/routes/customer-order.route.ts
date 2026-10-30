@@ -12,6 +12,7 @@ import {
 	cancelOrderBodySchema,
 	cancelOrderParamSchema,
 } from "@interfaces/validation/orders/cancel-order.schema.ts";
+import { checkoutQuerySchema } from "@interfaces/validation/orders/checkout-query.schema.ts";
 import { orderHistoryQuerySchema } from "@interfaces/validation/orders/order-history-query.schema.ts";
 import { placeOrderBodySchema } from "@interfaces/validation/orders/place-order.schema.ts";
 import { Router } from "express";
@@ -20,6 +21,13 @@ const customerOrderRouter: Router = Router();
 
 const customerOrderController = container.get<CustomerOrderController>(
 	TYPES.CustomerOrderController,
+);
+
+customerOrderRouter.get(
+	ORDER_ROUTES.CHECKOUT,
+	customerAuthMiddleware,
+	validateRequestQuery(checkoutQuerySchema),
+	customerOrderController.getCheckoutDetails,
 );
 
 customerOrderRouter.post(

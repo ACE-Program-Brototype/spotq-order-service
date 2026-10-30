@@ -19,6 +19,7 @@ export const TYPES = {
 	CustomerOrderController: Symbol.for("CustomerOrderController"),
 	QueueServiceClient: Symbol.for("QueueServiceClient"),
 	PlaceOrderUseCase: Symbol.for("PlaceOrderUseCase"),
+	GetCheckoutDetailsUseCase: Symbol.for("GetCheckoutDetailsUseCase"),
 };
 
 export default TYPES;
