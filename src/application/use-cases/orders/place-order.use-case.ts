@@ -24,8 +24,8 @@ import {
 	CartNotFoundError,
 } from "@domain/errors/cart.errors.ts";
 import { InvalidPaymentModeError } from "@domain/errors/order.errors.ts";
-import type { ICartRepository } from "@domain/repositories/i-cart.repository.ts";
-import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 

@@ -12,7 +12,7 @@ import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import type {
 	ICartRepository,
 	ReplaceCartBatchItemInput,
-} from "@domain/repositories/i-cart.repository.ts";
+} from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()

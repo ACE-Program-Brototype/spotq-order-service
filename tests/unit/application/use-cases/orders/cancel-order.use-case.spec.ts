@@ -11,7 +11,7 @@ import {
 	OrderCancellationNotAllowedError,
 	OrderNotFoundError,
 } from "@domain/errors/index.ts";
-import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type { CancelledOrderData } from "@domain/types/order-repository.types";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 

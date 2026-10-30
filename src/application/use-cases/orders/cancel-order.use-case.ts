@@ -6,7 +6,7 @@ import { CancelOrderMapper } from "@application/mappers/orders/cancel-order.mapp
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { OrderNotFoundError } from "@domain/errors/index.ts";
-import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 

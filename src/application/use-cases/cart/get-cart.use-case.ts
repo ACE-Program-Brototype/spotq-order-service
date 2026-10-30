@@ -6,7 +6,7 @@ import { CartResponseMapper } from "@application/mappers/cart/cart-response.mapp
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartNotFoundError } from "@domain/errors/cart.errors.ts";
-import type { ICartRepository } from "@domain/repositories/i-cart.repository.ts";
+import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()

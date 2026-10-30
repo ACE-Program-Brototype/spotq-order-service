@@ -13,7 +13,7 @@ import {
 import type {
 	ICartRepository,
 	UpdateCartInput,
-} from "@domain/repositories/i-cart.repository.ts";
+} from "@domain/repositories/cart.repository.interface.ts";
 
 class MockCartRepository implements ICartRepository {
 	public carts: Map<string, Cart> = new Map();

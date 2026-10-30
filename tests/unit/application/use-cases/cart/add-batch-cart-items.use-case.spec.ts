@@ -19,7 +19,7 @@ import type {
 	ICartRepository,
 	ReplaceCartBatchInput,
 	UpdateCartInput,
-} from "@domain/repositories/i-cart.repository.ts";
+} from "@domain/repositories/cart.repository.interface.ts";
 
 class MockBatchCartRepository implements ICartRepository {
 	public lastReplacedInput: ReplaceCartBatchInput | null = null;

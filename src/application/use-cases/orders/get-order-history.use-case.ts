@@ -5,7 +5,7 @@ import type {
 import { OrderHistoryMapper } from "@application/mappers/orders/order-history.mapper.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
-import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()

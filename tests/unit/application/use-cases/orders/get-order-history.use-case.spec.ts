@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-history.use-case.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type { GetCustomerOrderHistoryRepoParams } from "@domain/types/order-repository.types";
 
 describe("GetOrderHistoryUseCase", () => {

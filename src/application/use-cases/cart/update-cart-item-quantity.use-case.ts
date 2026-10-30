@@ -13,7 +13,7 @@ import {
 	CartItemNotFoundError,
 	CartNotFoundError,
 } from "@domain/errors/cart.errors.ts";
-import type { ICartRepository } from "@domain/repositories/i-cart.repository.ts";
+import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()

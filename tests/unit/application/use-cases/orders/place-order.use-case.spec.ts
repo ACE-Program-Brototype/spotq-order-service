@@ -35,8 +35,8 @@ import type {
 	AddItemInput,
 	ICartRepository,
 	UpdateCartInput,
-} from "@domain/repositories/i-cart.repository.ts";
-import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+} from "@domain/repositories/cart.repository.interface.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
 	CancelledOrderData,
 	GetCustomerOrderHistoryRepoParams,

@@ -9,7 +9,7 @@ import type {
 	ICartRepository,
 	ReplaceCartBatchInput,
 	UpdateCartInput,
-} from "@domain/repositories/i-cart.repository.ts";
+} from "@domain/repositories/cart.repository.interface.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
 import {
 	CartPersistenceMapper,

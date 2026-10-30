@@ -1,7 +1,7 @@
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import type { IOrderRepository } from "@domain/repositories/i-order.repository.ts";
+import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
 	CancelledOrderData,
 	GetCustomerOrderHistoryRepoParams,
