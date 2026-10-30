@@ -9,6 +9,7 @@ import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
+import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
@@ -19,6 +20,7 @@ import { GetCartUseCase } from "@application/use-cases/cart/get-cart.use-case.ts
 import { RemoveCartItemUseCase } from "@application/use-cases/cart/remove-cart-item.use-case.ts";
 import { UpdateCartItemQuantityUseCase } from "@application/use-cases/cart/update-cart-item-quantity.use-case.ts";
 import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.use-case.ts";
+import { GetCheckoutDetailsUseCase } from "@application/use-cases/orders/get-checkout-details.use-case.ts";
 import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-history.use-case.ts";
 import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orders-overview.use-case.ts";
 import { PlaceOrderUseCase } from "@application/use-cases/orders/place-order.use-case.ts";
@@ -128,6 +130,11 @@ container
 container
 	.bind<IPlaceOrderUseCase>(TYPES.PlaceOrderUseCase)
 	.to(PlaceOrderUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IGetCheckoutDetailsUseCase>(TYPES.GetCheckoutDetailsUseCase)
+	.to(GetCheckoutDetailsUseCase)
 	.inSingletonScope();
 
 export { container };

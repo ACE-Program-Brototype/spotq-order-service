@@ -5,6 +5,7 @@ import type {
 	PlaceOrderInputDTO,
 } from "@application/dtos/orders/place-order.dto.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
+import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { OrderPriority } from "@domain/enums/order-priority.enum.ts";
@@ -70,11 +71,13 @@ describe("CustomerOrderController", () => {
 		placeOrder?: IPlaceOrderUseCase;
 		getOrderHistory?: IGetOrderHistoryUseCase;
 		cancelOrder?: ICancelOrderUseCase;
+		getCheckoutDetails?: IGetCheckoutDetailsUseCase;
 	}): CustomerOrderController {
 		return new CustomerOrderController(
 			overrides?.placeOrder ?? { execute: notImplemented },
 			overrides?.getOrderHistory ?? { execute: notImplemented },
 			overrides?.cancelOrder ?? { execute: notImplemented },
+			overrides?.getCheckoutDetails ?? { execute: notImplemented },
 		);
 	}
 
@@ -326,6 +329,64 @@ describe("CustomerOrderController", () => {
 				statusCode: HttpStatus.OK,
 				message: ORDER_MESSAGES.CANCEL_SUCCESS,
 				data: mockCancelledData,
+			});
+		});
+	});
+
+	describe("getCheckoutDetails", () => {
+		it("should fetch checkout details successfully with 200 OK and forward query params", async () => {
+			let capturedDto: unknown = null;
+			const mockCheckoutResponse = {
+				cartId: "cart-123",
+				restaurantId: "rest-456",
+				restaurantName: "Tasty Bytes",
+				payment: {
+					mode: PaymentMode.ONLINE,
+					paymentRequired: true,
+				},
+				itemCount: 2,
+				subtotal: 100,
+				taxPercent: 5,
+				taxAmount: 5,
+				totalAmount: 105,
+				items: [],
+			};
+
+			const mockCheckoutUseCase: IGetCheckoutDetailsUseCase = {
+				execute: async (dto) => {
+					capturedDto = dto;
+					return mockCheckoutResponse;
+				},
+			};
+
+			const controller = createController({
+				getCheckoutDetails: mockCheckoutUseCase,
+			});
+
+			const { res, getStatus, getBody } = createMockResponse();
+			const req = {
+				user: {
+					userId: "user-cust-1",
+				},
+				query: {
+					restaurantId: "rest-456",
+					cartId: "cart-123",
+				},
+			} as unknown as Request;
+
+			await controller.getCheckoutDetails(req, res);
+
+			assert.equal(getStatus(), HttpStatus.OK);
+			assert.deepEqual(capturedDto, {
+				userId: "user-cust-1",
+				restaurantId: "rest-456",
+				cartId: "cart-123",
+			});
+			assert.deepEqual(getBody(), {
+				success: true,
+				statusCode: HttpStatus.OK,
+				message: ORDER_MESSAGES.CHECKOUT_DETAILS_FETCHED_SUCCESS,
+				data: mockCheckoutResponse,
 			});
 		});
 	});

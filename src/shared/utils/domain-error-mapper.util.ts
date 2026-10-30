@@ -21,6 +21,7 @@ export const DOMAIN_ERROR_HTTP_MAP: Record<string, HttpStatus> = {
 	[ORDER_ERROR_CODES.ORDER_CANNOT_BE_CANCELLED]: HttpStatus.BAD_REQUEST,
 	[ORDER_ERROR_CODES.CART_EMPTY]: HttpStatus.BAD_REQUEST,
 	[ORDER_ERROR_CODES.INVALID_PAYMENT_MODE]: HttpStatus.BAD_REQUEST,
+	[ORDER_ERROR_CODES.INVALID_TAX_PERCENT]: HttpStatus.BAD_REQUEST,
 };
 
 export function mapDomainErrorToHttpStatus(errorCode: string): HttpStatus {

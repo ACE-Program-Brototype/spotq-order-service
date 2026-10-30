@@ -48,3 +48,9 @@ export class ForbiddenRestaurantAccessError extends DomainError {
 		super(message, ORDER_ERROR_CODES.FORBIDDEN_RESTAURANT_ACCESS);
 	}
 }
+
+export class InvalidTaxPercentError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.INVALID_TAX_PERCENT) {
+		super(message, ORDER_ERROR_CODES.INVALID_TAX_PERCENT);
+	}
+}

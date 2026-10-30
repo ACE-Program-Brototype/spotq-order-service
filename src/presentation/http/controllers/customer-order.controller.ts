@@ -1,8 +1,10 @@
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
+import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { OrderRequestMapper } from "@presentation/http/mappers/order-request.mapper.ts";
+import type { CheckoutQuery } from "@presentation/http/validators/orders/checkout-query.schema.ts";
 import type { PlaceOrderBody } from "@presentation/http/validators/orders/place-order.schema.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
@@ -19,7 +21,30 @@ export class CustomerOrderController {
 		private readonly getOrderHistoryUseCase: IGetOrderHistoryUseCase,
 		@inject(TYPES.CancelOrderUseCase)
 		private readonly cancelOrderUseCase: ICancelOrderUseCase,
+		@inject(TYPES.GetCheckoutDetailsUseCase)
+		private readonly getCheckoutDetailsUseCase: IGetCheckoutDetailsUseCase,
 	) {}
+
+	public getCheckoutDetails = async (
+		req: Request,
+		res: Response,
+	): Promise<void> => {
+		const userId = req.user?.userId as string;
+		const query = req.query as CheckoutQuery;
+
+		const result = await this.getCheckoutDetailsUseCase.execute({
+			userId,
+			restaurantId: query.restaurantId,
+			cartId: query.cartId,
+		});
+
+		sendSuccessResponse(
+			res,
+			result,
+			ORDER_MESSAGES.CHECKOUT_DETAILS_FETCHED_SUCCESS,
+			HttpStatus.OK,
+		);
+	};
 
 	public placeOrder = async (req: Request, res: Response): Promise<void> => {
 		const userId = req.user?.userId as string;

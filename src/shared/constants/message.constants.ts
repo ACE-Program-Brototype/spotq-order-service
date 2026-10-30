@@ -73,6 +73,7 @@ export const ORDER_MESSAGES = {
 	HISTORY_FETCHED_SUCCESS: "Order history retrieved successfully",
 	CANCEL_SUCCESS: "Order cancelled successfully",
 	ORDER_PLACED_SUCCESS: "Order placed successfully",
+	CHECKOUT_DETAILS_FETCHED_SUCCESS: "Checkout details retrieved successfully",
 	CART_EMPTY: "Cannot place an order with an empty cart",
 	INVALID_PAYMENT_MODE:
 		"Online payment feature is coming soon. Please select Pay at Counter.",
@@ -94,6 +95,7 @@ export const ORDER_MESSAGES = {
 	INVALID_CANCELLATION_REASON:
 		"Cancellation reason cannot exceed 500 characters",
 	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
+	INVALID_TAX_PERCENT: "Tax percent cannot be negative",
 };
 
 export const ORDER_DEFAULTS = {
@@ -121,6 +123,7 @@ export const ORDER_ERROR_CODES = {
 	INVALID_ORDER_ID: "INVALID_ORDER_ID",
 	CART_EMPTY: "CART_EMPTY",
 	INVALID_PAYMENT_MODE: "INVALID_PAYMENT_MODE",
+	INVALID_TAX_PERCENT: "INVALID_TAX_PERCENT",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
