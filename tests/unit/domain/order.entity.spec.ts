@@ -7,9 +7,11 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
-import { ForbiddenOrderAccessError } from "@domain/errors/forbidden-order-access.error.ts";
-import { OrderCancellationNotAllowedError } from "@domain/errors/order-cancellation-not-allowed.error.ts";
+import { CartEmptyError } from "@domain/errors/cart.errors.ts";
+import {
+	ForbiddenOrderAccessError,
+	OrderCancellationNotAllowedError,
+} from "@domain/errors/order.errors.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 
 describe("Order Domain Entity", () => {

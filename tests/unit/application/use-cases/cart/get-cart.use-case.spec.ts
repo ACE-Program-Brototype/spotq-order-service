@@ -5,9 +5,11 @@ import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
+import {
+	CartExpiredError,
+	CartNotFoundError,
+	ForbiddenCartAccessError,
+} from "@domain/errors/cart.errors.ts";
 import type {
 	ICartRepository,
 	UpdateCartInput,

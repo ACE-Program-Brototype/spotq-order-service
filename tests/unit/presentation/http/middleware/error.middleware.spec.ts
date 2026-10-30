@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
+import { CartNotFoundError } from "@domain/errors/cart.errors.ts";
 import {
 	errorHandler,
 	mapDomainErrorToHttpStatus,

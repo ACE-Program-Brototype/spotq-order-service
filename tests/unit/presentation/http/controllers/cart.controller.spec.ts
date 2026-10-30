@@ -6,7 +6,7 @@ import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
+import { CartNotFoundError } from "@domain/errors/cart.errors.ts";
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
 import { CART_MESSAGES } from "@shared/constants/message.constants.ts";

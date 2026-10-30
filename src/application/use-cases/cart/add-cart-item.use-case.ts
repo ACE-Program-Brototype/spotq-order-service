@@ -9,9 +9,11 @@ import { validateCatalogItemAvailability } from "@application/utils/catalog-vali
 import { TYPES } from "@config/di/types.ts";
 import { CART_LIMITS } from "@domain/constants/cart.constants.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
-import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
+import {
+	CartExpiredError,
+	DifferentRestaurantCartError,
+	InvalidCartQuantityError,
+} from "@domain/errors/cart.errors.ts";
 import type { ICartRepository } from "@domain/repositories/i-cart.repository.ts";
 import { inject, injectable } from "inversify";
 

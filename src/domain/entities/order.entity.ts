@@ -14,7 +14,7 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { OrderType } from "@domain/enums/order-type.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
+import { CartEmptyError } from "@domain/errors/cart.errors.ts";
 import {
 	ForbiddenOrderAccessError,
 	OrderCancellationNotAllowedError,

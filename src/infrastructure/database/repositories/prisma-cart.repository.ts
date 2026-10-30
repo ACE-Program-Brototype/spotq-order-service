@@ -3,7 +3,7 @@ import { CART_LIMITS } from "@domain/constants/cart.constants.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
+import { InvalidCartQuantityError } from "@domain/errors/cart.errors.ts";
 import type {
 	AddItemInput,
 	ICartRepository,

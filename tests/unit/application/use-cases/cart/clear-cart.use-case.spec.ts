@@ -4,8 +4,10 @@ import { ClearCartUseCase } from "@application/use-cases/cart/clear-cart.use-cas
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
+import {
+	CartNotFoundError,
+	ForbiddenCartAccessError,
+} from "@domain/errors/cart.errors.ts";
 import type {
 	AddItemInput,
 	ICartRepository,

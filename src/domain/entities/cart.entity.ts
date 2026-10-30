@@ -1,10 +1,12 @@
 import { CART_LIMITS } from "@domain/constants/cart.constants.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
-import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
+import {
+	CartExpiredError,
+	DifferentRestaurantCartError,
+	ForbiddenCartAccessError,
+	InvalidCartQuantityError,
+} from "@domain/errors/cart.errors.ts";
 import type {
 	BatchCartItemCandidate,
 	CartProps,

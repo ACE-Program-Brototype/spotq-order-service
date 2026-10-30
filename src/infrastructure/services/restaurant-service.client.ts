@@ -2,9 +2,11 @@ import type { RestaurantValidationResultDTO } from "@application/dtos/external/r
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
 import env from "@config/env.ts";
 import { DomainError } from "@domain/errors/domain.error.ts";
-import { ForbiddenRestaurantAccessError } from "@domain/errors/forbidden-restaurant-access.error.ts";
-import { RestaurantNotEligibleError } from "@domain/errors/restaurant-not-eligible.error.ts";
-import { RestaurantNotFoundError } from "@domain/errors/restaurant-not-found.error.ts";
+import {
+	ForbiddenRestaurantAccessError,
+	RestaurantNotEligibleError,
+	RestaurantNotFoundError,
+} from "@domain/errors/order.errors.ts";
 import logger from "@infrastructure/observability/logger.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
