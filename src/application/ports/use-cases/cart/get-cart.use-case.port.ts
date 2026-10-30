@@ -1,8 +1,8 @@
 import type {
-	GetCartRequestDto,
-	GetCartResponseDto,
+	GetCartRequestDTO,
+	GetCartResponseDTO,
 } from "@application/dtos/cart/get-cart.dto.ts";
 
 export interface IGetCartUseCase {
-	execute(dto: GetCartRequestDto): Promise<GetCartResponseDto>;
+	execute(dto: GetCartRequestDTO): Promise<GetCartResponseDTO>;
 }

@@ -1,13 +1,13 @@
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 
-export interface GetOrderHistoryInputDto {
+export interface GetOrderHistoryInputDTO {
 	customerId: string;
 	page: number;
 	limit: number;
 	status?: OrderStatus | undefined;
 }
 
-export interface OrderHistoryItemDto {
+export interface OrderHistoryItemDTO {
 	order_id: string;
 	order_number: string;
 	restaurant_id: string;
@@ -17,14 +17,14 @@ export interface OrderHistoryItemDto {
 	created_at: string;
 }
 
-export interface OrderHistoryPaginationDto {
+export interface OrderHistoryPaginationDTO {
 	current_page: number;
 	total_pages: number;
 	total_orders: number;
 	has_next: boolean;
 }
 
-export interface OrderHistoryResponseDto {
-	orders: OrderHistoryItemDto[];
-	pagination: OrderHistoryPaginationDto;
+export interface OrderHistoryResponseDTO {
+	orders: OrderHistoryItemDTO[];
+	pagination: OrderHistoryPaginationDTO;
 }

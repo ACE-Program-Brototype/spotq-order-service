@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { Order } from "@domain/entities/order.entity.ts";
 import { OrderItem } from "@domain/entities/order-item.entity.ts";
 import { OrderItemAddon } from "@domain/entities/order-item-addon.entity.ts";
@@ -8,9 +7,12 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
-import { ForbiddenOrderAccessError } from "@domain/errors/forbidden-order-access.error.ts";
-import { OrderCancellationNotAllowedError } from "@domain/errors/order-cancellation-not-allowed.error.ts";
+import { CartEmptyError } from "@domain/errors/cart.errors.ts";
+import {
+	ForbiddenOrderAccessError,
+	OrderCancellationNotAllowedError,
+} from "@domain/errors/order.errors.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 
 describe("Order Domain Entity", () => {
 	const customerId = "customer-123";

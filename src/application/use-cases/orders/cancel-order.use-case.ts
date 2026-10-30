@@ -1,13 +1,13 @@
 import type {
-	CancelOrderInputDto,
-	CancelOrderResponseDto,
+	CancelOrderInputDTO,
+	CancelOrderResponseDTO,
 } from "@application/dtos/orders/cancel-order.dto.ts";
-import { CancelOrderMapper } from "@application/mappers/cancel-order.mapper.ts";
+import { CancelOrderMapper } from "@application/mappers/orders/cancel-order.mapper.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
-import { ORDER_MESSAGES } from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import { OrderNotFoundError } from "@domain/errors/index.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -18,8 +18,8 @@ export class CancelOrderUseCase implements ICancelOrderUseCase {
 	) {}
 
 	public async execute(
-		dto: CancelOrderInputDto,
-	): Promise<CancelOrderResponseDto> {
+		dto: CancelOrderInputDTO,
+	): Promise<CancelOrderResponseDTO> {
 		const order = await this.orderRepository.findById(dto.orderId);
 
 		if (!order) {
@@ -35,7 +35,7 @@ export class CancelOrderUseCase implements ICancelOrderUseCase {
 			previousStatus,
 		);
 
-		return CancelOrderMapper.toResponseDto(cancelledOrder);
+		return CancelOrderMapper.toDTO(cancelledOrder);
 	}
 }
 

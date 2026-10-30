@@ -1,10 +1,10 @@
 import type {
-	UpdateCartItemQuantityRequestDto,
-	UpdateCartItemQuantityResponseDto,
+	UpdateCartItemQuantityRequestDTO,
+	UpdateCartItemQuantityResponseDTO,
 } from "@application/dtos/cart/update-cart-item-quantity.dto.ts";
 
 export interface IUpdateCartItemQuantityUseCase {
 	execute(
-		dto: UpdateCartItemQuantityRequestDto,
-	): Promise<UpdateCartItemQuantityResponseDto>;
+		dto: UpdateCartItemQuantityRequestDTO,
+	): Promise<UpdateCartItemQuantityResponseDTO>;
 }

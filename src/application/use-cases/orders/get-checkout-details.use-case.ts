@@ -1,22 +1,24 @@
 import type {
 	CheckoutDetailsResponseDTO,
-	GetCheckoutDetailsInputDto,
+	GetCheckoutDetailsInputDTO,
 } from "@application/dtos/orders/checkout-details.dto.ts";
-import { CheckoutResponseMapper } from "@application/mappers/checkout-response.mapper.ts";
+import { CheckoutResponseMapper } from "@application/mappers/orders/checkout-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port.ts";
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
-import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import env from "@config/env.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { CheckoutDetails } from "@domain/entities/checkout.entity.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
+import {
+	CartEmptyError,
+	CartExpiredError,
+	CartNotFoundError,
+	ItemUnavailableError,
+} from "@domain/errors/cart.errors.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
+import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -31,7 +33,7 @@ export class GetCheckoutDetailsUseCase implements IGetCheckoutDetailsUseCase {
 	) {}
 
 	public async execute(
-		dto: GetCheckoutDetailsInputDto,
+		dto: GetCheckoutDetailsInputDTO,
 	): Promise<CheckoutDetailsResponseDTO> {
 		let cart: Cart | null = null;
 		if (dto.cartId) {
@@ -130,6 +132,6 @@ export class GetCheckoutDetailsUseCase implements IGetCheckoutDetailsUseCase {
 			taxPercent: env.TAX_PERCENT,
 		});
 
-		return CheckoutResponseMapper.toDto(checkoutDetails);
+		return CheckoutResponseMapper.toDTO(checkoutDetails);
 	}
 }

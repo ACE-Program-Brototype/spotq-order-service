@@ -1,4 +1,4 @@
-export interface RestaurantValidationResultDto {
+export interface RestaurantValidationResultDTO {
 	restaurantId: string;
 	restaurantName: string;
 	verificationStatus: string;

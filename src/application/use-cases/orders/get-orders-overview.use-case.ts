@@ -1,8 +1,8 @@
 import type {
-	GetOrdersOverviewInputDto,
-	OrdersOverviewResponseDto,
-} from "@application/dtos/orders/get-orders-overview.dto";
-import { OrdersOverviewMapper } from "@application/mappers/orders-overview.mapper.ts";
+	GetOrdersOverviewInputDTO,
+	OrdersOverviewResponseDTO,
+} from "@application/dtos/orders/get-orders-overview.dto.ts";
+import { OrdersOverviewMapper } from "@application/mappers/orders/orders-overview.mapper.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import { TYPES } from "@config/di/types.ts";
@@ -19,8 +19,8 @@ export class GetOrdersOverviewUseCase implements IGetOrdersOverviewUseCase {
 	) {}
 
 	public async execute(
-		dto: GetOrdersOverviewInputDto,
-	): Promise<OrdersOverviewResponseDto> {
+		dto: GetOrdersOverviewInputDTO,
+	): Promise<OrdersOverviewResponseDTO> {
 		await this.restaurantServiceClient.validateRestaurant(dto.restaurantId);
 
 		const result = await this.orderRepository.getOrdersOverview({
@@ -33,6 +33,6 @@ export class GetOrdersOverviewUseCase implements IGetOrdersOverviewUseCase {
 			limit: dto.limit,
 		});
 
-		return OrdersOverviewMapper.toResponseDto(result);
+		return OrdersOverviewMapper.toDTO(result);
 	}
 }

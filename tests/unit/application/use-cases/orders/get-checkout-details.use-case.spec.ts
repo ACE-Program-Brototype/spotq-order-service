@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import type { RestaurantValidationResultDto } from "@application/dtos/external/restaurant-validation.dto.ts";
+import type { RestaurantValidationResultDTO } from "@application/dtos/external/restaurant-validation.dto.ts";
 import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
@@ -13,14 +13,16 @@ import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { DifferentRestaurantCartError } from "@domain/errors/different-restaurant-cart.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
-import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
-import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
-import { RestaurantNotEligibleError } from "@domain/errors/restaurant-not-eligible.error.ts";
+import {
+	CartEmptyError,
+	CartExpiredError,
+	CartNotFoundError,
+	DifferentRestaurantCartError,
+	ForbiddenCartAccessError,
+	ItemUnavailableError,
+	MenuItemNotFoundError,
+} from "@domain/errors/cart.errors.ts";
+import { RestaurantNotEligibleError } from "@domain/errors/order.errors.ts";
 import type {
 	AddItemInput,
 	ICartRepository,
@@ -93,7 +95,7 @@ class MockCartRepository implements ICartRepository {
 }
 
 class MockRestaurantServiceClient implements IRestaurantServiceClient {
-	public mockValidationResult: RestaurantValidationResultDto = {
+	public mockValidationResult: RestaurantValidationResultDTO = {
 		restaurantId: "rest-uuid-1",
 		restaurantName: "The Gourmet Kitchen",
 		verificationStatus: "ACTIVE",
@@ -109,7 +111,7 @@ class MockRestaurantServiceClient implements IRestaurantServiceClient {
 
 	public async validateRestaurant(
 		restaurantId: string,
-	): Promise<RestaurantValidationResultDto> {
+	): Promise<RestaurantValidationResultDTO> {
 		if (this.shouldThrowError) {
 			throw this.shouldThrowError;
 		}

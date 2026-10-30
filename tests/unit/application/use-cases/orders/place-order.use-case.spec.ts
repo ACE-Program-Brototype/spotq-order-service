@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
 	ActiveQueueDetails,
-	ActiveQueueUserResponseDto,
+	ActiveQueueUserResponseDTO,
 } from "@application/dtos/external/queue-active-user.dto.ts";
-import type { RestaurantValidationResultDto } from "@application/dtos/external/restaurant-validation.dto.ts";
+import type { RestaurantValidationResultDTO } from "@application/dtos/external/restaurant-validation.dto.ts";
 import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
@@ -22,13 +22,15 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { ForbiddenCartAccessError } from "@domain/errors/forbidden-cart-access.error.ts";
-import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
-import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
-import { RestaurantNotEligibleError } from "@domain/errors/restaurant-not-eligible.error.ts";
+import {
+	CartEmptyError,
+	CartExpiredError,
+	CartNotFoundError,
+	ForbiddenCartAccessError,
+	ItemUnavailableError,
+	MenuItemNotFoundError,
+} from "@domain/errors/cart.errors.ts";
+import { RestaurantNotEligibleError } from "@domain/errors/order.errors.ts";
 import type {
 	AddItemInput,
 	ICartRepository,
@@ -153,7 +155,7 @@ class MockOrderRepository implements IOrderRepository {
 }
 
 class MockRestaurantServiceClient implements IRestaurantServiceClient {
-	public validationResult: RestaurantValidationResultDto = {
+	public validationResult: RestaurantValidationResultDTO = {
 		restaurantId: "rest-1",
 		restaurantName: "SpotQ Test Kitchen",
 		verificationStatus: "ACTIVE",
@@ -168,7 +170,7 @@ class MockRestaurantServiceClient implements IRestaurantServiceClient {
 
 	public async validateRestaurant(
 		_restaurantId: string,
-	): Promise<RestaurantValidationResultDto> {
+	): Promise<RestaurantValidationResultDTO> {
 		if (this.shouldThrowError) {
 			throw this.shouldThrowError;
 		}
@@ -205,12 +207,12 @@ class MockMenuItemCatalogPort implements IMenuItemCatalogPort {
 }
 
 class MockQueueServiceClient implements IQueueServiceClient {
-	public activeQueue: ActiveQueueUserResponseDto | null = null;
+	public activeQueue: ActiveQueueUserResponseDTO | null = null;
 
 	public async checkUserActiveQueue(
 		_restaurantId: string,
 		_userId: string,
-	): Promise<ActiveQueueUserResponseDto | null> {
+	): Promise<ActiveQueueUserResponseDTO | null> {
 		return this.activeQueue;
 	}
 }

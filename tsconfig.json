@@ -18,11 +18,9 @@
 			"@domain/*": ["./src/domain/*"],
 			"@application/*": ["./src/application/*"],
 			"@infrastructure/*": ["./src/infrastructure/*"],
-			"@interfaces/*": ["./src/interfaces/*"],
-			"@presentation/*": ["./src/interfaces/*"],
+			"@presentation/*": ["./src/presentation/*"],
 			"@config/*": ["./src/config/*"],
-			"@common/*": ["./src/common/*"],
-			"@shared/*": ["./src/common/*"],
+			"@shared/*": ["./src/shared/*"],
 			"@generated/*": ["./src/generated/*"],
 			"@types/*": ["./src/types/*"],
 			"@/*": ["./src/*"]

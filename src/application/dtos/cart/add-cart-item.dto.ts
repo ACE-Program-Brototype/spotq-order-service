@@ -1,4 +1,4 @@
-export interface AddCartItemRequestDto {
+export interface AddCartItemRequestDTO {
 	cartId?: string | undefined;
 	authenticatedUserId: string;
 	restaurantId: string;
@@ -9,7 +9,7 @@ export interface AddCartItemRequestDto {
 	specialInstructions?: string | null | undefined;
 }
 
-export interface AddCartItemResponseItemDto {
+export interface AddCartItemResponseItemDTO {
 	cartItemId: string;
 	menuItemId: string;
 	quantity: number;
@@ -17,11 +17,11 @@ export interface AddCartItemResponseItemDto {
 	totalPrice: number;
 }
 
-export interface AddCartItemResponseDto {
+export interface AddCartItemResponseDTO {
 	cartId: string;
 	restaurantId: string;
 	itemCount: number;
 	subtotal: number;
 	updatedAt: string;
-	items: AddCartItemResponseItemDto[];
+	items: AddCartItemResponseItemDTO[];
 }

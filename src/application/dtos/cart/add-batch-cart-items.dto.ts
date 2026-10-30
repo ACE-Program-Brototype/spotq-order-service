@@ -1,4 +1,4 @@
-import type { GetCartResponseDto } from "@application/dtos/cart/get-cart.dto.ts";
+import type { GetCartResponseDTO } from "@application/dtos/cart/get-cart.dto.ts";
 
 export interface BatchCartItemInputDTO {
 	menuItemId: string;
@@ -14,4 +14,4 @@ export interface AddBatchCartItemsDTO {
 	items: BatchCartItemInputDTO[];
 }
 
-export type AddBatchCartItemsResponseDTO = GetCartResponseDto;
+export type AddBatchCartItemsResponseDTO = GetCartResponseDTO;

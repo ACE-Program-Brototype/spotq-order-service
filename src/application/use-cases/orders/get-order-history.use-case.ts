@@ -1,8 +1,8 @@
 import type {
-	GetOrderHistoryInputDto,
-	OrderHistoryResponseDto,
+	GetOrderHistoryInputDTO,
+	OrderHistoryResponseDTO,
 } from "@application/dtos/orders/get-order-history.dto.ts";
-import { OrderHistoryMapper } from "@application/mappers/order-history.mapper.ts";
+import { OrderHistoryMapper } from "@application/mappers/orders/order-history.mapper.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
@@ -16,8 +16,8 @@ export class GetOrderHistoryUseCase implements IGetOrderHistoryUseCase {
 	) {}
 
 	public async execute(
-		dto: GetOrderHistoryInputDto,
-	): Promise<OrderHistoryResponseDto> {
+		dto: GetOrderHistoryInputDTO,
+	): Promise<OrderHistoryResponseDTO> {
 		const repoResult = await this.orderRepository.getCustomerOrderHistory({
 			customerId: dto.customerId,
 			page: dto.page,
@@ -25,7 +25,7 @@ export class GetOrderHistoryUseCase implements IGetOrderHistoryUseCase {
 			status: dto.status,
 		});
 
-		return OrderHistoryMapper.toResponseDto(repoResult);
+		return OrderHistoryMapper.toDTO(repoResult);
 	}
 }
 

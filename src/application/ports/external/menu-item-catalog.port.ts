@@ -1,8 +1,8 @@
 export type {
 	MenuItemCatalogApiResponse,
-	RemoteAddonDto,
-	RemoteMenuItemDto,
-	RemoteVariantDto,
+	RemoteAddonDTO,
+	RemoteMenuItemDTO,
+	RemoteVariantDTO,
 } from "@application/dtos/external/menu-item-catalog.dto.ts";
 
 export interface CatalogAddonDetails {

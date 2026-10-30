@@ -1,8 +1,8 @@
 import type {
-	GetOrderHistoryInputDto,
-	OrderHistoryResponseDto,
+	GetOrderHistoryInputDTO,
+	OrderHistoryResponseDTO,
 } from "@application/dtos/orders/get-order-history.dto.ts";
 
 export interface IGetOrderHistoryUseCase {
-	execute(dto: GetOrderHistoryInputDto): Promise<OrderHistoryResponseDto>;
+	execute(dto: GetOrderHistoryInputDTO): Promise<OrderHistoryResponseDTO>;
 }

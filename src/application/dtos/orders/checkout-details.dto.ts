@@ -1,18 +1,18 @@
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 
-export interface GetCheckoutDetailsInputDto {
+export interface GetCheckoutDetailsInputDTO {
 	userId: string;
 	restaurantId?: string | undefined;
 	cartId?: string | undefined;
 }
 
-export interface CheckoutItemAddonDto {
+export interface CheckoutItemAddonDTO {
 	addonId: string;
 	name: string;
 	price: number;
 }
 
-export interface CheckoutItemDto {
+export interface CheckoutItemDTO {
 	cartItemId: string;
 	menuItemId: string;
 	name: string;
@@ -22,7 +22,7 @@ export interface CheckoutItemDto {
 	unitPrice: number;
 	totalPrice: number;
 	specialInstructions: string | null;
-	addons: CheckoutItemAddonDto[];
+	addons: CheckoutItemAddonDTO[];
 }
 
 export interface CheckoutPaymentContractDTO {
@@ -40,5 +40,5 @@ export interface CheckoutDetailsResponseDTO {
 	taxPercent: number;
 	taxAmount: number;
 	totalAmount: number;
-	items: CheckoutItemDto[];
+	items: CheckoutItemDTO[];
 }

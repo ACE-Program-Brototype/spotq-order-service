@@ -1,43 +1,16 @@
 import type { Cart } from "@domain/entities/cart.entity.ts";
-import type { CartStatus } from "@domain/enums/cart-status.enum.ts";
+import type {
+	AddItemInput,
+	ReplaceCartBatchInput,
+	UpdateCartInput,
+} from "@domain/types/cart.types.ts";
 
-export interface UpdateCartInput {
-	status?: CartStatus;
-	expiresAt?: Date;
-}
-
-export interface AddItemInput {
-	cartId?: string | undefined;
-	userId?: string;
-	restaurantId?: string;
-	menuItemId: string;
-	menuItemName: string;
-	variantId?: string | null;
-	variantName?: string | null;
-	addonIds?: string[];
-	quantity: number;
-	specialInstructions?: string | null;
-	unitPrice: number;
-	itemAddons: Array<{ addonId: string; price: number; name: string }>;
-}
-
-export interface ReplaceCartBatchItemInput {
-	menuItemId: string;
-	menuItemName: string;
-	variantId: string | null;
-	variantName: string | null;
-	quantity: number;
-	specialInstructions: string | null;
-	unitPrice: number;
-	totalPrice: number;
-	itemAddons: Array<{ addonId: string; price: number; name: string }>;
-}
-
-export interface ReplaceCartBatchInput {
-	userId: string;
-	restaurantId: string;
-	items: ReplaceCartBatchItemInput[];
-}
+export type {
+	AddItemInput,
+	ReplaceCartBatchInput,
+	ReplaceCartBatchItemInput,
+	UpdateCartInput,
+} from "@domain/types/cart.types.ts";
 
 export interface ICartRepository {
 	findById(cartId: string): Promise<Cart | null>;

@@ -1,15 +1,10 @@
-export interface GetCartRequestDto {
-	cartId: string;
-	authenticatedUserId: string;
-}
-
-export interface CartItemAddonResponseDto {
+export interface CartItemAddonResponseDTO {
 	addonId: string;
 	addonName: string;
 	price: number;
 }
 
-export interface CartItemResponseDto {
+export interface CartItemResponseDTO {
 	cartItemId: string;
 	menuItemId: string;
 	menuItemName: string;
@@ -19,10 +14,15 @@ export interface CartItemResponseDto {
 	unitPrice: number;
 	totalPrice: number;
 	specialInstructions: string | null;
-	addons: CartItemAddonResponseDto[];
+	addons: CartItemAddonResponseDTO[];
 }
 
-export interface GetCartResponseDto {
+export interface GetCartRequestDTO {
+	cartId: string;
+	authenticatedUserId: string;
+}
+
+export interface GetCartResponseDTO {
 	cartId: string;
 	restaurantId: string;
 	userId: string;
@@ -32,5 +32,5 @@ export interface GetCartResponseDto {
 	createdAt: string;
 	updatedAt: string;
 	expiresAt: string;
-	items: CartItemResponseDto[];
+	items: CartItemResponseDTO[];
 }

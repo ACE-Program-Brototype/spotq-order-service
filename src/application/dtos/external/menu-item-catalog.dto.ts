@@ -1,4 +1,4 @@
-export interface RemoteAddonDto {
+export interface RemoteAddonDTO {
 	addonId?: string;
 	id?: string;
 	name: string;
@@ -6,7 +6,7 @@ export interface RemoteAddonDto {
 	isAvailable?: boolean;
 }
 
-export interface RemoteVariantDto {
+export interface RemoteVariantDTO {
 	variantId?: string;
 	id?: string;
 	name: string;
@@ -14,14 +14,14 @@ export interface RemoteVariantDto {
 	isAvailable?: boolean;
 }
 
-export interface RemoteMenuItemDto {
+export interface RemoteMenuItemDTO {
 	menuItemId?: string;
 	id?: string;
 	name: string;
 	price: number;
 	isAvailable?: boolean;
-	variants?: RemoteVariantDto[];
-	addons?: RemoteAddonDto[];
+	variants?: RemoteVariantDTO[];
+	addons?: RemoteAddonDTO[];
 }
 
 export interface MenuItemCatalogApiResponse<T> {

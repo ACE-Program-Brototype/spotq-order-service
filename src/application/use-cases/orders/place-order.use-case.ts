@@ -1,15 +1,14 @@
 import type {
-	OrderResponseDto,
-	PlaceOrderInputDto,
+	OrderResponseDTO,
+	PlaceOrderInputDTO,
 } from "@application/dtos/orders/place-order.dto.ts";
-import { OrderResponseMapper } from "@application/mappers/order-response.mapper.ts";
+import { OrderResponseMapper } from "@application/mappers/orders/order-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { generateOrderNumber } from "@application/utils/order-number.util.ts";
-import { ORDER_DEFAULTS } from "@common/constants/message.constants.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { Order } from "@domain/entities/order.entity.ts";
@@ -19,12 +18,15 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
-import { InvalidPaymentModeError } from "@domain/errors/invalid-payment-mode.error.ts";
+import {
+	CartEmptyError,
+	CartExpiredError,
+	CartNotFoundError,
+} from "@domain/errors/cart.errors.ts";
+import { InvalidPaymentModeError } from "@domain/errors/order.errors.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -42,7 +44,7 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		private readonly queueServiceClient: IQueueServiceClient,
 	) {}
 
-	public async execute(dto: PlaceOrderInputDto): Promise<OrderResponseDto> {
+	public async execute(dto: PlaceOrderInputDTO): Promise<OrderResponseDTO> {
 		if (dto.paymentMode === PaymentMode.ONLINE) {
 			throw new InvalidPaymentModeError();
 		}
@@ -196,6 +198,6 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 
 		const createdOrder = await this.orderRepository.create(order, cart.id);
 
-		return OrderResponseMapper.toDto(createdOrder);
+		return OrderResponseMapper.toDTO(createdOrder);
 	}
 }

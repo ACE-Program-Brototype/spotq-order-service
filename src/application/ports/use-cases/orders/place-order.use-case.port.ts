@@ -1,8 +1,8 @@
 import type {
-	OrderResponseDto,
-	PlaceOrderInputDto,
+	OrderResponseDTO,
+	PlaceOrderInputDTO,
 } from "@application/dtos/orders/place-order.dto.ts";
 
 export interface IPlaceOrderUseCase {
-	execute(dto: PlaceOrderInputDto): Promise<OrderResponseDto>;
+	execute(dto: PlaceOrderInputDTO): Promise<OrderResponseDTO>;
 }

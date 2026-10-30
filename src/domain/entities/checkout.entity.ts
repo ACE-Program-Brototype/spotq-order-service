@@ -6,8 +6,8 @@ import {
 	CheckoutItemAddon,
 	type CheckoutItemAddonProps,
 } from "@domain/entities/checkout-item-addon.entity.ts";
-import { CartEmptyError } from "@domain/errors/cart-empty.error.ts";
-import { InvalidTaxPercentError } from "@domain/errors/invalid-tax-percent.error.ts";
+import { CartEmptyError } from "@domain/errors/cart.errors.ts";
+import { InvalidTaxPercentError } from "@domain/errors/order.errors.ts";
 
 export {
 	CheckoutItem,

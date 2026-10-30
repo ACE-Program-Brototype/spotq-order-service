@@ -1,10 +1,10 @@
-export interface RemoveCartItemRequestDto {
+export interface RemoveCartItemRequestDTO {
 	cartId: string;
 	cartItemId: string;
 	authenticatedUserId: string;
 }
 
-export interface RemoveCartItemResponseItemDto {
+export interface RemoveCartItemResponseItemDTO {
 	cartItemId: string;
 	menuItemId: string;
 	quantity: number;
@@ -12,11 +12,11 @@ export interface RemoveCartItemResponseItemDto {
 	totalPrice: number;
 }
 
-export interface RemoveCartItemResponseDto {
+export interface RemoveCartItemResponseDTO {
 	cartId: string;
 	restaurantId: string;
 	itemCount: number;
 	subtotal: number;
 	updatedAt: string;
-	items: RemoveCartItemResponseItemDto[];
+	items: RemoveCartItemResponseItemDTO[];
 }

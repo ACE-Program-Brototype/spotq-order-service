@@ -1,6 +1,6 @@
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 
-export interface GetOrdersOverviewInputDto {
+export interface GetOrdersOverviewInputDTO {
 	restaurantId: string;
 	from?: Date | undefined;
 	to?: Date | undefined;
@@ -10,7 +10,7 @@ export interface GetOrdersOverviewInputDto {
 	limit: number;
 }
 
-export interface OrderSummaryDto {
+export interface OrderSummaryDTO {
 	total_orders: number;
 	gross_revenue: number;
 	completed_orders: number;
@@ -20,7 +20,7 @@ export interface OrderSummaryDto {
 	ready_orders: number;
 }
 
-export interface OrderOverviewItemDto {
+export interface OrderOverviewItemDTO {
 	order_id: string;
 	order_number: string;
 	status: string;
@@ -30,14 +30,14 @@ export interface OrderOverviewItemDto {
 	created_at: string;
 }
 
-export interface OrderOverviewPaginationDto {
+export interface OrderOverviewPaginationDTO {
 	current_page: number;
 	total_pages: number;
 	total_items: number;
 }
 
-export interface OrdersOverviewResponseDto {
-	summary: OrderSummaryDto;
-	orders: OrderOverviewItemDto[];
-	pagination: OrderOverviewPaginationDto;
+export interface OrdersOverviewResponseDTO {
+	summary: OrderSummaryDTO;
+	orders: OrderOverviewItemDTO[];
+	pagination: OrderOverviewPaginationDTO;
 }

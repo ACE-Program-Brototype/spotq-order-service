@@ -29,14 +29,39 @@ This repository currently includes the foundational infrastructure required for 
 
 ```text
 src/
-├── application/
-├── common/
-├── config/
-├── domain/
-├── infrastructure/
-├── interfaces/
-├── app.ts
-└── server.ts
+├── application/           # Use cases, ports, DTOs, mappers
+│   ├── dtos/              # Request & Response DTOs grouped by feature
+│   │   ├── cart/
+│   │   ├── external/
+│   │   └── orders/
+│   ├── mappers/           # Application mappers grouped by feature
+│   │   ├── cart/
+│   │   └── orders/
+│   ├── ports/             # Port interfaces (use-cases/, external/)
+│   └── use-cases/         # Injectable use case implementations
+├── config/                # Inversify DI container & environment configuration
+├── domain/                # Enterprise business rules, entities, repository interfaces
+│   ├── constants/         # Domain constants
+│   ├── entities/          # Pure domain entities (Cart, Order, OrderItem)
+│   ├── errors/            # Consolidated error modules (cart.errors.ts, order.errors.ts)
+│   ├── repositories/      # Repository interfaces (*.repository.interface.ts)
+│   └── types/             # Domain entity and aggregate types
+├── infrastructure/        # Database, external services, observability, Redis
+│   ├── database/          # Prisma repositories extending PrismaBaseRepository
+│   ├── observability/     # Structured Pino logging & Prometheus metrics
+│   ├── redis/             # Redis client and connection lifecycle
+│   └── services/          # External microservice clients (S2S authenticated)
+├── presentation/          # Delivery mechanisms & HTTP transport layer
+│   └── http/
+│       ├── controllers/   # Express controllers
+│       ├── middleware/    # Auth, validation, and error middleware
+│       ├── routes/        # Express REST API routes
+│       └── validators/    # Zod request validation schemas
+└── shared/                # Cross-cutting constants, responses, errors, utils
+    ├── constants/         # HTTP_STATUS, messages, limits, route paths
+    ├── errors/            # Base AppError classes
+    ├── responses/         # Standard ApiResponse envelope
+    └── utils/             # Domain error to HTTP status mapper
 
 prisma/
 ├── migrations/
@@ -250,21 +275,46 @@ Pull requests targeting the protected branches must pass the required CI checks 
 
 ## Architecture
 
-This service follows the **Clean Architecture** pattern.
+This service strictly adheres to **Clean Architecture** and **Domain-Driven Design (DDD)** principles, enforcing unidirectional dependency flow from presentation down to domain.
 
 ```text
-src/
-├── domain/            # Enterprise business rules
-├── application/       # Application use cases
-├── infrastructure/    # Database, queues, logging and external services
-├── interfaces/        # Controllers, routes and API interfaces
-├── config/            # Application configuration
-├── common/            # Shared utilities
-├── app.ts             # Express application configuration
-└── server.ts          # Application startup
+Presentation (HTTP, Controllers, Routes, Validators)
+        │
+        ▼
+Application (Use Cases, Ports, DTOs, Mappers)
+        │
+        ▼
+Domain (Entities, Value Objects, Repository Interfaces, Domain Errors)
+        ▲
+        │
+Infrastructure (Prisma Repositories, Redis, External Service Clients)
 ```
 
-The architecture separates business logic from infrastructure concerns, making the service easier to maintain, test, and extend.
+### Architectural Standards & Conventions
+
+#### 1. DTO Standards
+- **Request DTOs**: Named using `*DTO` or `*InputDTO` (e.g. `PlaceOrderDTO`, `GetOrderHistoryInputDTO`, `AddCartItemDTO`).
+- **Response DTOs**: Standardized on `*ResponseDTO` across all application use cases and mappers (e.g. `OrderHistoryResponseDTO`, `CartResponseDTO`, `CancelOrderResponseDTO`, `PlaceOrderResponseDTO`, `OrdersOverviewResponseDTO`). While generic Clean Architecture terminology sometimes refers to `*OutputDTO`, `*ResponseDTO` is uniformly maintained across the entire order service boundary for API consistency.
+- **DTO Placement**: Zero inline DTO or interface declarations in use cases or controllers. All DTOs are located in `src/application/dtos/` and grouped by feature (`cart/`, `orders/`, `external/`).
+
+#### 2. Mapper Standards
+- **Feature Grouping**: Application mappers reside in `src/application/mappers/` grouped by feature (`cart/`, `orders/`).
+- **Method Conventions**: Mappers provide explicit, purpose-built static methods: `toDTO(...)` for query responses and `toMutationDTO(...)` for command/mutation operations.
+- **Zero Forwarding Wrappers**: Redundant alias methods (e.g. `toResponseDto`, `toDto`) are eliminated in favor of direct, standardized mapper calls.
+
+#### 3. Repository Standards
+- **Interface Naming**: Repository interfaces reside in `src/domain/repositories/` following the `*.repository.interface.ts` naming convention (e.g. `cart.repository.interface.ts`, `order.repository.interface.ts`).
+- **Interface Types**: Interface names are prefixed with `I` (e.g. `ICartRepository`, `IOrderRepository`).
+- **Implementations**: Concrete repository implementations reside in `src/infrastructure/database/repositories/`, extend `PrismaBaseRepository`, and map database models into domain entities. Repository interfaces never import Prisma types.
+
+#### 4. Error Handling & Mapping
+- **Consolidated Error Modules**: Domain errors reside in `src/domain/errors/` and are organized into aggregate modules (`cart.errors.ts`, `order.errors.ts`) extending `DomainError`.
+- **Zero HTTP Coupling in Domain**: Domain errors contain zero HTTP status codes or web framework dependencies.
+- **Centralized Error Mapping**: The presentation layer maps domain error codes to HTTP responses using `domain-error-mapper.util.ts` and centralized message constants.
+
+#### 5. HTTP Status Constants
+- **Upper Snake Case**: HTTP status codes are referenced using the `HTTP_STATUS` constant object (e.g. `HTTP_STATUS.OK`, `HTTP_STATUS.NOT_FOUND`, `HTTP_STATUS.CREATED`, `HTTP_STATUS.UNAUTHORIZED`) exported from `@shared/constants/http.constants.ts`.
+- **Zero Numeric Literals**: Hardcoded numeric status codes (such as 200, 201, 404, 500) are forbidden in controllers, middleware, and services.
 
 ---
 

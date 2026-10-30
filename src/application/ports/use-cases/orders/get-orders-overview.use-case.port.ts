@@ -1,8 +1,8 @@
 import type {
-	GetOrdersOverviewInputDto,
-	OrdersOverviewResponseDto,
-} from "@application/dtos/orders/get-orders-overview.dto";
+	GetOrdersOverviewInputDTO,
+	OrdersOverviewResponseDTO,
+} from "@application/dtos/orders/get-orders-overview.dto.ts";
 
 export interface IGetOrdersOverviewUseCase {
-	execute(dto: GetOrdersOverviewInputDto): Promise<OrdersOverviewResponseDto>;
+	execute(dto: GetOrdersOverviewInputDTO): Promise<OrdersOverviewResponseDTO>;
 }

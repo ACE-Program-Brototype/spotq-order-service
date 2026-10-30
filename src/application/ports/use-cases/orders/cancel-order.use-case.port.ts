@@ -1,8 +1,8 @@
 import type {
-	CancelOrderInputDto,
-	CancelOrderResponseDto,
+	CancelOrderInputDTO,
+	CancelOrderResponseDTO,
 } from "@application/dtos/orders/cancel-order.dto.ts";
 
 export interface ICancelOrderUseCase {
-	execute(dto: CancelOrderInputDto): Promise<CancelOrderResponseDto>;
+	execute(dto: CancelOrderInputDTO): Promise<CancelOrderResponseDTO>;
 }

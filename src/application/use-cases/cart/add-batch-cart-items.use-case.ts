@@ -2,7 +2,7 @@ import type {
 	AddBatchCartItemsDTO,
 	AddBatchCartItemsResponseDTO,
 } from "@application/dtos/cart/add-batch-cart-items.dto.ts";
-import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
+import { CartResponseMapper } from "@application/mappers/cart/cart-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
 import type { IAddBatchCartItemsUseCase } from "@application/ports/use-cases/cart/add-batch-cart-items.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
@@ -75,6 +75,6 @@ export class AddBatchCartItemsUseCase implements IAddBatchCartItemsUseCase {
 			items: preparedItems,
 		});
 
-		return CartResponseMapper.toDto(syncedCart);
+		return CartResponseMapper.toDTO(syncedCart);
 	}
 }

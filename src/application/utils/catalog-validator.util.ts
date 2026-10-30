@@ -1,6 +1,8 @@
 import type { CatalogItemDetails } from "@application/ports/external/menu-item-catalog.port.ts";
-import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
-import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
+import {
+	ItemUnavailableError,
+	MenuItemNotFoundError,
+} from "@domain/errors/cart.errors.ts";
 
 export function validateCatalogItemAvailability(
 	catalogItem: CatalogItemDetails | null,

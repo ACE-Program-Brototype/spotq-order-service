@@ -1,14 +1,16 @@
 import type {
-	RemoveCartItemRequestDto,
-	RemoveCartItemResponseDto,
+	RemoveCartItemRequestDTO,
+	RemoveCartItemResponseDTO,
 } from "@application/dtos/cart/remove-cart-item.dto.ts";
-import { CartResponseMapper } from "@application/mappers/cart-response.mapper.ts";
+import { CartResponseMapper } from "@application/mappers/cart/cart-response.mapper.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { CartExpiredError } from "@domain/errors/cart-expired.error.ts";
-import { CartItemNotFoundError } from "@domain/errors/cart-item-not-found.error.ts";
-import { CartNotFoundError } from "@domain/errors/cart-not-found.error.ts";
+import {
+	CartExpiredError,
+	CartItemNotFoundError,
+	CartNotFoundError,
+} from "@domain/errors/cart.errors.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import { inject, injectable } from "inversify";
 
@@ -20,8 +22,8 @@ export class RemoveCartItemUseCase implements IRemoveCartItemUseCase {
 	) {}
 
 	public async execute(
-		dto: RemoveCartItemRequestDto,
-	): Promise<RemoveCartItemResponseDto> {
+		dto: RemoveCartItemRequestDTO,
+	): Promise<RemoveCartItemResponseDTO> {
 		const cart = await this.cartRepository.findById(dto.cartId);
 
 		if (!cart) {
@@ -49,6 +51,6 @@ export class RemoveCartItemUseCase implements IRemoveCartItemUseCase {
 			dto.cartItemId,
 		);
 
-		return CartResponseMapper.toMutationDto(updatedCart);
+		return CartResponseMapper.toMutationDTO(updatedCart);
 	}
 }

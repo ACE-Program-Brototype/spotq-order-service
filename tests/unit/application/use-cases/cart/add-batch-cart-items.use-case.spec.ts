@@ -9,9 +9,11 @@ import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { InvalidCartQuantityError } from "@domain/errors/invalid-cart-quantity.error.ts";
-import { ItemUnavailableError } from "@domain/errors/item-unavailable.error.ts";
-import { MenuItemNotFoundError } from "@domain/errors/menu-item-not-found.error.ts";
+import {
+	InvalidCartQuantityError,
+	ItemUnavailableError,
+	MenuItemNotFoundError,
+} from "@domain/errors/cart.errors.ts";
 import type {
 	AddItemInput,
 	ICartRepository,

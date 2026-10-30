@@ -3,7 +3,7 @@ import {
 	connectDatabase,
 	disconnectDatabase,
 } from "@infrastructure/database/prisma.connect.ts";
-import logger from "@infrastructure/logger/pino.ts";
+import logger from "@infrastructure/observability/logger.ts";
 import {
 	connectRedis,
 	disconnectRedis,

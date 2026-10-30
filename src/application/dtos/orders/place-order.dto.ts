@@ -4,7 +4,7 @@ import type { OrderType } from "@domain/enums/order-type.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 
-export interface PlaceOrderInputDto {
+export interface PlaceOrderInputDTO {
 	userId: string;
 	restaurantId: string;
 	cartId?: string | undefined;
@@ -14,14 +14,14 @@ export interface PlaceOrderInputDto {
 	userPhone?: string | undefined;
 }
 
-export interface OrderItemAddonResponseDto {
+export interface OrderItemAddonResponseDTO {
 	id: string;
 	addonId: string;
 	addonName: string;
 	price: number;
 }
 
-export interface OrderItemResponseDto {
+export interface OrderItemResponseDTO {
 	id: string;
 	menuItemId: string;
 	itemName: string;
@@ -31,10 +31,10 @@ export interface OrderItemResponseDto {
 	unitPrice: number;
 	totalPrice: number;
 	specialInstructions: string | null;
-	addons: OrderItemAddonResponseDto[];
+	addons: OrderItemAddonResponseDTO[];
 }
 
-export interface OrderResponseDto {
+export interface OrderResponseDTO {
 	id: string;
 	orderNumber: string;
 	restaurantId: string;
@@ -56,6 +56,6 @@ export interface OrderResponseDto {
 	discountAmount: number;
 	grandTotal: number;
 	specialInstructions: string | null;
-	items: OrderItemResponseDto[];
+	items: OrderItemResponseDTO[];
 	createdAt: string;
 }
