@@ -48,6 +48,7 @@ describe("GetOrderHistoryUseCase", () => {
 				};
 			},
 			findById: async () => null,
+			findByRestaurantAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],
 				totalOrders: 0,
@@ -101,6 +102,7 @@ describe("GetOrderHistoryUseCase", () => {
 				hasNext: false,
 			}),
 			findById: async () => null,
+			findByRestaurantAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],
 				totalOrders: 0,

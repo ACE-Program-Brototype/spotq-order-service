@@ -154,6 +154,13 @@ class MockOrderRepository implements IOrderRepository {
 		throw new Error("Not implemented in test");
 	}
 
+	public async findByRestaurantAndOrderId(
+		_restaurantId: string,
+		_orderId: string,
+	): Promise<Order | null> {
+		return null;
+	}
+
 	public async getRestaurantOrders(): Promise<GetRestaurantOrdersRepoResult> {
 		return {
 			orders: [],

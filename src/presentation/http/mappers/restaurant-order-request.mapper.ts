@@ -1,8 +1,10 @@
 import type { GetOrdersOverviewInputDTO } from "@application/dtos/orders/get-orders-overview.dto.ts";
 import type { GetRestaurantOrdersListInputDTO } from "@application/dtos/orders/get-restaurant-orders.dto";
+import { GetRestaurantOrderDetailsInputDTO } from "@application/dtos/orders/get-restaurant-order-details.dto";
 import type { OrdersOverviewQuery } from "@presentation/http/validators/orders/orders-overview-query.schema.ts";
 import type { RestaurantOrderListQuery } from "@presentation/http/validators/orders/restaurant-orders-list-query.schema"
 import type { Request } from "express";
+import { RestaurantOrderDetailsParam } from "../validators/orders/restaurant-order-details-param.schema";
 
 export const RestaurantOrderRequestMapper = {
 	toOrdersOverviewInputDTO(req: Request): GetOrdersOverviewInputDTO {
@@ -25,6 +27,13 @@ export const RestaurantOrderRequestMapper = {
 			...(query.to !== undefined && { to:query.to}),
 			page:query.page,
 			limit:query.limit
+		}
+	},
+
+	toRestaurantOrderDetailsInputDTO(req: Request): GetRestaurantOrderDetailsInputDTO{
+		return{
+			restaurantId:req.params.restaurantId as string,
+			orderId:req.params.orderId as string,
 		}
 	}
 

@@ -1,4 +1,5 @@
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port.ts";
+import type { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
 import type { IGetRestaurantOrdersListUseCase } from "@application/ports/use-cases/orders/get-restaurant-orders.use-case.port";
 import { TYPES } from "@config/di/types.ts";
 import { RestaurantOrderRequestMapper } from "@presentation/http/mappers/restaurant-order-request.mapper.ts";
@@ -16,6 +17,9 @@ export class RestaurantOrderController {
 
 		@inject(TYPES.GetRestaurantOrdersListUseCase)
 		private readonly getRestaurantOrderListUseCase:IGetRestaurantOrdersListUseCase,
+
+		@inject(TYPES.GetRestaurantOrderDetailsUseCase)
+		private readonly getRestaurantOrderDetailsUseCase: IGetRestaurantOrdersDetailsUseCase,
 	) {}
 
 	public getOrdersOverview = async (
@@ -46,6 +50,21 @@ export class RestaurantOrderController {
 			result,
 			ORDER_MESSAGES.ORDER_LIST_FETCHED_SUCCESS,
 			HttpStatus.OK
+		)
+	}
+
+	public getRestaurantOrderDetails = async (
+		req:Request,
+		res:Response
+	):Promise<void>=>{
+		const inputDto =RestaurantOrderRequestMapper.toRestaurantOrderDetailsInputDTO(req);
+		const result = await this.getRestaurantOrderDetailsUseCase.execute(inputDto);
+
+		sendSuccessResponse(
+			res,
+			result,
+			ORDER_MESSAGES.ORDER_DETAILS_FETCHED_SUCCESS,
+			HttpStatus.OK,
 		)
 	}
 }

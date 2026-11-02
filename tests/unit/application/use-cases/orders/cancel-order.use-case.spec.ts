@@ -58,6 +58,7 @@ function createMockOrderRepo(options: {
 			throw new Error("Not implemented");
 		},
 		findById: async () => options.order ?? null,
+		findByRestaurantAndOrderId: async () => options.order ?? null,
 		getRestaurantOrders: async () => ({
 			orders: [],
 			totalOrders: 0,
