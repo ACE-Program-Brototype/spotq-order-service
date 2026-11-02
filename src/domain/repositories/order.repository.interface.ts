@@ -30,4 +30,8 @@ export interface IOrderRepository {
 	getRestaurantOrders(
 		params:GetRestaurantOrdersRepoParams,
 	): Promise<GetRestaurantOrdersRepoResult>;
+	findByRestaurantAndOrderId(
+		restaurantId:string,
+		orderId:string,
+	): Promise< Order | null >;
 }

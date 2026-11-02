@@ -1,5 +1,5 @@
 import { TYPES } from "@config/di/types.ts";
-import type { Order } from "@domain/entities/order.entity.ts";
+import { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
@@ -422,5 +422,28 @@ export class PrismaOrderRepository
 			this.handlePrismaError(error,params);
 			throw error;
 		}
+	}
+
+	public async findByRestaurantAndOrderId(restaurantId: string, orderId: string): Promise<Order | null> {
+		const order = await this.prisma.order.findFirst({
+			where:{
+				id: orderId,
+				restaurantId: restaurantId,
+			},
+			include: {
+				items: {
+					include: {
+						addons: true,
+					},
+				},
+				statusHistory:true,
+			},
+		});
+
+		if(!order){
+			return null;
+		}
+
+		return order ? OrderPersistenceMapper.toDomain(order) : null;
 	}
 }
