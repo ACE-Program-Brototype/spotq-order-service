@@ -60,9 +60,9 @@ export interface PrismaRestaurantOrderRecord{
 	orderStatus:string;
 	grandTotal:Prisma.Decimal;
 	_count:{
-		item:number;
+		items:number;
 	};
-	created:Date;
+	createdAt:Date;
 }
 
 export const OrderPersistenceMapper = {
@@ -105,9 +105,9 @@ export const OrderPersistenceMapper = {
 			orderId:record.id,
 			orderNumber:record.orderNumber,
 			orderStatus:record.orderStatus,
-			itemsCount:record._count.item,
+			itemsCount:record._count.items,
 			grandTotal:Number(record.grandTotal.toFixed(2)),
-			createdAt:record.created,
+			createdAt:record.createdAt,
 		}
 	},
 

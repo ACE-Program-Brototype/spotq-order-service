@@ -412,7 +412,7 @@ export class PrismaOrderRepository
 			const totalPages= Math.ceil(totalOrders / params.limit);
 
 			return {
-				orders:OrderPersistenceMapper.toCustomerOrderItemList(orderRecords),
+				orders:OrderPersistenceMapper.toRestaurantOrderItemList(orderRecords),
 				totalOrders,
 				totalPages,
 				currentPage:params.page,
