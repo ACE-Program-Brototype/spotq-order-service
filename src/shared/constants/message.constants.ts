@@ -96,6 +96,7 @@ export const ORDER_MESSAGES = {
 		"Cancellation reason cannot exceed 500 characters",
 	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
 	INVALID_TAX_PERCENT: "Tax percent cannot be negative",
+	ORDER_LIST_FETCHED_SUCCESS: "Orders list fetched"
 };
 
 export const ORDER_DEFAULTS = {

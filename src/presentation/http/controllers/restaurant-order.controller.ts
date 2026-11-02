@@ -1,4 +1,5 @@
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port.ts";
+import type { IGetRestaurantOrdersListUseCase } from "@application/ports/use-cases/orders/get-restaurant-orders.use-case.port";
 import { TYPES } from "@config/di/types.ts";
 import { RestaurantOrderRequestMapper } from "@presentation/http/mappers/restaurant-order-request.mapper.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
@@ -12,13 +13,16 @@ export class RestaurantOrderController {
 	constructor(
 		@inject(TYPES.GetOrdersOverviewUseCase)
 		private readonly getOrdersOverviewUseCase: IGetOrdersOverviewUseCase,
+
+		@inject(TYPES.GetRestaurantOrdersListUseCase)
+		private readonly getRestaurantOrderListUseCase:IGetRestaurantOrdersListUseCase,
 	) {}
 
 	public getOrdersOverview = async (
 		req: Request,
 		res: Response,
 	): Promise<void> => {
-		const inputDto = RestaurantOrderRequestMapper.toOrdersOverviewInputDto(req);
+		const inputDto = RestaurantOrderRequestMapper.toOrdersOverviewInputDTO(req);
 		const result = await this.getOrdersOverviewUseCase.execute(inputDto);
 
 		sendSuccessResponse(
@@ -28,6 +32,22 @@ export class RestaurantOrderController {
 			HttpStatus.OK,
 		);
 	};
+
+	public getRestaurantOrderList = async (
+		req:Request,
+		res:Response,
+	):Promise<void> => {
+		const inputDto = RestaurantOrderRequestMapper.toRestaurantOrdersListInputDTO(req);
+
+		const result = await this.getRestaurantOrderListUseCase.execute(inputDto);
+
+		sendSuccessResponse(
+			res,
+			result,
+			ORDER_MESSAGES.ORDER_LIST_FETCHED_SUCCESS,
+			HttpStatus.OK
+		)
+	}
 }
 
 export default RestaurantOrderController;

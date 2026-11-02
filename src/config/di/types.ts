@@ -1,3 +1,5 @@
+import { GetRestaurantOrdersListUseCase } from "@application/use-cases/orders/get-restaurant-orders.use-case";
+
 export const TYPES = {
 	PrismaClient: Symbol.for("PrismaClient"),
 	CartRepository: Symbol.for("CartRepository"),
@@ -20,6 +22,7 @@ export const TYPES = {
 	QueueServiceClient: Symbol.for("QueueServiceClient"),
 	PlaceOrderUseCase: Symbol.for("PlaceOrderUseCase"),
 	GetCheckoutDetailsUseCase: Symbol.for("GetCheckoutDetailsUseCase"),
+	GetRestaurantOrdersListUseCase: Symbol.for("GetRestaurantOrdersListUsecase")
 };
 
 export default TYPES;

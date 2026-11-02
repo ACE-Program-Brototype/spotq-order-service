@@ -1,4 +1,3 @@
-import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { z } from "zod";
 
@@ -32,27 +31,6 @@ export const ordersOverviewQuerySchema = z.object({
 			return date;
 		})
 		.optional(),
-
-	status: z
-		.enum(
-			[
-				OrderStatus.PLACED,
-				OrderStatus.CONFIRMED,
-				OrderStatus.PREPARING,
-				OrderStatus.READY,
-				OrderStatus.SERVED,
-				OrderStatus.COMPLETED,
-				OrderStatus.CANCELLED,
-			] as const,
-			{
-				message: ORDER_MESSAGES.INVALID_ORDER_STATUS,
-			},
-		)
-		.optional(),
-
-	search: z.string().trim().max(100).optional(),
-	page: z.coerce.number().int().positive().default(1),
-	limit: z.coerce.number().int().positive().max(100).default(20),
 });
 
 export type OrdersOverviewQuery = z.infer<typeof ordersOverviewQuerySchema>;

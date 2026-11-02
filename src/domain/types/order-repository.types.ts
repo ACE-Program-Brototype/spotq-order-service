@@ -4,10 +4,6 @@ export interface GetOrdersOverviewRepoParams {
 	restaurantId: string;
 	fromDate?: Date | undefined;
 	toDate?: Date | undefined;
-	status?: OrderStatus | undefined;
-	search?: string | undefined;
-	page: number;
-	limit: number;
 }
 
 export interface OrderOverviewSummaryData {
@@ -15,9 +11,6 @@ export interface OrderOverviewSummaryData {
 	grossRevenue: number;
 	completedOrders: number;
 	cancelledOrders: number;
-	pendingOrders: number;
-	preparingOrders: number;
-	readyOrders: number;
 }
 
 export interface OrderOverviewItemData {
@@ -38,8 +31,6 @@ export interface OrderOverviewPaginationData {
 
 export interface GetOrdersOverviewRepoResult {
 	summary: OrderOverviewSummaryData;
-	orders: OrderOverviewItemData[];
-	pagination: OrderOverviewPaginationData;
 }
 
 export interface GetCustomerOrderHistoryRepoParams {
@@ -47,6 +38,33 @@ export interface GetCustomerOrderHistoryRepoParams {
 	page: number;
 	limit: number;
 	status?: OrderStatus | undefined;
+}
+
+export interface GetRestaurantOrdersRepoParams{
+	restaurantId:string;
+	search?:string | undefined;
+	status?:OrderStatus | undefined;
+	fromDate?:Date | undefined;
+	toDate?:Date |undefined;
+	page:number;
+	limit:number;
+}
+
+export interface RestaurantOrderListItemData{
+	orderId:string;
+	orderNumber:string;
+	orderStatus:string;
+	itemsCount:number;
+	grandTotal:number;
+	createdAt:Date;
+}
+
+export interface GetRestaurantOrdersRepoResult{
+	orders:RestaurantOrderListItemData[];
+	totalOrders:number;
+	totalPages:number;
+	currentPage:number;
+	hasNext:boolean;
 }
 
 export interface CustomerOrderHistoryItemData {
@@ -85,3 +103,4 @@ export interface CancelledOrderData {
 	cancellationReason: string | null;
 	cancelledAt: Date | null;
 }
+

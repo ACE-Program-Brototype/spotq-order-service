@@ -27,10 +27,6 @@ export class GetOrdersOverviewUseCase implements IGetOrdersOverviewUseCase {
 			restaurantId: dto.restaurantId,
 			fromDate: dto.from,
 			toDate: dto.to,
-			status: dto.status,
-			search: dto.search,
-			page: dto.page,
-			limit: dto.limit,
 		});
 
 		return OrdersOverviewMapper.toDTO(result);

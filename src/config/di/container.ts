@@ -36,6 +36,8 @@ import { RestaurantServiceClient } from "@infrastructure/services/restaurant-ser
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
 import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
 import { RestaurantOrderController } from "@presentation/http/controllers/restaurant-order.controller.ts";
+import type { IGetRestaurantOrdersListUseCase } from "@application/ports/use-cases/orders/get-restaurant-orders.use-case.port";
+import { GetRestaurantOrdersListUseCase } from "@application/use-cases/orders/get-restaurant-orders.use-case";
 import { Container } from "inversify";
 
 const container = new Container();
@@ -135,6 +137,11 @@ container
 container
 	.bind<IGetCheckoutDetailsUseCase>(TYPES.GetCheckoutDetailsUseCase)
 	.to(GetCheckoutDetailsUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IGetRestaurantOrdersListUseCase>(TYPES.GetRestaurantOrdersListUseCase)
+	.to(GetRestaurantOrdersListUseCase)
 	.inSingletonScope();
 
 export { container };

@@ -30,7 +30,8 @@ export const RESTAURANT_SERVICE_ENDPOINTS = {
 } as const;
 
 export const RESTAURANT_ORDER_ROUTES = {
-	OVERVIEW: "/:restaurantId/overview",
+	OVERVIEW: "/:restaurantId/orders/overview",
+	LIST: "/:restaurantId/orders",
 } as const;
 
 export const RESTAURANT_SERVICE_ROUTES = {
