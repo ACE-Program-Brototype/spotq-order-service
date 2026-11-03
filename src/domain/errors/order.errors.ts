@@ -54,3 +54,15 @@ export class InvalidTaxPercentError extends DomainError {
 		super(message, ORDER_ERROR_CODES.INVALID_TAX_PERCENT);
 	}
 }
+
+export class InvalidOrderStatusTransitionError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.INVALID_STATUS_TRANSITION) {
+		super(message, ORDER_ERROR_CODES.INVALID_STATUS_TRANSITION);
+	}
+}
+
+export class OrderStatusConflictError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.ORDER_STATUS_CONFLICT) {
+		super(message, ORDER_ERROR_CODES.ORDER_STATUS_CONFLICT);
+	}
+}

@@ -6,6 +6,7 @@ import customerOrderRouter from "@presentation/http/routes/customer-order.route.
 import healthRouter from "@presentation/http/routes/health.route.ts";
 import metricsRouter from "@presentation/http/routes/metrics.route.ts";
 import restaurantOrderRouter from "@presentation/http/routes/restaurant-order.route.ts";
+import staffOrderRouter from "@presentation/http/routes/staff-order.route.ts";
 import ROUTES from "@shared/constants/routes.constants.ts";
 import compression from "compression";
 import cors from "cors";
@@ -32,6 +33,8 @@ app.use(ROUTES.HEALTH, healthRouter);
 app.use(ROUTES.METRICS, metricsRouter);
 
 app.use(ROUTES.CARTS, cartRouter);
+
+app.use(ROUTES.STAFF, staffOrderRouter);
 
 app.use(ROUTES.ROOT, customerOrderRouter);
 

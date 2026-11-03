@@ -5,6 +5,11 @@ export const ROUTES = {
 	CARTS: "/carts",
 	RESTAURANTS: "/restaurants",
 	ORDERS: "/orders",
+	STAFF: "/staff",
+} as const;
+
+export const STAFF_ORDER_ROUTES = {
+	UPDATE_STATUS: "/:orderId/status",
 } as const;
 
 export const ORDER_ROUTES = {
