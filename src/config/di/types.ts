@@ -25,7 +25,9 @@ export const TYPES = {
 	PlaceOrderUseCase: Symbol.for("PlaceOrderUseCase"),
 	GetCheckoutDetailsUseCase: Symbol.for("GetCheckoutDetailsUseCase"),
 	GetRestaurantOrdersListUseCase: Symbol.for("GetRestaurantOrdersListUsecase"),
-	GetRestaurantOrderDetailsUseCase: Symbol.for("GetRestaurantOrderDetailsUseCase"),
+	GetRestaurantOrderDetailsUseCase: Symbol.for(
+		"GetRestaurantOrderDetailsUseCase",
+	),
 };
 
 export default TYPES;

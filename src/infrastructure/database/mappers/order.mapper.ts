@@ -54,15 +54,15 @@ export type PrismaOrderWithRelations = Prisma.OrderGetPayload<{
 	};
 }>;
 
-export interface PrismaRestaurantOrderRecord{
-	id:string;
-	orderNumber:string;
-	orderStatus:string;
-	grandTotal:Prisma.Decimal;
-	_count:{
-		items:number;
+export interface PrismaRestaurantOrderRecord {
+	id: string;
+	orderNumber: string;
+	orderStatus: string;
+	grandTotal: Prisma.Decimal;
+	_count: {
+		items: number;
 	};
-	createdAt:Date;
+	createdAt: Date;
 }
 
 export const OrderPersistenceMapper = {
@@ -100,20 +100,24 @@ export const OrderPersistenceMapper = {
 		};
 	},
 
-	toRestaurantOrderItem(record:PrismaRestaurantOrderRecord):RestaurantOrderListItemData{
+	toRestaurantOrderItem(
+		record: PrismaRestaurantOrderRecord,
+	): RestaurantOrderListItemData {
 		return {
-			orderId:record.id,
-			orderNumber:record.orderNumber,
-			orderStatus:record.orderStatus,
-			itemsCount:record._count.items,
-			grandTotal:Number(record.grandTotal.toFixed(2)),
-			createdAt:record.createdAt,
-		}
+			orderId: record.id,
+			orderNumber: record.orderNumber,
+			orderStatus: record.orderStatus,
+			itemsCount: record._count.items,
+			grandTotal: Number(record.grandTotal.toFixed(2)),
+			createdAt: record.createdAt,
+		};
 	},
 
-	toRestaurantOrderItemList(records:PrismaRestaurantOrderRecord[]):RestaurantOrderListItemData[]{
-		return records.map((record)=>
-			OrderPersistenceMapper.toRestaurantOrderItem(record)
+	toRestaurantOrderItemList(
+		records: PrismaRestaurantOrderRecord[],
+	): RestaurantOrderListItemData[] {
+		return records.map((record) =>
+			OrderPersistenceMapper.toRestaurantOrderItem(record),
 		);
 	},
 
@@ -196,7 +200,4 @@ export const OrderPersistenceMapper = {
 			})),
 		});
 	},
-
-	
-
 };

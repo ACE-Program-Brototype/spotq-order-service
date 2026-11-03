@@ -12,6 +12,8 @@ import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/ca
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
+import type { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
+import type { IGetRestaurantOrdersListUseCase } from "@application/ports/use-cases/orders/get-restaurant-orders.use-case.port";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { AddBatchCartItemsUseCase } from "@application/use-cases/cart/add-batch-cart-items.use-case.ts";
 import { AddCartItemUseCase } from "@application/use-cases/cart/add-cart-item.use-case.ts";
@@ -23,6 +25,8 @@ import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.u
 import { GetCheckoutDetailsUseCase } from "@application/use-cases/orders/get-checkout-details.use-case.ts";
 import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-history.use-case.ts";
 import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orders-overview.use-case.ts";
+import { GetRestaurantOrderDetailsUseCase } from "@application/use-cases/orders/get-restaurant-order-details.use-case";
+import { GetRestaurantOrdersListUseCase } from "@application/use-cases/orders/get-restaurant-orders.use-case";
 import { PlaceOrderUseCase } from "@application/use-cases/orders/place-order.use-case.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
@@ -36,11 +40,7 @@ import { RestaurantServiceClient } from "@infrastructure/services/restaurant-ser
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
 import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
 import { RestaurantOrderController } from "@presentation/http/controllers/restaurant-order.controller.ts";
-import type { IGetRestaurantOrdersListUseCase } from "@application/ports/use-cases/orders/get-restaurant-orders.use-case.port";
-import { GetRestaurantOrdersListUseCase } from "@application/use-cases/orders/get-restaurant-orders.use-case";
 import { Container } from "inversify";
-import { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
-import { GetRestaurantOrderDetailsUseCase } from "@application/use-cases/orders/get-restaurant-order-details.use-case";
 
 const container = new Container();
 
@@ -147,7 +147,9 @@ container
 	.inSingletonScope();
 
 container
-	.bind<IGetRestaurantOrdersDetailsUseCase>(TYPES.GetRestaurantOrderDetailsUseCase)
+	.bind<IGetRestaurantOrdersDetailsUseCase>(
+		TYPES.GetRestaurantOrderDetailsUseCase,
+	)
 	.to(GetRestaurantOrderDetailsUseCase)
 	.inSingletonScope();
 

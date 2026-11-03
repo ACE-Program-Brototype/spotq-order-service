@@ -8,10 +8,10 @@ import {
 } from "@presentation/http/middleware/validation.middleware.ts";
 import { ordersOverviewQuerySchema } from "@presentation/http/validators/orders/orders-overview-query.schema.ts";
 import { restaurantIdParamSchema } from "@presentation/http/validators/restaurant-id-param.schema.ts";
-import { restaurantOrderListQuerySchema } from "../validators/orders/restaurant-orders-list-query.schema";
 import { RESTAURANT_ORDER_ROUTES } from "@shared/constants/routes.constants.ts";
 import { Router } from "express";
 import { restaurantOrderDetailsParamSchema } from "../validators/orders/restaurant-order-details-param.schema";
+import { restaurantOrderListQuerySchema } from "../validators/orders/restaurant-orders-list-query.schema";
 
 const restaurantOrderRouter: Router = Router();
 
@@ -33,12 +33,12 @@ restaurantOrderRouter.get(
 	validateRequestParams(restaurantIdParamSchema),
 	validateRequestQuery(restaurantOrderListQuerySchema),
 	restaurantOrderController.getRestaurantOrderList,
-)
+);
 
 restaurantOrderRouter.get(
 	RESTAURANT_ORDER_ROUTES.DETAILS,
 	restaurantAdminAuthMiddleware,
 	validateRequestParams(restaurantOrderDetailsParamSchema),
-	restaurantOrderController.getRestaurantOrderDetails
-)
+	restaurantOrderController.getRestaurantOrderDetails,
+);
 export default restaurantOrderRouter;

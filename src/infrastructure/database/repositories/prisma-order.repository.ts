@@ -1,5 +1,5 @@
 import { TYPES } from "@config/di/types.ts";
-import { Order } from "@domain/entities/order.entity.ts";
+import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
@@ -205,11 +205,7 @@ export class PrismaOrderRepository
 			};
 		}
 
-		const [
-			totalOrders,
-			revenueAggregate,
-			statusGroups,
-		] = await Promise.all([
+		const [totalOrders, revenueAggregate, statusGroups] = await Promise.all([
 			this.prisma.order.count({
 				where: baseDateFilter,
 			}),
@@ -231,8 +227,6 @@ export class PrismaOrderRepository
 					id: true,
 				},
 			}),
-
-
 		]);
 
 		const statusCountMap: Record<string, number> = {};
@@ -243,12 +237,9 @@ export class PrismaOrderRepository
 		const completedOrders = statusCountMap[OrderStatus.COMPLETED] ?? 0;
 		const cancelledOrders = statusCountMap[OrderStatus.CANCELLED] ?? 0;
 
-
 		const grossRevenue = revenueAggregate._sum.grandTotal
 			? Number(revenueAggregate._sum.grandTotal.toFixed(2))
 			: 0;
-
-
 
 		return {
 			summary: {
@@ -359,8 +350,10 @@ export class PrismaOrderRepository
 		}
 	}
 
-	public async getRestaurantOrders(params: GetRestaurantOrdersRepoParams): Promise<GetRestaurantOrdersRepoResult> {
-		try{
+	public async getRestaurantOrders(
+		params: GetRestaurantOrdersRepoParams,
+	): Promise<GetRestaurantOrdersRepoResult> {
+		try {
 			const where: Prisma.OrderWhereInput = {
 				restaurantId: params.restaurantId,
 				...(params.search && {
@@ -376,14 +369,13 @@ export class PrismaOrderRepository
 
 				...(params.fromDate || params.toDate
 					? {
-						createdAt: {
-							...(params.fromDate && {gte:params.fromDate}),
-							...(params.toDate && {lte:params.toDate}),
-						},
-					}
-				:{}),
-				
-			}
+							createdAt: {
+								...(params.fromDate && { gte: params.fromDate }),
+								...(params.toDate && { lte: params.toDate }),
+							},
+						}
+					: {}),
+			};
 
 			const skip = (params.page - 1) * params.limit;
 
@@ -391,42 +383,45 @@ export class PrismaOrderRepository
 				this.prisma.order.findMany({
 					where,
 					skip,
-					take:params.limit,
+					take: params.limit,
 					orderBy: {
-						createdAt:"desc",
+						createdAt: "desc",
 					},
-					include:{
-						_count:{
-							select:{
-								items:true,
-							}
-						}
-					}
+					include: {
+						_count: {
+							select: {
+								items: true,
+							},
+						},
+					},
 				}),
 
 				this.prisma.order.count({
 					where,
 				}),
-			])
+			]);
 
-			const totalPages= Math.ceil(totalOrders / params.limit);
+			const totalPages = Math.ceil(totalOrders / params.limit);
 
 			return {
-				orders:OrderPersistenceMapper.toRestaurantOrderItemList(orderRecords),
+				orders: OrderPersistenceMapper.toRestaurantOrderItemList(orderRecords),
 				totalOrders,
 				totalPages,
-				currentPage:params.page,
+				currentPage: params.page,
 				hasNext: params.page < totalPages,
-			}
-		}catch (error){
-			this.handlePrismaError(error,params);
+			};
+		} catch (error) {
+			this.handlePrismaError(error, params);
 			throw error;
 		}
 	}
 
-	public async findByRestaurantAndOrderId(restaurantId: string, orderId: string): Promise<Order | null> {
+	public async findByRestaurantAndOrderId(
+		restaurantId: string,
+		orderId: string,
+	): Promise<Order | null> {
 		const order = await this.prisma.order.findFirst({
-			where:{
+			where: {
 				id: orderId,
 				restaurantId: restaurantId,
 			},
@@ -436,11 +431,11 @@ export class PrismaOrderRepository
 						addons: true,
 					},
 				},
-				statusHistory:true,
+				statusHistory: true,
 			},
 		});
 
-		if(!order){
+		if (!order) {
 			return null;
 		}
 

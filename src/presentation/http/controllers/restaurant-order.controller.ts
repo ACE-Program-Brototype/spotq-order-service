@@ -16,7 +16,7 @@ export class RestaurantOrderController {
 		private readonly getOrdersOverviewUseCase: IGetOrdersOverviewUseCase,
 
 		@inject(TYPES.GetRestaurantOrdersListUseCase)
-		private readonly getRestaurantOrderListUseCase:IGetRestaurantOrdersListUseCase,
+		private readonly getRestaurantOrderListUseCase: IGetRestaurantOrdersListUseCase,
 
 		@inject(TYPES.GetRestaurantOrderDetailsUseCase)
 		private readonly getRestaurantOrderDetailsUseCase: IGetRestaurantOrdersDetailsUseCase,
@@ -38,10 +38,11 @@ export class RestaurantOrderController {
 	};
 
 	public getRestaurantOrderList = async (
-		req:Request,
-		res:Response,
-	):Promise<void> => {
-		const inputDto = RestaurantOrderRequestMapper.toRestaurantOrdersListInputDTO(req);
+		req: Request,
+		res: Response,
+	): Promise<void> => {
+		const inputDto =
+			RestaurantOrderRequestMapper.toRestaurantOrdersListInputDTO(req);
 
 		const result = await this.getRestaurantOrderListUseCase.execute(inputDto);
 
@@ -49,24 +50,26 @@ export class RestaurantOrderController {
 			res,
 			result,
 			ORDER_MESSAGES.ORDER_LIST_FETCHED_SUCCESS,
-			HttpStatus.OK
-		)
-	}
+			HttpStatus.OK,
+		);
+	};
 
 	public getRestaurantOrderDetails = async (
-		req:Request,
-		res:Response
-	):Promise<void>=>{
-		const inputDto =RestaurantOrderRequestMapper.toRestaurantOrderDetailsInputDTO(req);
-		const result = await this.getRestaurantOrderDetailsUseCase.execute(inputDto);
+		req: Request,
+		res: Response,
+	): Promise<void> => {
+		const inputDto =
+			RestaurantOrderRequestMapper.toRestaurantOrderDetailsInputDTO(req);
+		const result =
+			await this.getRestaurantOrderDetailsUseCase.execute(inputDto);
 
 		sendSuccessResponse(
 			res,
 			result,
 			ORDER_MESSAGES.ORDER_DETAILS_FETCHED_SUCCESS,
 			HttpStatus.OK,
-		)
-	}
+		);
+	};
 }
 
 export default RestaurantOrderController;

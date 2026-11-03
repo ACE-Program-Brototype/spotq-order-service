@@ -13,7 +13,6 @@ export interface OrderSummaryDTO {
 	cancelled_orders: number;
 }
 
-
 export interface OrdersOverviewResponseDTO {
 	summary: OrderSummaryDTO;
 }

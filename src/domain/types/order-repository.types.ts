@@ -40,31 +40,31 @@ export interface GetCustomerOrderHistoryRepoParams {
 	status?: OrderStatus | undefined;
 }
 
-export interface GetRestaurantOrdersRepoParams{
-	restaurantId:string;
-	search?:string | undefined;
-	status?:OrderStatus | undefined;
-	fromDate?:Date | undefined;
-	toDate?:Date |undefined;
-	page:number;
-	limit:number;
+export interface GetRestaurantOrdersRepoParams {
+	restaurantId: string;
+	search?: string | undefined;
+	status?: OrderStatus | undefined;
+	fromDate?: Date | undefined;
+	toDate?: Date | undefined;
+	page: number;
+	limit: number;
 }
 
-export interface RestaurantOrderListItemData{
-	orderId:string;
-	orderNumber:string;
-	orderStatus:string;
-	itemsCount:number;
-	grandTotal:number;
-	createdAt:Date;
+export interface RestaurantOrderListItemData {
+	orderId: string;
+	orderNumber: string;
+	orderStatus: string;
+	itemsCount: number;
+	grandTotal: number;
+	createdAt: Date;
 }
 
-export interface GetRestaurantOrdersRepoResult{
-	orders:RestaurantOrderListItemData[];
-	totalOrders:number;
-	totalPages:number;
-	currentPage:number;
-	hasNext:boolean;
+export interface GetRestaurantOrdersRepoResult {
+	orders: RestaurantOrderListItemData[];
+	totalOrders: number;
+	totalPages: number;
+	currentPage: number;
+	hasNext: boolean;
 }
 
 export interface CustomerOrderHistoryItemData {
@@ -103,4 +103,3 @@ export interface CancelledOrderData {
 	cancellationReason: string | null;
 	cancelledAt: Date | null;
 }
-

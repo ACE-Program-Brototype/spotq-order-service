@@ -1,13 +1,13 @@
-import TYPES from "@config/di/types";
-import { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
-import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
-import {
+import type {
 	GetRestaurantOrderDetailsInputDTO,
 	GetRestaurantOrderDetailsResponseDTO,
 } from "@application/dtos/orders/get-restaurant-order-details.dto";
+import { GetRestaurantOrderDetailsMapper } from "@application/mappers/orders/get-restaurant-order-details.mapper";
+import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
+import type { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
+import TYPES from "@config/di/types";
 import { OrderNotFoundError } from "@domain/errors";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface";
-import { GetRestaurantOrderDetailsMapper } from "@application/mappers/orders/get-restaurant-order-details.mapper";
 import { inject, injectable } from "inversify";
 
 @injectable()

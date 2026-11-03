@@ -7,7 +7,7 @@ import type {
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
 	GetRestaurantOrdersRepoParams,
-	GetRestaurantOrdersRepoResult
+	GetRestaurantOrdersRepoResult,
 } from "@domain/types/order-repository.types.ts";
 
 export interface IOrderRepository {
@@ -28,10 +28,10 @@ export interface IOrderRepository {
 		previousStatus: OrderStatus,
 	): Promise<CancelledOrderData>;
 	getRestaurantOrders(
-		params:GetRestaurantOrdersRepoParams,
+		params: GetRestaurantOrdersRepoParams,
 	): Promise<GetRestaurantOrdersRepoResult>;
 	findByRestaurantAndOrderId(
-		restaurantId:string,
-		orderId:string,
-	): Promise< Order | null >;
+		restaurantId: string,
+		orderId: string,
+	): Promise<Order | null>;
 }

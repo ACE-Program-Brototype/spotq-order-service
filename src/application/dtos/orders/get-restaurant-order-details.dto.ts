@@ -3,35 +3,35 @@ import type { OrderType } from "@domain/enums/order-type.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 
-export interface GetRestaurantOrderDetailsInputDTO{
-    restaurantId:string;
-    orderId:string;
+export interface GetRestaurantOrderDetailsInputDTO {
+	restaurantId: string;
+	orderId: string;
 }
 
-export interface RestaurantOrderAddonDTO{
-    addonId:string;
-    addonName:string;
-    price:number;
+export interface RestaurantOrderAddonDTO {
+	addonId: string;
+	addonName: string;
+	price: number;
 }
 
-export interface RestaurantOrderItemDTO{
-    itemId: string;
-    menuItemId:string;
-    itemName:string;
-    variantName:string | null;
-    quantity:number;
-    unitPrice:number;
-    totalPrice:number;
-    specialInstructions:string | null;
-    addons: RestaurantOrderAddonDTO[];
+export interface RestaurantOrderItemDTO {
+	itemId: string;
+	menuItemId: string;
+	itemName: string;
+	variantName: string | null;
+	quantity: number;
+	unitPrice: number;
+	totalPrice: number;
+	specialInstructions: string | null;
+	addons: RestaurantOrderAddonDTO[];
 }
 
-export interface RestaurantOrderStatusHistoryDTO{
-    previousStatus:OrderStatus | null;
-    currentStatus:OrderStatus;
-    changedBy:string;
-    notes:string |null;
-    createdAt: Date;
+export interface RestaurantOrderStatusHistoryDTO {
+	previousStatus: OrderStatus | null;
+	currentStatus: OrderStatus;
+	changedBy: string;
+	notes: string | null;
+	createdAt: Date;
 }
 
 export interface GetRestaurantOrderDetailsResponseDTO {
