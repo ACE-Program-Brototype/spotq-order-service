@@ -1,7 +1,3 @@
-import { GetRestaurantOrderDetailsMapper } from "@application/mappers/orders/get-restaurant-order-details.mapper";
-import { GetRestaurantOrderDetailsUseCase } from "@application/use-cases/orders/get-restaurant-order-details.use-case";
-import { GetRestaurantOrdersListUseCase } from "@application/use-cases/orders/get-restaurant-orders.use-case";
-
 export const TYPES = {
 	PrismaClient: Symbol.for("PrismaClient"),
 	CartRepository: Symbol.for("CartRepository"),
