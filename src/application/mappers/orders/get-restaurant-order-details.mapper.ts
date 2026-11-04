@@ -1,8 +1,8 @@
-import type { GetRestaurantOrderDetailsResponseDTO } from "@application/dtos/orders/get-restaurant-order-details.dto";
+import type { GetRestaurantOrderDetailsOutputDTO } from "@application/dtos/orders/get-restaurant-order-details.dto";
 import type { Order } from "@domain/entities/order.entity";
 
 export const GetRestaurantOrderDetailsMapper = {
-	toDTO(order: Order): GetRestaurantOrderDetailsResponseDTO {
+	toDTO(order: Order): GetRestaurantOrderDetailsOutputDTO {
 		return {
 			orderId: order.id,
 			orderNumber: order.orderNumber,

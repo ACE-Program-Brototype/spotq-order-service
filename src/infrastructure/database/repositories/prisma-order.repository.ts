@@ -205,29 +205,27 @@ export class PrismaOrderRepository
 			};
 		}
 
-		const [totalOrders, revenueAggregate, statusGroups] = await Promise.all([
-			this.prisma.order.count({
-				where: baseDateFilter,
-			}),
+		const totalOrders = await this.prisma.order.count({
+			where: baseDateFilter,
+		});
 
-			this.prisma.order.aggregate({
-				where: {
-					...baseDateFilter,
-					orderStatus: OrderStatus.COMPLETED,
-				},
-				_sum: {
-					grandTotal: true,
-				},
-			}),
+		const revenueAggregate = await this.prisma.order.aggregate({
+			where: {
+				...baseDateFilter,
+				orderStatus: OrderStatus.COMPLETED,
+			},
+			_sum: {
+				grandTotal: true,
+			},
+		});
 
-			this.prisma.order.groupBy({
-				by: ["orderStatus"],
-				where: baseDateFilter,
-				_count: {
-					id: true,
-				},
-			}),
-		]);
+		const statusGroups = await this.prisma.order.groupBy({
+			by: ["orderStatus"],
+			where: baseDateFilter,
+			_count: {
+				id: true,
+			},
+		});
 
 		const statusCountMap: Record<string, number> = {};
 		for (const group of statusGroups) {
@@ -379,7 +377,7 @@ export class PrismaOrderRepository
 
 			const skip = (params.page - 1) * params.limit;
 
-			const [orderRecords, totalOrders] = await Promise.all([
+			const [orderRecords, totalOrders] = await this.prisma.$transaction([
 				this.prisma.order.findMany({
 					where,
 					skip,

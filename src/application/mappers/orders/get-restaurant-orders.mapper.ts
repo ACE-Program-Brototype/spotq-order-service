@@ -14,10 +14,12 @@ export const GetRestaurantOrdersListMapper = {
 				grandTotal: Number(order.grandTotal.toFixed(2)),
 				createdAt: order.createdAt,
 			})),
-			totalOrders: repoResult.totalOrders,
-			totalPages: repoResult.totalPages,
-			currentPage: repoResult.currentPage,
-			hasNext: repoResult.hasNext,
+			pagination: {
+				totalOrders: repoResult.totalOrders,
+				totalPages: repoResult.totalPages,
+				currentPage: repoResult.currentPage,
+				hasNext: repoResult.hasNext,
+			},
 		};
 	},
 };

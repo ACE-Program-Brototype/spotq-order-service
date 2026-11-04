@@ -77,6 +77,8 @@ poolUrl.searchParams.delete("sslmode");
 const pool = new pg.Pool({
 	connectionString: poolUrl.toString(),
 	ssl,
+	max: 3,
+	idleTimeoutMillis: 10000,
 });
 
 const adapter = new PrismaPg(pool);

@@ -1,4 +1,3 @@
-import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 
 export interface GetOrdersOverviewInputDTO {
 	restaurantId: string;

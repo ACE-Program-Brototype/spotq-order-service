@@ -34,7 +34,7 @@ export interface RestaurantOrderStatusHistoryDTO {
 	createdAt: Date;
 }
 
-export interface GetRestaurantOrderDetailsResponseDTO {
+export interface GetRestaurantOrderDetailsOutputDTO {
 	orderId: string;
 	orderNumber: string;
 	orderStatus: OrderStatus;

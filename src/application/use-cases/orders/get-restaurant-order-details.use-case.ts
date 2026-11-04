@@ -1,6 +1,6 @@
 import type {
 	GetRestaurantOrderDetailsInputDTO,
-	GetRestaurantOrderDetailsResponseDTO,
+	GetRestaurantOrderDetailsOutputDTO,
 } from "@application/dtos/orders/get-restaurant-order-details.dto";
 import { GetRestaurantOrderDetailsMapper } from "@application/mappers/orders/get-restaurant-order-details.mapper";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
@@ -24,7 +24,7 @@ export class GetRestaurantOrderDetailsUseCase
 
 	public async execute(
 		dto: GetRestaurantOrderDetailsInputDTO,
-	): Promise<GetRestaurantOrderDetailsResponseDTO> {
+	): Promise<GetRestaurantOrderDetailsOutputDTO> {
 		await this.restaurantServiceClient.validateRestaurant(dto.restaurantId);
 		const order = await this.orderRepository.findByRestaurantAndOrderId(
 			dto.restaurantId,
