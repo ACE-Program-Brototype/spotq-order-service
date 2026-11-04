@@ -1,0 +1,84 @@
+import { ORDER_EVENTS } from "@shared/constants/events.constants.ts";
+import { z } from "zod";
+
+export const orderPaymentInvoiceItemAddonSchema = z.object({
+	addonId: z.string(),
+	addonName: z.string(),
+	price: z.number(),
+});
+
+export type OrderPaymentInvoiceItemAddonDTO = z.infer<
+	typeof orderPaymentInvoiceItemAddonSchema
+>;
+
+export const orderPaymentInvoiceItemSchema = z.object({
+	menuItemId: z.string(),
+	itemName: z.string(),
+	variantId: z.string().nullable(),
+	variantName: z.string().nullable(),
+	quantity: z.number().int().positive(),
+	unitPrice: z.number(),
+	totalPrice: z.number(),
+	specialInstructions: z.string().nullable(),
+	addons: z.array(orderPaymentInvoiceItemAddonSchema),
+});
+
+export type OrderPaymentInvoiceItemDTO = z.infer<
+	typeof orderPaymentInvoiceItemSchema
+>;
+
+export const orderPaymentInvoiceFinancialsSchema = z.object({
+	subtotal: z.number(),
+	taxAmount: z.number(),
+	taxPercent: z.number().optional(),
+	platformFee: z.number(),
+	discountAmount: z.number(),
+	grandTotal: z.number(),
+	amountPaise: z.number().int().positive(),
+});
+
+export type OrderPaymentInvoiceFinancialsDTO = z.infer<
+	typeof orderPaymentInvoiceFinancialsSchema
+>;
+
+export const orderInvoiceDataSchema = z.object({
+	orderId: z.string(),
+	orderNumber: z.string(),
+	paymentId: z.string().nullable(),
+	restaurantId: z.string(),
+	restaurantName: z.string().nullable(),
+	customerId: z.string().nullable(),
+	customerName: z.string().nullable(),
+	customerPhone: z.string().nullable(),
+	orderingMode: z.string(),
+	tableId: z.string().nullable(),
+	tableNumber: z.number().nullable(),
+	queueEntryId: z.string().nullable().optional(),
+	paymentMode: z.string(),
+	paymentStatus: z.string(),
+	orderStatus: z.string(),
+	currency: z.string(),
+	specialInstructions: z.string().nullable().optional(),
+	financials: orderPaymentInvoiceFinancialsSchema,
+	items: z.array(orderPaymentInvoiceItemSchema),
+	createdAt: z.string(),
+	confirmedAt: z.string(),
+});
+
+export type OrderInvoiceDataDTO = z.infer<typeof orderInvoiceDataSchema>;
+
+export const orderPaymentInvoiceEventSchema = z.object({
+	eventId: z.string(),
+	eventType: z.literal(ORDER_EVENTS.PAYMENT_INVOICE),
+	aggregateId: z.string(),
+	timestamp: z.string(),
+	orderData: orderInvoiceDataSchema,
+});
+
+export type OrderPaymentInvoiceEventDTO = z.infer<
+	typeof orderPaymentInvoiceEventSchema
+>;
+
+// Aliases for compatibility
+export const orderConfirmedEventSchema = orderPaymentInvoiceEventSchema;
+export type OrderConfirmedEventDTO = OrderPaymentInvoiceEventDTO;

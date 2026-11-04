@@ -49,6 +49,10 @@ export class CustomerOrderController {
 	public placeOrder = async (req: Request, res: Response): Promise<void> => {
 		const userId = req.user?.userId as string;
 		const body = req.body as PlaceOrderBody;
+		const idempotencyKey =
+			(req.headers?.["x-idempotency-key"] as string | undefined) ??
+			body.idempotencyKey ??
+			undefined;
 
 		const result = await this.placeOrderUseCase.execute({
 			userId,
@@ -56,6 +60,8 @@ export class CustomerOrderController {
 			userPhone: body.userPhone ?? req.user?.phone,
 			restaurantId: body.restaurantId,
 			cartId: body.cartId,
+			tableId: body.tableId,
+			idempotencyKey,
 			paymentMode: body.paymentMode,
 			specialInstructions: body.specialInstructions ?? undefined,
 		});

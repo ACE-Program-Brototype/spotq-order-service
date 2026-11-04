@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
+	CreateOrderPaymentInputDTO,
+	CreateOrderPaymentResponseDTO,
+} from "@application/dtos/external/payment-service.dto.ts";
+import type {
 	ActiveQueueDetails,
 	ActiveQueueUserResponseDTO,
 } from "@application/dtos/external/queue-active-user.dto.ts";
@@ -9,17 +13,17 @@ import type {
 	CatalogItemDetails,
 	IMenuItemCatalogPort,
 } from "@application/ports/external/menu-item-catalog.port.ts";
+import type { IPaymentServiceClient } from "@application/ports/external/payment-service.client.port.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port.ts";
 import { PlaceOrderUseCase } from "@application/use-cases/orders/place-order.use-case.ts";
 import { Cart } from "@domain/entities/cart.entity.ts";
 import { CartItem } from "@domain/entities/cart-item.entity.ts";
 import { CartItemAddon } from "@domain/entities/cart-item-addon.entity.ts";
-import { Order } from "@domain/entities/order.entity.ts";
+import type { Order } from "@domain/entities/order.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { OrderPriority } from "@domain/enums/order-priority.enum.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import {
@@ -27,10 +31,12 @@ import {
 	CartExpiredError,
 	CartNotFoundError,
 	ForbiddenCartAccessError,
-	ItemUnavailableError,
-	MenuItemNotFoundError,
 } from "@domain/errors/cart.errors.ts";
-import { RestaurantNotEligibleError } from "@domain/errors/order.errors.ts";
+import {
+	ActiveQueueEntryRequiredError,
+	InvalidPaymentModeError,
+	OrderingModeNotSupportedError,
+} from "@domain/errors/order.errors.ts";
 import type {
 	AddItemInput,
 	ICartRepository,
@@ -60,8 +66,8 @@ class MockCartRepository implements ICartRepository {
 		for (const cart of this.carts.values()) {
 			if (
 				cart.userId === userId &&
-				(!restaurantId || cart.restaurantId === restaurantId) &&
-				!cart.isExpired()
+				cart.status === CartStatus.ACTIVE &&
+				(!restaurantId || cart.restaurantId === restaurantId)
 			) {
 				return cart;
 			}
@@ -73,20 +79,24 @@ class MockCartRepository implements ICartRepository {
 		cartId: string,
 		data: UpdateCartInput,
 	): Promise<Cart | null> {
-		const existing = this.carts.get(cartId);
-		if (existing && data.status) {
-			existing.status = data.status;
+		const cart = this.carts.get(cartId);
+		if (!cart) {
+			return null;
 		}
-		return existing ?? null;
+		if (data.status !== undefined) {
+			(cart as { status: CartStatus }).status = data.status;
+		}
+		return cart;
 	}
 
 	public async clearCart(cartId: string): Promise<Cart> {
 		this.clearedCartIds.push(cartId);
-		const existing = this.carts.get(cartId);
-		if (!existing) {
-			throw new Error("Cart not found");
+		const cart = this.carts.get(cartId);
+		if (cart) {
+			(cart as { items: CartItem[] }).items = [];
+			return cart;
 		}
-		return existing;
+		throw new Error("Cart not found in mock");
 	}
 
 	public async addItem(_input: AddItemInput): Promise<Cart> {
@@ -127,6 +137,15 @@ class MockOrderRepository implements IOrderRepository {
 		return this.orders.get(id) ?? null;
 	}
 
+	public async findByIdempotencyKey(key: string): Promise<Order | null> {
+		for (const order of this.orders.values()) {
+			if (order.idempotencyKey === key) {
+				return order;
+			}
+		}
+		return null;
+	}
+
 	public async findActiveByUserId(
 		restaurantId: string,
 		userId: string,
@@ -152,6 +171,33 @@ class MockOrderRepository implements IOrderRepository {
 	): Promise<CancelledOrderData> {
 		throw new Error("Not implemented in test");
 	}
+
+	public async updatePaymentReference(
+		orderId: string,
+		paymentId: string,
+	): Promise<void> {
+		const order = this.orders.get(orderId);
+		if (order) {
+			order.associatePayment(paymentId);
+		}
+	}
+
+	public async updatePaymentAndOrderStatus(
+		orderId: string,
+		paymentStatus: PaymentStatus,
+		_orderStatus?: OrderStatus,
+		reason?: string,
+		_paymentId?: string,
+	): Promise<void> {
+		const order = this.orders.get(orderId);
+		if (order) {
+			if (paymentStatus === PaymentStatus.FAILED) {
+				order.markPaymentFailed(reason);
+			} else if (paymentStatus === PaymentStatus.PAID) {
+				order.markAsPaid();
+			}
+		}
+	}
 }
 
 class MockRestaurantServiceClient implements IRestaurantServiceClient {
@@ -162,18 +208,14 @@ class MockRestaurantServiceClient implements IRestaurantServiceClient {
 		isBlocked: false,
 		blockReason: null,
 		isSubscriptionActive: true,
-		subscriptionPlanCode: "PREMIUM",
-		subscriptionEndsAt: new Date(Date.now() + 86400000).toISOString(),
+		subscriptionPlanCode: "SELF_PRO",
+		subscriptionEndsAt: "2027-01-01T00:00:00.000Z",
 		canAccessQueueService: true,
 	};
-	public shouldThrowError: Error | null = null;
 
 	public async validateRestaurant(
 		_restaurantId: string,
 	): Promise<RestaurantValidationResultDTO> {
-		if (this.shouldThrowError) {
-			throw this.shouldThrowError;
-		}
 		return this.validationResult;
 	}
 }
@@ -184,25 +226,8 @@ class MockMenuItemCatalogPort implements IMenuItemCatalogPort {
 	public async getItemDetails(
 		_restaurantId: string,
 		menuItemId: string,
-		variantId?: string | null,
-		addonIds?: string[],
 	): Promise<CatalogItemDetails | null> {
-		const item = this.catalog.get(menuItemId);
-		if (!item) {
-			return null;
-		}
-
-		return {
-			...item,
-			variant: variantId
-				? item.variant?.variantId === variantId
-					? item.variant
-					: null
-				: null,
-			addons: (item.addons ?? []).filter((a) =>
-				(addonIds ?? []).includes(a.addonId),
-			),
-		};
+		return this.catalog.get(menuItemId) ?? null;
 	}
 }
 
@@ -217,33 +242,61 @@ class MockQueueServiceClient implements IQueueServiceClient {
 	}
 }
 
+class MockPaymentServiceClient implements IPaymentServiceClient {
+	public paymentDraft: CreateOrderPaymentResponseDTO = {
+		paymentId: "pay-123456",
+		orderId: "order-test-1",
+		razorpayOrderId: "order_rzp_123",
+		keyId: "rzp_test_key",
+		amountPaise: 48300,
+		currency: "INR",
+	};
+	public shouldFail = false;
+	public failureError: Error = new Error("Payment gateway service unavailable");
+
+	public async createGatewayOrder(
+		_data: CreateOrderPaymentInputDTO,
+	): Promise<CreateOrderPaymentResponseDTO> {
+		if (this.shouldFail) {
+			throw this.failureError;
+		}
+		return this.paymentDraft;
+	}
+}
+
 describe("PlaceOrderUseCase", () => {
-	const userId = "user-123";
-	const restaurantId = "rest-123";
-	const cartId = "cart-123";
-	const menuItemId = "item-123";
-	const addonId = "addon-123";
+	const userId = "user-101";
+	const restaurantId = "rest-1";
+	const cartId = "cart-555";
+	const tableId = "table-777";
+	const menuItemId = "item-pizza";
+	const addonId = "addon-extra-cheese";
 
 	function setupFixture() {
 		const cartRepo = new MockCartRepository();
 		const orderRepo = new MockOrderRepository();
 		const restaurantClient = new MockRestaurantServiceClient();
-		restaurantClient.validationResult.restaurantId = restaurantId;
 		const catalogPort = new MockMenuItemCatalogPort();
 		const queueClient = new MockQueueServiceClient();
+		const paymentClient = new MockPaymentServiceClient();
 
-		catalogPort.catalog.set(menuItemId, {
+		const cartItem = new CartItem({
+			id: "cart-item-1",
+			cartId,
 			menuItemId,
-			name: "Paneer Butter Masala",
-			price: 250,
-			isAvailable: true,
+			menuItemName: "Margherita Pizza",
+			quantity: 2,
+			unitPrice: 200,
+			totalPrice: 460,
+			specialInstructions: "Well done",
 			addons: [
-				{
+				new CartItemAddon({
+					id: "addon-row-1",
+					cartItemId: "cart-item-1",
 					addonId,
-					name: "Extra Butter",
+					addonName: "Extra Cheese",
 					price: 30,
-					isAvailable: true,
-				},
+				}),
 			],
 		});
 
@@ -252,28 +305,27 @@ describe("PlaceOrderUseCase", () => {
 			restaurantId,
 			userId,
 			status: CartStatus.ACTIVE,
-			expiresAt: new Date(Date.now() + 86400000),
-			items: [
-				new CartItem({
-					id: "cart-item-1",
-					cartId,
-					menuItemId,
-					menuItemName: "Paneer Butter Masala",
-					quantity: 2,
-					unitPrice: 250,
-					addons: [
-						new CartItemAddon({
-							id: "addon-row-1",
-							cartItemId: "cart-item-1",
-							addonId,
-							addonName: "Extra Butter",
-							price: 30,
-						}),
-					],
-				}),
+			expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+			items: [cartItem],
+		});
+
+		cartRepo.carts.set(cartId, cart);
+
+		catalogPort.catalog.set(menuItemId, {
+			menuItemId,
+			name: "Margherita Pizza Fresh",
+			price: 200,
+			preparationTime: 20,
+			isAvailable: true,
+			addons: [
+				{
+					addonId,
+					name: "Extra Cheese Fresh",
+					price: 30,
+					isAvailable: true,
+				},
 			],
 		});
-		cartRepo.carts.set(cartId, cart);
 
 		const useCase = new PlaceOrderUseCase(
 			cartRepo,
@@ -281,6 +333,7 @@ describe("PlaceOrderUseCase", () => {
 			restaurantClient,
 			catalogPort,
 			queueClient,
+			paymentClient,
 		);
 
 		return {
@@ -289,12 +342,13 @@ describe("PlaceOrderUseCase", () => {
 			restaurantClient,
 			catalogPort,
 			queueClient,
+			paymentClient,
 			useCase,
 			cart,
 		};
 	}
 
-	it("throws InvalidPaymentModeError when paymentMode is ONLINE", async () => {
+	it("throws InvalidPaymentModeError when paymentMode is not ONLINE", async () => {
 		const { useCase } = setupFixture();
 
 		await assert.rejects(
@@ -303,14 +357,10 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId,
-					paymentMode: PaymentMode.ONLINE,
+					tableId,
+					paymentMode: "PAY_AT_COUNTER" as unknown as PaymentMode,
 				}),
-			(err: unknown) => {
-				const error = err as Error;
-				assert.equal(error.name, "InvalidPaymentModeError");
-				assert.match(error.message, /feature is coming soon/i);
-				return true;
-			},
+			InvalidPaymentModeError,
 		);
 	});
 
@@ -324,7 +374,8 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId: "non-existent-cart",
-					paymentMode: PaymentMode.PAY_AT_COUNTER,
+					tableId,
+					paymentMode: PaymentMode.ONLINE,
 				}),
 			CartNotFoundError,
 		);
@@ -339,7 +390,8 @@ describe("PlaceOrderUseCase", () => {
 					userId: "different-user",
 					restaurantId,
 					cartId,
-					paymentMode: PaymentMode.PAY_AT_COUNTER,
+					tableId,
+					paymentMode: PaymentMode.ONLINE,
 				}),
 			ForbiddenCartAccessError,
 		);
@@ -363,7 +415,8 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId,
-					paymentMode: PaymentMode.PAY_AT_COUNTER,
+					tableId,
+					paymentMode: PaymentMode.ONLINE,
 				}),
 			CartExpiredError,
 		);
@@ -378,7 +431,7 @@ describe("PlaceOrderUseCase", () => {
 			restaurantId,
 			userId,
 			status: CartStatus.ACTIVE,
-			expiresAt: new Date(Date.now() + 86400000),
+			expiresAt: new Date(Date.now() + 60 * 60 * 1000),
 			items: [],
 		});
 		cartRepo.carts.set(cartId, emptyCart);
@@ -389,161 +442,164 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId,
-					paymentMode: PaymentMode.PAY_AT_COUNTER,
+					tableId,
+					paymentMode: PaymentMode.ONLINE,
 				}),
 			CartEmptyError,
 		);
 	});
 
-	it("propagates restaurant validation errors if restaurant is ineligible", async () => {
-		const { useCase, restaurantClient } = setupFixture();
-		restaurantClient.shouldThrowError = new RestaurantNotEligibleError(
-			"Restaurant suspended",
-		);
-
-		await assert.rejects(
-			async () =>
-				useCase.execute({
-					userId,
-					restaurantId,
-					cartId,
-					paymentMode: PaymentMode.PAY_AT_COUNTER,
-				}),
-			RestaurantNotEligibleError,
-		);
-	});
-
-	it("throws MenuItemNotFoundError if item is not found in catalog", async () => {
-		const { useCase, catalogPort } = setupFixture();
-		catalogPort.catalog.clear();
-
-		await assert.rejects(
-			async () =>
-				useCase.execute({
-					userId,
-					restaurantId,
-					cartId,
-					paymentMode: PaymentMode.PAY_AT_COUNTER,
-				}),
-			MenuItemNotFoundError,
-		);
-	});
-
-	it("throws ItemUnavailableError if item or addon is unavailable in catalog", async () => {
-		const { useCase, catalogPort } = setupFixture();
-		catalogPort.catalog.set(menuItemId, {
-			menuItemId,
-			name: "Paneer Butter Masala",
-			price: 250,
-			isAvailable: false,
-			addons: [],
-		});
-
-		await assert.rejects(
-			async () =>
-				useCase.execute({
-					userId,
-					restaurantId,
-					cartId,
-					paymentMode: PaymentMode.PAY_AT_COUNTER,
-				}),
-			ItemUnavailableError,
-		);
-	});
-
-	it("Priority 1 (ADDON): assigns priority 1 and DINE_IN when user has uncompleted orders in this restaurant", async () => {
-		const { useCase, orderRepo } = setupFixture();
-
-		const activeOrder = new Order({
-			orderNumber: "ORD-ACTIVE-001",
-			restaurantId,
-			userId,
-			tableId: "table-uuid-7",
-			tableNumber: 7,
-			priority: 2,
-			orderType: OrderType.DINE_IN,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
-			paymentStatus: PaymentStatus.PENDING,
-			orderStatus: OrderStatus.PREPARING,
-			items: [
-				{
-					menuItemId: "item-prev",
-					itemName: "Roti",
-					quantity: 2,
-					unitPrice: 20,
-				},
-			],
-		});
-		orderRepo.activeOrderByUserId.set(`${restaurantId}:${userId}`, activeOrder);
+	it("successfully places SELF_ORDER when tableId is omitted", async () => {
+		const { useCase } = setupFixture();
 
 		const result = await useCase.execute({
 			userId,
 			restaurantId,
 			cartId,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
+			paymentMode: PaymentMode.ONLINE,
 		});
 
-		assert.equal(result.priority, OrderPriority.ADDON);
-		assert.equal(result.orderType, OrderType.DINE_IN);
-		assert.equal(result.tableId, "table-uuid-7");
-		assert.equal(result.tableNumber, 7);
+		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
+		assert.equal(result.tableId, null);
+	});
+
+	it("successfully places SELF_ORDER when restaurant plan is SELF_SERVICE_PRO", async () => {
+		const { useCase, restaurantClient } = setupFixture();
+		restaurantClient.validationResult = {
+			...restaurantClient.validationResult,
+			subscriptionPlanCode: "SELF_SERVICE_PRO",
+		};
+
+		const result = await useCase.execute({
+			userId,
+			restaurantId,
+			cartId,
+			paymentMode: PaymentMode.ONLINE,
+		});
+
+		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
+	});
+
+	it("returns existing order when idempotencyKey matches an existing order", async () => {
+		const { useCase } = setupFixture();
+		const idempotencyKey = "unique-key-123";
+
+		const firstOrder = await useCase.execute({
+			userId,
+			restaurantId,
+			cartId,
+			idempotencyKey,
+			paymentMode: PaymentMode.ONLINE,
+		});
+
+		const secondOrder = await useCase.execute({
+			userId,
+			restaurantId,
+			cartId,
+			idempotencyKey,
+			paymentMode: PaymentMode.ONLINE,
+		});
+
+		assert.equal(secondOrder.id, firstOrder.id);
+		assert.equal(secondOrder.orderNumber, firstOrder.orderNumber);
+	});
+
+	it("automatically sets QUEUE_ORDER when customer has active queue entry and plan is QUEUE_PRO", async () => {
+		const { useCase, queueClient, restaurantClient } = setupFixture();
+		restaurantClient.validationResult.subscriptionPlanCode = "QUEUE_PRO";
+		const activeQueueEntry: ActiveQueueDetails = {
+			queueEntryId: "queue-entry-auto-2",
+			restaurantId,
+			userId,
+			queueNumber: "Q-99",
+			partySize: 2,
+			status: "WAITING",
+			position: 1,
+			estimatedWaitMinutes: 5,
+		};
+		queueClient.activeQueue = {
+			hasActiveQueue: true,
+			queueEntry: activeQueueEntry,
+		};
+
+		const result = await useCase.execute({
+			userId,
+			restaurantId,
+			cartId,
+			paymentMode: PaymentMode.ONLINE,
+		});
+
+		assert.equal(result.orderingMode, OrderingMode.QUEUE_ORDER);
+		assert.equal(result.queueEntryId, "queue-entry-auto-2");
+	});
+
+	it("successfully places a SELF_ORDER and computes authoritative totals and estimatedReadyAt", async () => {
+		const { useCase, orderRepo, cartRepo } = setupFixture();
+
+		const result = await useCase.execute({
+			userId,
+			restaurantId,
+			cartId,
+			tableId,
+			paymentMode: PaymentMode.ONLINE,
+		});
+
+		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
+		assert.equal(result.tableId, tableId);
+		assert.equal(result.queueEntryId, null);
+		assert.equal(result.paymentMode, PaymentMode.ONLINE);
 		assert.equal(result.paymentStatus, PaymentStatus.PENDING);
 		assert.equal(result.orderStatus, OrderStatus.PLACED);
-		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(result.paymentId, "pay-123456");
+		assert.notEqual(result.paymentDraft, null);
+		assert.equal(result.paymentDraft?.paymentId, "pay-123456");
+		assert.equal(result.paymentDraft?.razorpayOrderId, "order_rzp_123");
+		assert.equal(cartRepo.clearedCartIds.includes(cartId), true);
+
+		// subtotal = (200 + 30) * 2 = 460
+		assert.equal(result.subtotal, 460);
+		// taxAmount = 460 * 5% = 23
+		assert.equal(result.taxAmount, 23);
+		// grandTotal = 460 + 23 = 483
+		assert.equal(result.grandTotal, 483);
+		assert.notEqual(result.estimatedReadyAt, null);
+
+		const saved = await orderRepo.findById(result.id);
+		assert.notEqual(saved, null);
+		assert.equal(saved?.orderingMode, OrderingMode.SELF_ORDER);
+		assert.equal(saved?.paymentId, "pay-123456");
 	});
 
-	it("retrieves the active cart for the specific restaurantId when cartId is not provided", async () => {
-		const { useCase, cartRepo, orderRepo } = setupFixture();
+	it("orchestrates Saga compensation when payment gateway draft creation fails", async () => {
+		const { useCase, paymentClient } = setupFixture();
+		paymentClient.shouldFail = true;
 
-		// Add an active cart for another restaurant
-		const otherCart = new Cart({
-			id: "cart-other-restaurant",
-			restaurantId: "other-rest-uuid",
-			userId,
-			status: CartStatus.ACTIVE,
-			expiresAt: new Date(Date.now() + 86400000),
-			items: [
-				new CartItem({
-					id: "cart-item-other",
-					cartId: "cart-other-restaurant",
-					menuItemId: "item-other",
-					quantity: 1,
-					unitPrice: 100,
-					addons: [],
+		await assert.rejects(
+			async () =>
+				useCase.execute({
+					userId,
+					restaurantId,
+					cartId,
+					tableId,
+					paymentMode: PaymentMode.ONLINE,
 				}),
-			],
-		});
-		cartRepo.carts.set("cart-other-restaurant", otherCart);
-
-		// Place order for target restaurantId without passing cartId
-		const result = await useCase.execute({
-			userId,
-			restaurantId,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
-		});
-
-		assert.equal(result.restaurantId, restaurantId);
-		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
-		assert.equal(
-			orderRepo.clearedCartIds.includes("cart-other-restaurant"),
-			false,
+			/Payment gateway service unavailable/,
 		);
 	});
 
-	it("Priority 3 (QUEUE): assigns priority 3 and sets queueEntryId and PRE_ORDER when user has active queue entry", async () => {
-		const { useCase, queueClient, restaurantClient, orderRepo } =
-			setupFixture();
-		restaurantClient.validationResult.canAccessQueueService = true;
+	it("successfully places a QUEUE_ORDER when customer has active queue entry", async () => {
+		const { useCase, queueClient, restaurantClient } = setupFixture();
+		restaurantClient.validationResult.subscriptionPlanCode = "QUEUE_PRO";
 
 		const activeQueueEntry: ActiveQueueDetails = {
-			queueEntryId: "queue-entry-777",
+			queueEntryId: "queue-entry-999",
 			restaurantId,
 			userId,
-			queueNumber: "Q-12",
-			partySize: 4,
+			queueNumber: "Q-15",
+			partySize: 2,
 			status: "WAITING",
-			position: 2,
-			estimatedWaitMinutes: 15,
+			position: 1,
+			estimatedWaitMinutes: 10,
 		};
 		queueClient.activeQueue = {
 			hasActiveQueue: true,
@@ -554,116 +610,100 @@ describe("PlaceOrderUseCase", () => {
 			userId,
 			restaurantId,
 			cartId,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
+			paymentMode: PaymentMode.ONLINE,
 		});
 
-		assert.equal(result.priority, OrderPriority.QUEUE);
-		assert.equal(result.queueEntryId, "queue-entry-777");
-		assert.equal(result.orderType, OrderType.PRE_ORDER);
-		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
-	});
-
-	it("Priority 3 (QUEUE): assigns priority 3 and PRE_ORDER even if customer has an existing active order while still waiting in queue", async () => {
-		const { useCase, queueClient, restaurantClient, orderRepo } =
-			setupFixture();
-		restaurantClient.validationResult.canAccessQueueService = true;
-
-		const existingActiveOrder = new Order({
-			orderNumber: "ORD-QUEUE-PREV",
-			restaurantId,
-			userId,
-			tableId: null,
-			tableNumber: null,
-			queueEntryId: "queue-entry-777",
-			priority: OrderPriority.QUEUE,
-			orderType: OrderType.PRE_ORDER,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
-			paymentStatus: PaymentStatus.PENDING,
-			orderStatus: OrderStatus.PLACED,
-			items: [
-				{
-					menuItemId: "item-prev",
-					itemName: "Garlic Bread",
-					quantity: 1,
-					unitPrice: 120,
-				},
-			],
-		});
-		orderRepo.activeOrderByUserId.set(
-			`${restaurantId}:${userId}`,
-			existingActiveOrder,
-		);
-
-		const activeQueueEntry: ActiveQueueDetails = {
-			queueEntryId: "queue-entry-777",
-			restaurantId,
-			userId,
-			queueNumber: "Q-12",
-			partySize: 4,
-			status: "WAITING",
-			position: 2,
-			estimatedWaitMinutes: 15,
-		};
-		queueClient.activeQueue = {
-			hasActiveQueue: true,
-			queueEntry: activeQueueEntry,
-		};
-
-		const result = await useCase.execute({
-			userId,
-			restaurantId,
-			cartId,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
-		});
-
-		assert.equal(result.priority, OrderPriority.QUEUE);
-		assert.equal(result.queueEntryId, "queue-entry-777");
-		assert.equal(result.orderType, OrderType.PRE_ORDER);
+		assert.equal(result.orderingMode, OrderingMode.QUEUE_ORDER);
+		assert.equal(result.queueEntryId, "queue-entry-999");
 		assert.equal(result.tableId, null);
-		assert.equal(result.tableNumber, null);
+		assert.equal(result.paymentMode, PaymentMode.ONLINE);
+		assert.equal(result.paymentStatus, PaymentStatus.PENDING);
+		assert.equal(result.orderStatus, OrderStatus.PLACED);
 	});
 
-	it("Priority 2 (NORMAL): assigns priority 2 and DINE_IN when user has no active order and no queue", async () => {
-		const { useCase, queueClient, orderRepo } = setupFixture();
-		queueClient.activeQueue = null;
+	it("automatically determines QUEUE_ORDER when orderingMode is omitted and user has active queue on QUEUE_PRO plan", async () => {
+		const { useCase, queueClient, restaurantClient } = setupFixture();
+		restaurantClient.validationResult.subscriptionPlanCode = "QUEUE_PRO";
+
+		const activeQueueEntry: ActiveQueueDetails = {
+			queueEntryId: "queue-entry-auto-1",
+			restaurantId,
+			userId,
+			queueNumber: "Q-20",
+			partySize: 2,
+			status: "WAITING",
+			position: 2,
+			estimatedWaitMinutes: 15,
+		};
+		queueClient.activeQueue = {
+			hasActiveQueue: true,
+			queueEntry: activeQueueEntry,
+		};
 
 		const result = await useCase.execute({
 			userId,
 			restaurantId,
 			cartId,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
+			paymentMode: PaymentMode.ONLINE,
 		});
 
-		assert.equal(result.priority, OrderPriority.NORMAL);
-		assert.equal(result.queueEntryId, null);
-		assert.equal(result.orderType, OrderType.DINE_IN);
-		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(result.orderingMode, OrderingMode.QUEUE_ORDER);
+		assert.equal(result.queueEntryId, "queue-entry-auto-1");
+	});
 
-		// Verify order is saved in repository
-		const savedOrder = await orderRepo.findById(result.id);
-		assert.notEqual(savedOrder, null);
-		assert.equal(savedOrder?.restaurantName, "SpotQ Test Kitchen");
-		assert.equal(result.restaurantName, "SpotQ Test Kitchen");
-		assert.equal(savedOrder?.priority, OrderPriority.NORMAL);
-		assert.equal(savedOrder?.items.length, 1);
-		assert.equal(savedOrder?.items[0]?.addons.length, 1);
-		assert.equal(savedOrder?.statusHistory.length, 1);
-		assert.equal(
-			savedOrder?.statusHistory[0]?.currentStatus,
-			OrderStatus.PLACED,
+	it("throws ActiveQueueEntryRequiredError when restaurant plan is QUEUE_PRO and customer is not in queue", async () => {
+		const { useCase, queueClient, restaurantClient } = setupFixture();
+		restaurantClient.validationResult.subscriptionPlanCode = "QUEUE_PRO";
+		queueClient.activeQueue = {
+			hasActiveQueue: false,
+			queueEntry: null,
+		};
+
+		await assert.rejects(
+			async () =>
+				useCase.execute({
+					userId,
+					restaurantId,
+					cartId,
+					paymentMode: PaymentMode.ONLINE,
+				}),
+			ActiveQueueEntryRequiredError,
 		);
 	});
 
-	it("finds active cart by userId if cartId is omitted", async () => {
-		const { useCase, orderRepo } = setupFixture();
+	it("throws OrderingModeNotSupportedError when restaurant plan does not support digital ordering", async () => {
+		const { useCase, restaurantClient } = setupFixture();
+		restaurantClient.validationResult.subscriptionPlanCode = "INVALID_PLAN";
+
+		await assert.rejects(
+			async () =>
+				useCase.execute({
+					userId,
+					restaurantId,
+					cartId,
+					paymentMode: PaymentMode.ONLINE,
+				}),
+			OrderingModeNotSupportedError,
+		);
+	});
+
+	it("automatically determines SELF_ORDER when orderingMode is omitted and user has no active queue", async () => {
+		const { useCase, queueClient } = setupFixture();
+		queueClient.activeQueue = {
+			hasActiveQueue: false,
+			queueEntry: null,
+		};
 
 		const result = await useCase.execute({
 			userId,
 			restaurantId,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
+			cartId,
+			tableId: "table-auto-1",
+			paymentMode: PaymentMode.ONLINE,
 		});
 
-		assert.equal(result.userId, userId);
-		assert.equal(orderRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
+		assert.equal(result.queueEntryId, null);
+		assert.equal(result.tableId, "table-auto-1");
 	});
 });

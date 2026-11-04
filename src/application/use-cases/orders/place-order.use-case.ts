@@ -4,18 +4,19 @@ import type {
 } from "@application/dtos/orders/place-order.dto.ts";
 import { OrderResponseMapper } from "@application/mappers/orders/order-response.mapper.ts";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
+import type { IPaymentServiceClient } from "@application/ports/external/payment-service.client.port.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { validateCatalogItemAvailability } from "@application/utils/catalog-validator.util.ts";
 import { generateOrderNumber } from "@application/utils/order-number.util.ts";
 import { TYPES } from "@config/di/types.ts";
+import env from "@config/env.ts";
 import type { Cart } from "@domain/entities/cart.entity.ts";
 import { Order } from "@domain/entities/order.entity.ts";
 import { CartStatus } from "@domain/enums/cart-status.enum.ts";
-import { OrderPriority } from "@domain/enums/order-priority.enum.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import {
@@ -23,7 +24,11 @@ import {
 	CartExpiredError,
 	CartNotFoundError,
 } from "@domain/errors/cart.errors.ts";
-import { InvalidPaymentModeError } from "@domain/errors/order.errors.ts";
+import {
+	ActiveQueueEntryRequiredError,
+	InvalidPaymentModeError,
+	OrderingModeNotSupportedError,
+} from "@domain/errors/order.errors.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
@@ -42,11 +47,22 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		private readonly catalogPort: IMenuItemCatalogPort,
 		@inject(TYPES.QueueServiceClient)
 		private readonly queueServiceClient: IQueueServiceClient,
+		@inject(TYPES.PaymentServiceClient)
+		private readonly paymentServiceClient: IPaymentServiceClient,
 	) {}
 
 	public async execute(dto: PlaceOrderInputDTO): Promise<OrderResponseDTO> {
-		if (dto.paymentMode === PaymentMode.ONLINE) {
+		if (dto.paymentMode !== PaymentMode.ONLINE) {
 			throw new InvalidPaymentModeError();
+		}
+
+		if (dto.idempotencyKey) {
+			const existingOrder = await this.orderRepository.findByIdempotencyKey(
+				dto.idempotencyKey,
+			);
+			if (existingOrder) {
+				return OrderResponseMapper.toDTO(existingOrder);
+			}
 		}
 
 		let cart: Cart | null = null;
@@ -85,6 +101,39 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		const restaurantValidation =
 			await this.restaurantServiceClient.validateRestaurant(cart.restaurantId);
 
+		let orderingMode: OrderingMode;
+		let queueEntryId: string | null = null;
+		const tableId: string | null = dto.tableId ?? null;
+
+		const planCode = restaurantValidation.subscriptionPlanCode
+			?.toUpperCase()
+			.trim();
+
+		if (planCode === "QUEUE_PRO") {
+			const activeQueue = await this.queueServiceClient.checkUserActiveQueue(
+				cart.restaurantId,
+				dto.userId,
+			);
+
+			if (
+				!activeQueue?.hasActiveQueue ||
+				!activeQueue.queueEntry?.queueEntryId
+			) {
+				throw new ActiveQueueEntryRequiredError();
+			}
+
+			queueEntryId = activeQueue.queueEntry.queueEntryId;
+			orderingMode = OrderingMode.QUEUE_ORDER;
+		} else if (planCode === "SELF_PRO" || planCode === "SELF_SERVICE_PRO") {
+			orderingMode = OrderingMode.SELF_ORDER;
+		} else {
+			throw new OrderingModeNotSupportedError(
+				`Restaurant subscription plan '${restaurantValidation.subscriptionPlanCode ?? "NONE"}' does not support digital ordering`,
+			);
+		}
+
+		const prepTimes: number[] = [];
+
 		const orderItemsData = await Promise.all(
 			cart.items.map(async (cartItem) => {
 				const addonIds = cartItem.addons.map((a) => a.addonId);
@@ -100,6 +149,10 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 					cartItem.variantId,
 					addonIds,
 				);
+
+				if (catalogItem.preparationTime && catalogItem.preparationTime > 0) {
+					prepTimes.push(catalogItem.preparationTime);
+				}
 
 				const unitPrice =
 					catalogItem.variant?.price ?? catalogItem.price ?? cartItem.unitPrice;
@@ -134,55 +187,24 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 			}),
 		);
 
-		let priority: number = OrderPriority.NORMAL;
-		let queueEntryId: string | null = null;
-		let orderType: OrderType = OrderType.DINE_IN;
-		let tableId: string | null = null;
-		let tableNumber: number | null = null;
-
-		if (restaurantValidation.canAccessQueueService) {
-			const activeQueue = await this.queueServiceClient.checkUserActiveQueue(
-				cart.restaurantId,
-				dto.userId,
-			);
-
-			if (activeQueue?.hasActiveQueue && activeQueue.queueEntry) {
-				priority = OrderPriority.QUEUE;
-				queueEntryId = activeQueue.queueEntry.queueEntryId;
-				orderType = OrderType.PRE_ORDER;
-			}
-		}
-
-		if (!queueEntryId) {
-			const activeOrder = await this.orderRepository.findActiveByUserId(
-				cart.restaurantId,
-				dto.userId,
-			);
-
-			if (activeOrder) {
-				priority = OrderPriority.ADDON;
-				orderType = OrderType.DINE_IN;
-				tableId = activeOrder.tableId;
-				tableNumber = activeOrder.tableNumber;
-			}
-		}
-
 		const orderNumber = generateOrderNumber();
 		const order = new Order({
 			orderNumber,
+			idempotencyKey: dto.idempotencyKey ?? null,
 			restaurantId: cart.restaurantId,
 			restaurantName: restaurantValidation.restaurantName,
+			restaurantPlan: restaurantValidation.subscriptionPlanCode ?? null,
 			userId: dto.userId,
 			userName: dto.userName ?? null,
 			userPhone: dto.userPhone ?? null,
 			tableId,
-			tableNumber,
 			queueEntryId,
-			priority,
-			orderType,
-			paymentMode: dto.paymentMode,
+			orderingMode,
+			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
+			taxPercent: env.TAX_PERCENT,
+			preparationTimes: prepTimes,
 			specialInstructions: dto.specialInstructions ?? null,
 			items: orderItemsData,
 			statusHistory: [
@@ -196,8 +218,37 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 			],
 		});
 
-		const createdOrder = await this.orderRepository.create(order, cart.id);
+		const createdOrder = await this.orderRepository.create(order);
 
-		return OrderResponseMapper.toDTO(createdOrder);
+		let paymentDraft = null;
+		try {
+			const amountPaise = Math.round(createdOrder.grandTotal * 100);
+			paymentDraft = await this.paymentServiceClient.createGatewayOrder({
+				orderId: createdOrder.id,
+				customerId: dto.userId,
+				restaurantId: createdOrder.restaurantId,
+				amountPaise,
+				currency: "INR",
+			});
+
+			await this.orderRepository.updatePaymentReference(
+				createdOrder.id,
+				paymentDraft.paymentId,
+			);
+			createdOrder.associatePayment(paymentDraft.paymentId);
+
+			await this.cartRepository.clearCart(cart.id);
+		} catch (error) {
+			// SAGA COMPENSATION (C1): Cancel order draft and retain cart items
+			await this.orderRepository.updatePaymentAndOrderStatus(
+				createdOrder.id,
+				PaymentStatus.FAILED,
+				OrderStatus.CANCELLED,
+				"Payment gateway draft creation failed",
+			);
+			throw error;
+		}
+
+		return OrderResponseMapper.toDTO(createdOrder, paymentDraft);
 	}
 }

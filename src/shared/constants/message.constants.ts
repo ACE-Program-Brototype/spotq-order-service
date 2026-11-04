@@ -75,11 +75,15 @@ export const ORDER_MESSAGES = {
 	ORDER_PLACED_SUCCESS: "Order placed successfully",
 	CHECKOUT_DETAILS_FETCHED_SUCCESS: "Checkout details retrieved successfully",
 	CART_EMPTY: "Cannot place an order with an empty cart",
-	INVALID_PAYMENT_MODE:
-		"Online payment feature is coming soon. Please select Pay at Counter.",
+	INVALID_PAYMENT_MODE: "Only ONLINE payment mode is currently supported",
 	INVALID_CART_ID: "Invalid cart ID format",
-	INVALID_PAYMENT_MODE_SELECTION:
-		"Invalid payment mode. Supported modes: ONLINE, PAY_AT_COUNTER",
+	INVALID_PAYMENT_MODE_SELECTION: "Only ONLINE payment mode is supported",
+	ORDERING_MODE_NOT_SUPPORTED:
+		"The selected ordering mode is not supported by this restaurant plan",
+	ACTIVE_QUEUE_REQUIRED:
+		"Active queue entry is required to place a queue pre-order",
+	TABLE_REQUIRED_FOR_SELF_ORDER:
+		"Table selection is required for self-service dine-in orders",
 	INVALID_SPECIAL_INSTRUCTIONS:
 		"Special instructions cannot exceed 250 characters",
 	INVALID_USER_NAME: "User name cannot exceed 100 characters",
@@ -123,6 +127,9 @@ export const ORDER_ERROR_CODES = {
 	INVALID_ORDER_ID: "INVALID_ORDER_ID",
 	CART_EMPTY: "CART_EMPTY",
 	INVALID_PAYMENT_MODE: "INVALID_PAYMENT_MODE",
+	ORDERING_MODE_NOT_SUPPORTED: "ORDERING_MODE_NOT_SUPPORTED",
+	ACTIVE_QUEUE_REQUIRED: "ACTIVE_QUEUE_REQUIRED",
+	TABLE_REQUIRED_FOR_SELF_ORDER: "TABLE_REQUIRED_FOR_SELF_ORDER",
 	INVALID_TAX_PERCENT: "INVALID_TAX_PERCENT",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",

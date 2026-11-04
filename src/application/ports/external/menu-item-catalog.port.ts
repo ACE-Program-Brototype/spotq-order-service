@@ -23,6 +23,7 @@ export interface CatalogItemDetails {
 	menuItemId: string;
 	name: string;
 	price: number;
+	preparationTime?: number | null;
 	isAvailable: boolean;
 	variant?: CatalogVariantDetails | null;
 	addons: CatalogAddonDetails[];

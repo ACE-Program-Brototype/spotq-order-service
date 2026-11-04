@@ -48,9 +48,12 @@ describe("GetOrderHistoryUseCase", () => {
 				};
 			},
 			findById: async () => null,
+			findByIdempotencyKey: async () => null,
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},
+			updatePaymentReference: async () => {},
+			updatePaymentAndOrderStatus: async () => {},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);
@@ -94,9 +97,12 @@ describe("GetOrderHistoryUseCase", () => {
 				hasNext: false,
 			}),
 			findById: async () => null,
+			findByIdempotencyKey: async () => null,
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},
+			updatePaymentReference: async () => {},
+			updatePaymentAndOrderStatus: async () => {},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);

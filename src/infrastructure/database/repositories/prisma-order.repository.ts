@@ -1,6 +1,7 @@
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
 	CancelledOrderData,
@@ -37,8 +38,10 @@ export class PrismaOrderRepository
 					data: {
 						id: order.id,
 						orderNumber: order.orderNumber,
+						idempotencyKey: order.idempotencyKey,
 						restaurantId: order.restaurantId,
 						restaurantName: order.restaurantName,
+						restaurantPlan: order.restaurantPlan,
 						userId: order.userId,
 						userName: order.userName,
 						userPhone: order.userPhone,
@@ -46,8 +49,7 @@ export class PrismaOrderRepository
 						tableNumber: order.tableNumber,
 						queueEntryId: order.queueEntryId,
 						paymentId: order.paymentId,
-						priority: order.priority,
-						orderType: order.orderType,
+						orderingMode: order.orderingMode,
 						paymentMode: order.paymentMode,
 						paymentStatus: order.paymentStatus,
 						orderStatus: order.orderStatus,
@@ -55,7 +57,6 @@ export class PrismaOrderRepository
 						taxAmount: order.taxAmount,
 						platformFee: order.platformFee,
 						discountAmount: order.discountAmount,
-						couponCode: order.couponCode,
 						grandTotal: order.grandTotal,
 						estimatedReadyAt: order.estimatedReadyAt,
 						specialInstructions: order.specialInstructions,
@@ -152,6 +153,27 @@ export class PrismaOrderRepository
 			return record ? OrderPersistenceMapper.toDomain(record) : null;
 		} catch (error) {
 			this.handlePrismaError(error, orderId);
+			throw error;
+		}
+	}
+
+	public async findByIdempotencyKey(key: string): Promise<Order | null> {
+		try {
+			const record = await this.prisma.order.findUnique({
+				where: { idempotencyKey: key },
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+					statusHistory: true,
+				},
+			});
+
+			return record ? OrderPersistenceMapper.toDomain(record) : null;
+		} catch (error) {
+			this.handlePrismaError(error, { idempotencyKey: key });
 			throw error;
 		}
 	}
@@ -403,6 +425,67 @@ export class PrismaOrderRepository
 			});
 		} catch (error) {
 			this.handlePrismaError(error, { orderId: order.id });
+			throw error;
+		}
+	}
+
+	public async updatePaymentReference(
+		orderId: string,
+		paymentId: string,
+	): Promise<void> {
+		try {
+			await this.prisma.order.update({
+				where: { id: orderId },
+				data: { paymentId },
+			});
+		} catch (error) {
+			this.handlePrismaError(error, { orderId });
+			throw error;
+		}
+	}
+
+	public async updatePaymentAndOrderStatus(
+		orderId: string,
+		paymentStatus: PaymentStatus,
+		orderStatus?: OrderStatus,
+		reason?: string,
+		paymentId?: string,
+	): Promise<void> {
+		try {
+			await this.prisma.$transaction(async (tx) => {
+				const updateData: Prisma.OrderUpdateInput = {
+					paymentStatus,
+				};
+				if (orderStatus) {
+					updateData.orderStatus = orderStatus;
+				}
+				if (reason && orderStatus === OrderStatus.CANCELLED) {
+					updateData.cancellationReason = reason;
+					updateData.cancelledAt = new Date();
+				}
+				if (paymentId) {
+					updateData.paymentId = paymentId;
+				}
+
+				await tx.order.update({
+					where: { id: orderId },
+					data: updateData,
+				});
+
+				if (orderStatus) {
+					await tx.orderStatusHistory.create({
+						data: {
+							orderId,
+							previousStatus: null,
+							currentStatus: orderStatus,
+							changedBy: "SYSTEM",
+							notes: reason ?? `Status updated to ${orderStatus}`,
+						},
+					});
+				}
+			});
+		} catch (error) {
+			this.handlePrismaError(error, { orderId });
 			throw error;
 		}
 	}

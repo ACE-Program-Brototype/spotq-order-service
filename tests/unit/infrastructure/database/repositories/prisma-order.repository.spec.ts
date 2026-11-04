@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { Order, type OrderProps } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
@@ -15,7 +15,8 @@ function createSampleOrder(props: Partial<OrderProps> = {}): Order {
 		orderNumber: props.orderNumber ?? "SQ-101",
 		restaurantId: props.restaurantId ?? "rest-1",
 		userId: props.userId === undefined ? "user-1" : props.userId,
-		orderType: props.orderType ?? OrderType.DINE_IN,
+		tableId: props.tableId ?? "table-1",
+		orderingMode: props.orderingMode ?? OrderingMode.SELF_ORDER,
 		paymentMode: props.paymentMode ?? PaymentMode.ONLINE,
 		paymentStatus: props.paymentStatus ?? PaymentStatus.PENDING,
 		orderStatus: props.orderStatus ?? OrderStatus.CANCELLED,

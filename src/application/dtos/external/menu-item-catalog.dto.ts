@@ -19,6 +19,7 @@ export interface RemoteMenuItemDTO {
 	id?: string;
 	name: string;
 	price: number;
+	preparationTime?: number | null;
 	isAvailable?: boolean;
 	variants?: RemoteVariantDTO[];
 	addons?: RemoteAddonDTO[];

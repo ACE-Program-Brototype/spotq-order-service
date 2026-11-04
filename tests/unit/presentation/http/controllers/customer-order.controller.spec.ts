@@ -8,9 +8,8 @@ import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/ca
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
-import { OrderPriority } from "@domain/enums/order-priority.enum.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart.errors.ts";
@@ -45,12 +44,13 @@ describe("CustomerOrderController", () => {
 		userId: "user-123",
 		userName: "John Doe",
 		userPhone: "9876543210",
-		tableId: null,
+		tableId: "table-1",
 		tableNumber: 4,
 		queueEntryId: null,
-		priority: OrderPriority.NORMAL,
-		orderType: OrderType.DINE_IN,
-		paymentMode: PaymentMode.PAY_AT_COUNTER,
+		paymentId: null,
+		restaurantPlan: "SELF_PRO",
+		orderingMode: OrderingMode.SELF_ORDER,
+		paymentMode: PaymentMode.ONLINE,
 		paymentStatus: PaymentStatus.PENDING,
 		orderStatus: OrderStatus.PLACED,
 		subtotal: 500,
@@ -58,6 +58,7 @@ describe("CustomerOrderController", () => {
 		platformFee: 5,
 		discountAmount: 0,
 		grandTotal: 530,
+		estimatedReadyAt: null,
 		specialInstructions: "Less spicy",
 		items: [],
 		createdAt: new Date().toISOString(),
@@ -100,7 +101,8 @@ describe("CustomerOrderController", () => {
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
 					cartId: "00000000-0000-0000-0000-000000000001",
-					paymentMode: "PAY_AT_COUNTER",
+					tableId: "33333333-3333-3333-3333-333333333333",
+					paymentMode: PaymentMode.ONLINE,
 					userName: "Jane Customer",
 					userPhone: "+919876543210",
 					specialInstructions: "Less spicy",
@@ -149,7 +151,9 @@ describe("CustomerOrderController", () => {
 				},
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
-					paymentMode: "PAY_AT_COUNTER",
+					cartId: "00000000-0000-0000-0000-000000000001",
+					tableId: "33333333-3333-3333-3333-333333333333",
+					paymentMode: PaymentMode.ONLINE,
 				},
 			} as unknown as Request;
 
@@ -181,7 +185,9 @@ describe("CustomerOrderController", () => {
 				user: { userId: "user-123" },
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
-					paymentMode: "PAY_AT_COUNTER",
+					cartId: "00000000-0000-0000-0000-000000000001",
+					tableId: "33333333-3333-3333-3333-333333333333",
+					paymentMode: PaymentMode.ONLINE,
 				},
 			} as unknown as Request;
 
@@ -206,7 +212,9 @@ describe("CustomerOrderController", () => {
 				user: { userId: "user-123" },
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
-					paymentMode: "ONLINE",
+					cartId: "00000000-0000-0000-0000-000000000001",
+					tableId: "33333333-3333-3333-3333-333333333333",
+					paymentMode: PaymentMode.ONLINE,
 				},
 			} as unknown as Request;
 

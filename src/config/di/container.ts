@@ -1,7 +1,9 @@
 import "reflect-metadata";
 import type { IMenuItemCatalogPort } from "@application/ports/external/menu-item-catalog.port.ts";
+import type { IPaymentServiceClient } from "@application/ports/external/payment-service.client.port.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port";
+import type { IOrderPaymentEventsConsumer } from "@application/ports/messaging/order-payment-events.consumer.port.ts";
 import type { IAddBatchCartItemsUseCase } from "@application/ports/use-cases/cart/add-batch-cart-items.use-case.port.ts";
 import type { IAddCartItemUseCase } from "@application/ports/use-cases/cart/add-cart-item.use-case.port.ts";
 import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-cart.use-case.port.ts";
@@ -30,7 +32,10 @@ import type { IOrderRepository } from "@domain/repositories/order.repository.int
 import prisma from "@infrastructure/database/prisma.ts";
 import { PrismaCartRepository } from "@infrastructure/database/repositories/prisma-cart.repository.ts";
 import { PrismaOrderRepository } from "@infrastructure/database/repositories/prisma-order.repository.ts";
+import { OrderPaymentEventsConsumer } from "@infrastructure/messaging/order-payment-events.consumer.ts";
+import { RabbitMQService } from "@infrastructure/rabbitmq/index.ts";
 import { MenuItemCatalogClient } from "@infrastructure/services/menu-item-catalog.client.ts";
+import { PaymentServiceClient } from "@infrastructure/services/payment-service.client.ts";
 import { QueueServiceClient } from "@infrastructure/services/queue-service.client.ts";
 import { RestaurantServiceClient } from "@infrastructure/services/restaurant-service.client.ts";
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
@@ -125,6 +130,21 @@ container
 container
 	.bind<IQueueServiceClient>(TYPES.QueueServiceClient)
 	.to(QueueServiceClient)
+	.inSingletonScope();
+
+container
+	.bind<IPaymentServiceClient>(TYPES.PaymentServiceClient)
+	.to(PaymentServiceClient)
+	.inSingletonScope();
+
+container
+	.bind<RabbitMQService>(TYPES.RabbitMQService)
+	.to(RabbitMQService)
+	.inSingletonScope();
+
+container
+	.bind<IOrderPaymentEventsConsumer>(TYPES.OrderPaymentEventsConsumer)
+	.to(OrderPaymentEventsConsumer)
 	.inSingletonScope();
 
 container

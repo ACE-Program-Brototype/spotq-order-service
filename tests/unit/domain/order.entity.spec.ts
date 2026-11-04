@@ -4,11 +4,12 @@ import { Order } from "@domain/entities/order.entity.ts";
 import { OrderItem } from "@domain/entities/order-item.entity.ts";
 import { OrderItemAddon } from "@domain/entities/order-item-addon.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart.errors.ts";
 import {
+	ActiveQueueEntryRequiredError,
 	ForbiddenOrderAccessError,
 	OrderCancellationNotAllowedError,
 } from "@domain/errors/order.errors.ts";
@@ -46,12 +47,12 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
+			tableId: "table-1",
 			tableNumber: 5,
-			orderType: OrderType.DINE_IN,
+			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
-			priority: 2,
 			taxAmount: 18,
 			platformFee: 5,
 			discountAmount: 10,
@@ -62,12 +63,56 @@ describe("Order Domain Entity", () => {
 		assert.equal(order.orderNumber, "ORD-001");
 		assert.equal(order.restaurantId, restaurantId);
 		assert.equal(order.userId, customerId);
+		assert.equal(order.orderingMode, OrderingMode.SELF_ORDER);
 		assert.equal(order.orderStatus, OrderStatus.PLACED);
 		assert.equal(order.paymentStatus, PaymentStatus.PENDING);
-		assert.equal(order.priority, 2);
 		assert.equal(order.subtotal, 350);
 		// grandTotal = 350 + 18 + 5 - 10 = 363
 		assert.equal(order.grandTotal, 363);
+	});
+
+	it("should allow SELF_ORDER without tableId and calculate domain financials and estimatedReadyAt", () => {
+		const item = createSampleItem();
+		const order = new Order({
+			id: "order-1",
+			orderNumber: "ORD-001",
+			restaurantId,
+			userId: customerId,
+			orderingMode: OrderingMode.SELF_ORDER,
+			paymentMode: PaymentMode.ONLINE,
+			paymentStatus: PaymentStatus.PENDING,
+			orderStatus: OrderStatus.PLACED,
+			taxPercent: 5,
+			preparationTimes: [15, 25],
+			items: [item],
+		});
+
+		assert.equal(order.tableId, null);
+		assert.equal(order.subtotal, 350);
+		// taxAmount = 350 * 5% = 17.5
+		assert.equal(order.taxAmount, 17.5);
+		// grandTotal = 350 + 17.5 = 367.5
+		assert.equal(order.grandTotal, 367.5);
+		assert.notEqual(order.estimatedReadyAt, null);
+	});
+
+	it("should throw ActiveQueueEntryRequiredError if queueEntryId is missing for QUEUE_ORDER", () => {
+		const item = createSampleItem();
+		assert.throws(
+			() =>
+				new Order({
+					id: "order-1",
+					orderNumber: "ORD-001",
+					restaurantId,
+					userId: customerId,
+					orderingMode: OrderingMode.QUEUE_ORDER,
+					paymentMode: PaymentMode.ONLINE,
+					paymentStatus: PaymentStatus.PENDING,
+					orderStatus: OrderStatus.PLACED,
+					items: [item],
+				}),
+			(err: unknown) => err instanceof ActiveQueueEntryRequiredError,
+		);
 	});
 
 	it("should throw CartEmptyError when items array is empty", () => {
@@ -78,8 +123,9 @@ describe("Order Domain Entity", () => {
 					orderNumber: "ORD-001",
 					restaurantId,
 					userId: customerId,
-					orderType: OrderType.TAKEAWAY,
-					paymentMode: PaymentMode.COD,
+					tableId: "table-1",
+					orderingMode: OrderingMode.SELF_ORDER,
+					paymentMode: PaymentMode.ONLINE,
 					paymentStatus: PaymentStatus.PENDING,
 					orderStatus: OrderStatus.PLACED,
 					items: [],
@@ -95,7 +141,8 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			orderType: OrderType.DINE_IN,
+			tableId: "table-1",
+			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
@@ -116,11 +163,11 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			orderType: OrderType.DINE_IN,
+			tableId: "table-1",
+			orderingMode: OrderingMode.SELF_ORDER,
 			orderStatus: OrderStatus.CONFIRMED,
 			paymentStatus: PaymentStatus.PAID,
 			paymentMode: PaymentMode.ONLINE,
-			priority: 2,
 			items: [item],
 		});
 
@@ -138,7 +185,8 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			orderType: OrderType.DINE_IN,
+			tableId: "table-1",
+			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
@@ -160,7 +208,8 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			orderType: OrderType.DINE_IN,
+			tableId: "table-1",
+			orderingMode: OrderingMode.SELF_ORDER,
 			orderStatus: OrderStatus.CANCELLED,
 			paymentStatus: PaymentStatus.PENDING,
 			paymentMode: PaymentMode.ONLINE,
@@ -190,7 +239,8 @@ describe("Order Domain Entity", () => {
 				orderNumber: "ORD-001",
 				restaurantId,
 				userId: customerId,
-				orderType: OrderType.DINE_IN,
+				tableId: "table-1",
+				orderingMode: OrderingMode.SELF_ORDER,
 				orderStatus: status,
 				paymentStatus: PaymentStatus.PAID,
 				paymentMode: PaymentMode.ONLINE,
