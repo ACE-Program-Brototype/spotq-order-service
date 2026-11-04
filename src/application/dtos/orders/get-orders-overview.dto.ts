@@ -1,4 +1,3 @@
-
 export interface GetOrdersOverviewInputDTO {
 	restaurantId: string;
 	from?: Date | undefined;

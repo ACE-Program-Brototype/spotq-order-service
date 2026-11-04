@@ -31,7 +31,8 @@ import { inject, injectable } from "inversify";
 @injectable()
 export class PrismaOrderRepository
 	extends PrismaBaseRepository<Order, PrismaOrderWithRelations>
-	implements IOrderRepository {
+	implements IOrderRepository
+{
 	constructor(
 		@inject(TYPES.PrismaClient)
 		private readonly prisma: PrismaClient,
@@ -374,11 +375,11 @@ export class PrismaOrderRepository
 
 				...(params.fromDate || params.toDate
 					? {
-						createdAt: {
-							...(params.fromDate && { gte: params.fromDate }),
-							...(params.toDate && { lte: params.toDate }),
-						},
-					}
+							createdAt: {
+								...(params.fromDate && { gte: params.fromDate }),
+								...(params.toDate && { lte: params.toDate }),
+							},
+						}
 					: {}),
 			};
 
@@ -477,9 +478,9 @@ export class PrismaOrderRepository
 					order.orderStatus === OrderStatus.COMPLETED
 						? ORDER_DEFAULTS.COMPLETED_AUDIT_NOTE
 						: ORDER_DEFAULTS.STATUS_UPDATED_AUDIT_NOTE(
-							previousStatus,
-							order.orderStatus,
-						);
+								previousStatus,
+								order.orderStatus,
+							);
 
 				await tx.orderStatusHistory.create({
 					data: {
