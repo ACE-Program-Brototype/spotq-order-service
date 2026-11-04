@@ -25,4 +25,10 @@ export interface IOrderRepository {
 		order: Order,
 		previousStatus: OrderStatus,
 	): Promise<CancelledOrderData>;
+	updateOrderStatus(
+		order: Order,
+		previousStatus: OrderStatus,
+		actorId: string,
+		notes?: string | null,
+	): Promise<Order>;
 }

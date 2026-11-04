@@ -1,3 +1,5 @@
+import { OrderStatus } from "@domain/enums/order-status.enum.ts";
+
 export const ORDER_LIMITS = {
 	DEFAULT_PRIORITY: 2,
 	MAX_SPECIAL_INSTRUCTIONS_LENGTH: 250,
@@ -11,6 +13,9 @@ export const ORDER_DEFAULTS = {
 	ADDON_NAME: "Addon",
 	AUDIT_NOTE: "Order placed by customer",
 	CANCEL_AUDIT_NOTE: "Order cancelled by customer",
+	COMPLETED_AUDIT_NOTE: "Order completed successfully",
+	STATUS_UPDATED_AUDIT_NOTE: (from: string, to: string) =>
+		`Order status updated from ${from} to ${to}`,
 } as const;
 
 export const ORDER_DOMAIN_MESSAGES = {
@@ -20,4 +25,24 @@ export const ORDER_DOMAIN_MESSAGES = {
 		"Order is already in preparation and cannot be cancelled",
 	CART_EMPTY: "Cannot place an order with an empty cart",
 	ORDER_NOT_FOUND: "Order not found",
+	FORBIDDEN_RESTAURANT_ACCESS:
+		"Forbidden: Order does not belong to your restaurant",
+	INVALID_STATUS_TRANSITION: "Invalid order status transition",
+	INVALID_STATUS_TRANSITION_TEMPLATE: (from: string, to: string) =>
+		`Cannot transition order status from ${from} to ${to}`,
+	ORDER_STATUS_CONFLICT:
+		"Order was updated concurrently or is no longer in expected status",
 } as const;
+
+export const ALLOWED_STATUS_TRANSITIONS: Record<
+	OrderStatus,
+	readonly OrderStatus[]
+> = {
+	[OrderStatus.PLACED]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+	[OrderStatus.CONFIRMED]: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
+	[OrderStatus.PREPARING]: [OrderStatus.READY],
+	[OrderStatus.READY]: [OrderStatus.SERVED, OrderStatus.COMPLETED],
+	[OrderStatus.SERVED]: [OrderStatus.COMPLETED],
+	[OrderStatus.COMPLETED]: [],
+	[OrderStatus.CANCELLED]: [],
+};

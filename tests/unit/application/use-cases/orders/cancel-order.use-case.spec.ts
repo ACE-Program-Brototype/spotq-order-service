@@ -72,6 +72,9 @@ function createMockOrderRepo(options: {
 				}
 			);
 		},
+		updateOrderStatus: async () => {
+			throw new Error("Not implemented");
+		},
 	};
 }
 
