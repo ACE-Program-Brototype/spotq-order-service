@@ -10,6 +10,8 @@ import { ordersOverviewQuerySchema } from "@presentation/http/validators/orders/
 import { restaurantIdParamSchema } from "@presentation/http/validators/restaurant-id-param.schema.ts";
 import { RESTAURANT_ORDER_ROUTES } from "@shared/constants/routes.constants.ts";
 import { Router } from "express";
+import { restaurantOrderDetailsParamSchema } from "../validators/orders/restaurant-order-details-param.schema";
+import { restaurantOrderListQuerySchema } from "../validators/orders/restaurant-orders-list-query.schema";
 
 const restaurantOrderRouter: Router = Router();
 
@@ -25,4 +27,18 @@ restaurantOrderRouter.get(
 	restaurantOrderController.getOrdersOverview,
 );
 
+restaurantOrderRouter.get(
+	RESTAURANT_ORDER_ROUTES.LIST,
+	restaurantAdminAuthMiddleware,
+	validateRequestParams(restaurantIdParamSchema),
+	validateRequestQuery(restaurantOrderListQuerySchema),
+	restaurantOrderController.getRestaurantOrderList,
+);
+
+restaurantOrderRouter.get(
+	RESTAURANT_ORDER_ROUTES.DETAILS,
+	restaurantAdminAuthMiddleware,
+	validateRequestParams(restaurantOrderDetailsParamSchema),
+	restaurantOrderController.getRestaurantOrderDetails,
+);
 export default restaurantOrderRouter;

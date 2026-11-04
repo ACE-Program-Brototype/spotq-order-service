@@ -85,6 +85,12 @@ function createMockOrderRepo(overrides: {
 		cancelOrder: async () => {
 			throw new Error("Not implemented");
 		},
+		getRestaurantOrders: async () => {
+			throw new Error("Not implemented");
+		},
+		findByRestaurantAndOrderId: async () => {
+			throw new Error("Not implemented");
+		},
 		updateOrderStatus: async (order, previousStatus, actorId, notes) => {
 			if (overrides.conflict) {
 				throw new OrderStatusConflictError();

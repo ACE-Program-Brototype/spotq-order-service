@@ -48,6 +48,14 @@ describe("GetOrderHistoryUseCase", () => {
 				};
 			},
 			findById: async () => null,
+			findByRestaurantAndOrderId: async () => null,
+			getRestaurantOrders: async () => ({
+				orders: [],
+				totalOrders: 0,
+				totalPages: 0,
+				currentPage: 1,
+				hasNext: false,
+			}),
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},
@@ -97,6 +105,14 @@ describe("GetOrderHistoryUseCase", () => {
 				hasNext: false,
 			}),
 			findById: async () => null,
+			findByRestaurantAndOrderId: async () => null,
+			getRestaurantOrders: async () => ({
+				orders: [],
+				totalOrders: 0,
+				totalPages: 0,
+				currentPage: 1,
+				hasNext: false,
+			}),
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},

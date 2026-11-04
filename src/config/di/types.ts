@@ -20,6 +20,10 @@ export const TYPES = {
 	QueueServiceClient: Symbol.for("QueueServiceClient"),
 	PlaceOrderUseCase: Symbol.for("PlaceOrderUseCase"),
 	GetCheckoutDetailsUseCase: Symbol.for("GetCheckoutDetailsUseCase"),
+	GetRestaurantOrdersListUseCase: Symbol.for("GetRestaurantOrdersListUsecase"),
+	GetRestaurantOrderDetailsUseCase: Symbol.for(
+		"GetRestaurantOrderDetailsUseCase",
+	),
 	UpdateOrderStatusUseCase: Symbol.for("UpdateOrderStatusUseCase"),
 	StaffOrderController: Symbol.for("StaffOrderController"),
 };
