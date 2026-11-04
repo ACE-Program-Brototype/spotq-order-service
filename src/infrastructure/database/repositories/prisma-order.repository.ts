@@ -1,6 +1,11 @@
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import {
+	DomainError,
+	OrderNotFoundError,
+	OrderStatusConflictError,
+} from "@domain/errors/index.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
 	CancelledOrderData,
@@ -17,14 +22,16 @@ import {
 	type PrismaOrderWithRelations,
 } from "@infrastructure/database/mappers/order.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/database/repositories/prisma-base.repository.ts";
-import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
+import {
+	ORDER_DEFAULTS,
+	ORDER_MESSAGES,
+} from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
 export class PrismaOrderRepository
 	extends PrismaBaseRepository<Order, PrismaOrderWithRelations>
-	implements IOrderRepository
-{
+	implements IOrderRepository {
 	constructor(
 		@inject(TYPES.PrismaClient)
 		private readonly prisma: PrismaClient,
@@ -367,11 +374,11 @@ export class PrismaOrderRepository
 
 				...(params.fromDate || params.toDate
 					? {
-							createdAt: {
-								...(params.fromDate && { gte: params.fromDate }),
-								...(params.toDate && { lte: params.toDate }),
-							},
-						}
+						createdAt: {
+							...(params.fromDate && { gte: params.fromDate }),
+							...(params.toDate && { lte: params.toDate }),
+						},
+					}
 					: {}),
 			};
 
@@ -438,5 +445,81 @@ export class PrismaOrderRepository
 		}
 
 		return order ? OrderPersistenceMapper.toDomain(order) : null;
+	}
+	public async updateOrderStatus(
+		order: Order,
+		previousStatus: OrderStatus,
+		actorId: string,
+		notes?: string | null,
+	): Promise<Order> {
+		try {
+			return await this.prisma.$transaction(async (tx) => {
+				const updateResult = await tx.order.updateMany({
+					where: {
+						id: order.id,
+						orderStatus: previousStatus,
+					},
+					data: {
+						orderStatus: order.orderStatus,
+						cancellationReason: order.cancellationReason,
+						cancelledAt: order.cancelledAt,
+						updatedAt: new Date(),
+					},
+				});
+
+				if (updateResult.count === 0) {
+					throw new OrderStatusConflictError(
+						ORDER_MESSAGES.ORDER_STATUS_CONFLICT,
+					);
+				}
+
+				const defaultNote =
+					order.orderStatus === OrderStatus.COMPLETED
+						? ORDER_DEFAULTS.COMPLETED_AUDIT_NOTE
+						: ORDER_DEFAULTS.STATUS_UPDATED_AUDIT_NOTE(
+							previousStatus,
+							order.orderStatus,
+						);
+
+				await tx.orderStatusHistory.create({
+					data: {
+						orderId: order.id,
+						previousStatus,
+						currentStatus: order.orderStatus,
+						changedBy: actorId,
+						notes: notes || defaultNote,
+						createdAt: new Date(),
+					},
+				});
+
+				const updatedRecord = await tx.order.findUnique({
+					where: { id: order.id },
+					include: {
+						items: {
+							include: {
+								addons: true,
+							},
+						},
+						statusHistory: {
+							orderBy: {
+								createdAt: "desc",
+							},
+						},
+					},
+				});
+
+				if (!updatedRecord) {
+					throw new OrderNotFoundError(ORDER_MESSAGES.ORDER_NOT_FOUND);
+				}
+
+				return OrderPersistenceMapper.toDomain(updatedRecord);
+			});
+		} catch (error) {
+			if (error instanceof DomainError) {
+				throw error;
+			}
+			this.handlePrismaError(error, { orderId: order.id });
+			throw error;
+		}
 	}
 }

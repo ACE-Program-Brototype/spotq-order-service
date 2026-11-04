@@ -1,4 +1,5 @@
 import {
+	ALLOWED_STATUS_TRANSITIONS,
 	ORDER_DOMAIN_MESSAGES,
 	ORDER_LIMITS,
 } from "@domain/constants/order.constants.ts";
@@ -17,6 +18,8 @@ import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart.errors.ts";
 import {
 	ForbiddenOrderAccessError,
+	ForbiddenRestaurantAccessError,
+	InvalidOrderStatusTransitionError,
 	OrderCancellationNotAllowedError,
 } from "@domain/errors/index.ts";
 
@@ -142,6 +145,7 @@ export class Order {
 		return Number(total.toFixed(2));
 	}
 
+	// --- Queries (CQS) ---
 	public calculateGrandTotal(): number {
 		const total =
 			this.subtotal + this.taxAmount + this.platformFee - this.discountAmount;
@@ -154,12 +158,30 @@ export class Order {
 		}
 	}
 
-	public cancel(customerId: string, reason?: string | null): void {
+	public validateCustomerAccess(customerId: string): void {
 		if (this.userId !== customerId) {
 			throw new ForbiddenOrderAccessError(
 				ORDER_DOMAIN_MESSAGES.ORDER_FORBIDDEN_CANCEL,
 			);
 		}
+	}
+
+	public validateRestaurantAccess(restaurantId: string): void {
+		if (this.restaurantId !== restaurantId) {
+			throw new ForbiddenRestaurantAccessError(
+				ORDER_DOMAIN_MESSAGES.FORBIDDEN_RESTAURANT_ACCESS,
+			);
+		}
+	}
+
+	public canTransitionTo(newStatus: OrderStatus): boolean {
+		const allowedTransitions =
+			ALLOWED_STATUS_TRANSITIONS[this.currentStatus] ?? [];
+		return allowedTransitions.includes(newStatus);
+	}
+
+	public cancel(customerId: string, reason?: string | null): void {
+		this.validateCustomerAccess(customerId);
 
 		if (this.currentStatus === OrderStatus.CANCELLED) {
 			throw new OrderCancellationNotAllowedError(
@@ -183,5 +205,25 @@ export class Order {
 		this.currentStatus = OrderStatus.CANCELLED;
 		this.currentCancellationReason = reason ?? null;
 		this.currentCancelledAt = new Date();
+	}
+
+	public updateStatus(newStatus: OrderStatus, restaurantId?: string): void {
+		if (restaurantId) {
+			this.validateRestaurantAccess(restaurantId);
+		}
+
+		if (!this.canTransitionTo(newStatus)) {
+			throw new InvalidOrderStatusTransitionError(
+				ORDER_DOMAIN_MESSAGES.INVALID_STATUS_TRANSITION_TEMPLATE(
+					this.currentStatus,
+					newStatus,
+				),
+			);
+		}
+
+		this.currentStatus = newStatus;
+		if (newStatus === OrderStatus.CANCELLED && !this.currentCancelledAt) {
+			this.currentCancelledAt = new Date();
+		}
 	}
 }

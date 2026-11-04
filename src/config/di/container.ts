@@ -15,6 +15,7 @@ import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/ord
 import type { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
 import type { IGetRestaurantOrdersListUseCase } from "@application/ports/use-cases/orders/get-restaurant-orders.use-case.port";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
+import type { IUpdateOrderStatusUseCase } from "@application/ports/use-cases/orders/update-order-status.use-case.port.ts";
 import { AddBatchCartItemsUseCase } from "@application/use-cases/cart/add-batch-cart-items.use-case.ts";
 import { AddCartItemUseCase } from "@application/use-cases/cart/add-cart-item.use-case.ts";
 import { ClearCartUseCase } from "@application/use-cases/cart/clear-cart.use-case.ts";
@@ -28,6 +29,7 @@ import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orde
 import { GetRestaurantOrderDetailsUseCase } from "@application/use-cases/orders/get-restaurant-order-details.use-case";
 import { GetRestaurantOrdersListUseCase } from "@application/use-cases/orders/get-restaurant-orders.use-case";
 import { PlaceOrderUseCase } from "@application/use-cases/orders/place-order.use-case.ts";
+import { UpdateOrderStatusUseCase } from "@application/use-cases/orders/update-order-status.use-case.ts";
 import { TYPES } from "@config/di/types.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
@@ -40,6 +42,7 @@ import { RestaurantServiceClient } from "@infrastructure/services/restaurant-ser
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
 import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
 import { RestaurantOrderController } from "@presentation/http/controllers/restaurant-order.controller.ts";
+import { StaffOrderController } from "@presentation/http/controllers/staff-order.controller.ts";
 import { Container } from "inversify";
 
 const container = new Container();
@@ -151,6 +154,16 @@ container
 		TYPES.GetRestaurantOrderDetailsUseCase,
 	)
 	.to(GetRestaurantOrderDetailsUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IUpdateOrderStatusUseCase>(TYPES.UpdateOrderStatusUseCase)
+	.to(UpdateOrderStatusUseCase)
+	.inSingletonScope();
+
+container
+	.bind<StaffOrderController>(TYPES.StaffOrderController)
+	.to(StaffOrderController)
 	.inSingletonScope();
 
 export { container };

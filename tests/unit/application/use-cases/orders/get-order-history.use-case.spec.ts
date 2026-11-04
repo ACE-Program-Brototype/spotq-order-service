@@ -59,6 +59,9 @@ describe("GetOrderHistoryUseCase", () => {
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},
+			updateOrderStatus: async () => {
+				throw new Error("Not implemented");
+			},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);
@@ -111,6 +114,9 @@ describe("GetOrderHistoryUseCase", () => {
 				hasNext: false,
 			}),
 			cancelOrder: async () => {
+				throw new Error("Not implemented");
+			},
+			updateOrderStatus: async () => {
 				throw new Error("Not implemented");
 			},
 		};

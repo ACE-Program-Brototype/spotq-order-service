@@ -34,4 +34,10 @@ export interface IOrderRepository {
 		restaurantId: string,
 		orderId: string,
 	): Promise<Order | null>;
+	updateOrderStatus(
+		order: Order,
+		previousStatus: OrderStatus,
+		actorId: string,
+		notes?: string | null,
+	): Promise<Order>;
 }

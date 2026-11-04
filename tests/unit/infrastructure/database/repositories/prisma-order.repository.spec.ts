@@ -5,6 +5,10 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderType } from "@domain/enums/order-type.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import {
+	OrderNotFoundError,
+	OrderStatusConflictError,
+} from "@domain/errors/order.errors.ts";
 import type { PrismaClient } from "@generated/prisma/client.ts";
 import { PrismaOrderRepository } from "@infrastructure/database/repositories/prisma-order.repository.ts";
 import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
@@ -491,5 +495,170 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 					/Record not found in database for context: {"orderId":"ord-123"}/,
 			},
 		);
+	});
+
+	describe("updateOrderStatus", () => {
+		it("should update order status, create audit log, and return domain order in transaction", async () => {
+			let capturedUpdateWhere: unknown;
+			let capturedUpdateData: unknown;
+			let capturedAuditData: unknown;
+
+			const mockPrismaOrderRecord = {
+				id: "ord-123",
+				orderNumber: "SQ-101",
+				restaurantId: "rest-1",
+				restaurantName: "SpotQ Test Kitchen",
+				userId: "user-1",
+				userName: "John Doe",
+				userPhone: "9876543210",
+				tableId: null,
+				tableNumber: null,
+				queueEntryId: null,
+				paymentId: null,
+				priority: 2,
+				orderType: "DINE_IN",
+				paymentMode: "ONLINE",
+				paymentStatus: "PAID",
+				orderStatus: "COMPLETED",
+				subtotal: 100,
+				taxAmount: 5,
+				platformFee: 2,
+				discountAmount: 0,
+				couponCode: null,
+				grandTotal: 107,
+				estimatedReadyAt: null,
+				specialInstructions: null,
+				cancellationReason: null,
+				cancelledAt: null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				items: [
+					{
+						id: "item-1",
+						orderId: "ord-123",
+						menuItemId: "menu-1",
+						itemName: "Burger",
+						variantId: null,
+						variantName: null,
+						quantity: 1,
+						unitPrice: 100,
+						totalPrice: 100,
+						specialInstructions: null,
+						createdAt: new Date(),
+						addons: [],
+					},
+				],
+				statusHistory: [],
+			};
+
+			const mockTx = {
+				order: {
+					updateMany: async (args: { where: unknown; data: unknown }) => {
+						capturedUpdateWhere = args.where;
+						capturedUpdateData = args.data;
+						return { count: 1 };
+					},
+					findUnique: async () => mockPrismaOrderRecord,
+				},
+				orderStatusHistory: {
+					create: async (args: { data: Record<string, unknown> }) => {
+						capturedAuditData = args.data;
+						return { id: "hist-1", ...args.data };
+					},
+				},
+			};
+
+			const mockPrisma = {
+				$transaction: async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
+					return await fn(mockTx);
+				},
+			} as unknown as PrismaClient;
+
+			const order = createSampleOrder({
+				id: "ord-123",
+				orderStatus: OrderStatus.COMPLETED,
+			});
+
+			const repository = new PrismaOrderRepository(mockPrisma);
+			const result = await repository.updateOrderStatus(
+				order,
+				OrderStatus.READY,
+				"staff-1",
+				"Completed order",
+			);
+
+			assert.equal(result.id, "ord-123");
+			assert.equal(result.orderStatus, OrderStatus.COMPLETED);
+			assert.deepEqual(capturedUpdateWhere, {
+				id: "ord-123",
+				orderStatus: OrderStatus.READY,
+			});
+			assert.equal(
+				(capturedUpdateData as { orderStatus: OrderStatus }).orderStatus,
+				OrderStatus.COMPLETED,
+			);
+			assert.deepEqual(capturedAuditData, {
+				orderId: "ord-123",
+				previousStatus: OrderStatus.READY,
+				currentStatus: OrderStatus.COMPLETED,
+				changedBy: "staff-1",
+				notes: "Completed order",
+				createdAt: (capturedAuditData as { createdAt: Date }).createdAt,
+			});
+		});
+
+		it("should throw OrderStatusConflictError when updateMany returns count: 0", async () => {
+			const mockTx = {
+				order: {
+					updateMany: async () => ({ count: 0 }),
+				},
+			};
+
+			const mockPrisma = {
+				$transaction: async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
+					return await fn(mockTx);
+				},
+			} as unknown as PrismaClient;
+
+			const order = createSampleOrder({
+				id: "ord-123",
+				orderStatus: OrderStatus.COMPLETED,
+			});
+
+			const repository = new PrismaOrderRepository(mockPrisma);
+			await assert.rejects(
+				() => repository.updateOrderStatus(order, OrderStatus.READY, "staff-1"),
+				(err: unknown) => err instanceof OrderStatusConflictError,
+			);
+		});
+
+		it("should throw OrderNotFoundError if findUnique returns null after update", async () => {
+			const mockTx = {
+				order: {
+					updateMany: async () => ({ count: 1 }),
+					findUnique: async () => null,
+				},
+				orderStatusHistory: {
+					create: async () => ({ id: "hist-1" }),
+				},
+			};
+
+			const mockPrisma = {
+				$transaction: async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
+					return await fn(mockTx);
+				},
+			} as unknown as PrismaClient;
+
+			const order = createSampleOrder({
+				id: "ord-123",
+				orderStatus: OrderStatus.COMPLETED,
+			});
+
+			const repository = new PrismaOrderRepository(mockPrisma);
+			await assert.rejects(
+				() => repository.updateOrderStatus(order, OrderStatus.READY, "staff-1"),
+				(err: unknown) => err instanceof OrderNotFoundError,
+			);
+		});
 	});
 });

@@ -170,6 +170,15 @@ class MockOrderRepository implements IOrderRepository {
 			hasNext: false,
 		};
 	}
+
+	public async updateOrderStatus(
+		_order: Order,
+		_previousStatus: OrderStatus,
+		_actorId: string,
+		_notes?: string | null,
+	): Promise<Order> {
+		throw new Error("Not implemented in test");
+	}
 }
 
 class MockRestaurantServiceClient implements IRestaurantServiceClient {

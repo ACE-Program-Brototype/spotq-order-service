@@ -10,6 +10,7 @@ export const AUTH_HEADERS = {
 
 export const AUTH_ROLES = {
 	RESTAURANT_OWNER: "RESTAURANT_OWNER",
+	STAFF: "staff",
 	CUSTOMER: "CUSTOMER",
 } as const;
 
