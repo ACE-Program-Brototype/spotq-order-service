@@ -20,5 +20,3 @@ export const StaffOrderRequestMapper = {
 		};
 	},
 };
-
-export default StaffOrderRequestMapper;

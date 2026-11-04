@@ -4,7 +4,7 @@ import type { Order } from "@domain/entities/order.entity.ts";
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 
 export const UpdateOrderStatusMapper = {
-	toDTO(
+	toResponseDTO(
 		order: Order,
 		previousStatus: OrderStatus,
 	): UpdateOrderStatusResponseDTO {
@@ -19,5 +19,3 @@ export const UpdateOrderStatusMapper = {
 		};
 	},
 };
-
-export default UpdateOrderStatusMapper;

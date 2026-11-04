@@ -71,5 +71,4 @@ staffOrderRouter.patch(
 	staffOrderController.updateOrderStatus,
 );
 
-export { staffOrderRouter };
 export default staffOrderRouter;

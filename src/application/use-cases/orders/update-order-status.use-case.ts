@@ -45,8 +45,6 @@ export class UpdateOrderStatusUseCase implements IUpdateOrderStatusUseCase {
 			auditNote,
 		);
 
-		return UpdateOrderStatusMapper.toDTO(updatedOrder, previousStatus);
+		return UpdateOrderStatusMapper.toResponseDTO(updatedOrder, previousStatus);
 	}
 }
-
-export default UpdateOrderStatusUseCase;

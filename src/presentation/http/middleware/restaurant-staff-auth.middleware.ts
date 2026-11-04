@@ -70,5 +70,3 @@ export function restaurantStaffAuthMiddleware(
 
 	next();
 }
-
-export default restaurantStaffAuthMiddleware;

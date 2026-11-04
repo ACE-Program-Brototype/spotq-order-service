@@ -29,5 +29,3 @@ export class StaffOrderController {
 		);
 	};
 }
-
-export default StaffOrderController;
