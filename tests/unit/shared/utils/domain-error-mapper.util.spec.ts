@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
-import { CART_ERROR_CODES } from "@shared/constants/message.constants.ts";
+import {
+	CART_ERROR_CODES,
+	ORDER_ERROR_CODES,
+} from "@shared/constants/message.constants.ts";
 import {
 	DOMAIN_ERROR_HTTP_MAP,
 	mapDomainErrorToHttpStatus,
@@ -36,6 +39,28 @@ describe("domain-error-mapper.util", () => {
 		assert.equal(
 			mapDomainErrorToHttpStatus(CART_ERROR_CODES.ITEM_UNAVAILABLE),
 			HttpStatus.CONFLICT,
+		);
+		assert.equal(
+			mapDomainErrorToHttpStatus(
+				ORDER_ERROR_CODES.PAYMENT_GATEWAY_DRAFT_FAILED,
+			),
+			HttpStatus.BAD_GATEWAY,
+		);
+		assert.equal(
+			mapDomainErrorToHttpStatus(ORDER_ERROR_CODES.INVALID_STATUS_TRANSITION),
+			HttpStatus.BAD_REQUEST,
+		);
+		assert.equal(
+			mapDomainErrorToHttpStatus(ORDER_ERROR_CODES.ORDER_STATUS_CONFLICT),
+			HttpStatus.CONFLICT,
+		);
+		assert.equal(
+			mapDomainErrorToHttpStatus(ORDER_ERROR_CODES.ORDERING_MODE_NOT_SUPPORTED),
+			HttpStatus.BAD_REQUEST,
+		);
+		assert.equal(
+			mapDomainErrorToHttpStatus(ORDER_ERROR_CODES.ACTIVE_QUEUE_REQUIRED),
+			HttpStatus.BAD_REQUEST,
 		);
 	});
 

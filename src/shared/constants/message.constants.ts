@@ -100,6 +100,13 @@ export const ORDER_MESSAGES = {
 		"Cancellation reason cannot exceed 500 characters",
 	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
 	INVALID_TAX_PERCENT: "Tax percent cannot be negative",
+	ORDER_STATUS_UPDATED_SUCCESS: "Order status updated successfully",
+	ORDER_COMPLETED_SUCCESS: "Order completed successfully",
+	ORDER_STATUS_CONFLICT:
+		"Order was updated concurrently or is no longer in expected status",
+	INVALID_STATUS_TRANSITION: "Invalid order status transition",
+	PAYMENT_GATEWAY_DRAFT_FAILED:
+		"Failed to initiate payment gateway order draft",
 };
 
 export const ORDER_DEFAULTS = {
@@ -131,6 +138,9 @@ export const ORDER_ERROR_CODES = {
 	ACTIVE_QUEUE_REQUIRED: "ACTIVE_QUEUE_REQUIRED",
 	TABLE_REQUIRED_FOR_SELF_ORDER: "TABLE_REQUIRED_FOR_SELF_ORDER",
 	INVALID_TAX_PERCENT: "INVALID_TAX_PERCENT",
+	INVALID_STATUS_TRANSITION: "INVALID_STATUS_TRANSITION",
+	ORDER_STATUS_CONFLICT: "ORDER_STATUS_CONFLICT",
+	PAYMENT_GATEWAY_DRAFT_FAILED: "PAYMENT_GATEWAY_DRAFT_FAILED",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",

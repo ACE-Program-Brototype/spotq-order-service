@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CartNotFoundError } from "@domain/errors/cart.errors.ts";
+import { PaymentGatewayDraftFailedError } from "@domain/errors/payment-gateway-draft-failed.error.ts";
 import {
 	errorHandler,
 	mapDomainErrorToHttpStatus,
@@ -68,6 +69,35 @@ describe("Error Middleware", () => {
 			statusCode: HttpStatus.NOT_FOUND,
 			code: CART_ERROR_CODES.CART_NOT_FOUND,
 			message: CART_MESSAGES.NOT_FOUND,
+			error: undefined,
+		});
+	});
+
+	it("should format response correctly when handling PaymentGatewayDraftFailedError with 502 Bad Gateway", () => {
+		const err = new PaymentGatewayDraftFailedError();
+		const req = {} as Request;
+		let capturedStatus = 0;
+		let capturedBody: unknown = null;
+
+		const res = {
+			status: (code: number) => {
+				capturedStatus = code;
+				return res;
+			},
+			json: (body: unknown) => {
+				capturedBody = body;
+				return res;
+			},
+		} as unknown as Response;
+
+		errorHandler(err, req, res, () => {});
+
+		assert.equal(capturedStatus, HttpStatus.BAD_GATEWAY);
+		assert.deepEqual(capturedBody, {
+			success: false,
+			statusCode: HttpStatus.BAD_GATEWAY,
+			code: ORDER_ERROR_CODES.PAYMENT_GATEWAY_DRAFT_FAILED,
+			message: "Failed to initiate payment gateway order draft",
 			error: undefined,
 		});
 	});

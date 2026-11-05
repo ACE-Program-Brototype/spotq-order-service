@@ -38,9 +38,7 @@ const envSchema = z.object({
 		.default("http://payment-service:3003"),
 	PAYMENT_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
 	S2S_PAYMENT_AUDIENCE: z.string().default("payment-service"),
-	RABBITMQ_URL: z
-		.string()
-		.default("amqp://spotq-rabbit:SpotqOfficial78@rabbitmq:5672"),
+	RABBITMQ_URL: z.string().default("amqp://guest:guest@rabbitmq:5672"),
 	RABBITMQ_QUEUE_ORDER_EVENTS: z.string().default("order-events"),
 	TAX_PERCENT: z.coerce.number().min(0).max(100).default(5),
 });

@@ -502,6 +502,7 @@ describe("PlaceOrderUseCase", () => {
 
 		assert.equal(secondOrder.id, firstOrder.id);
 		assert.equal(secondOrder.orderNumber, firstOrder.orderNumber);
+		assert.deepEqual(secondOrder.paymentDraft, firstOrder.paymentDraft);
 	});
 
 	it("automatically sets QUEUE_ORDER when customer has active queue entry and plan is QUEUE_PRO", async () => {

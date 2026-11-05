@@ -61,7 +61,21 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 				dto.idempotencyKey,
 			);
 			if (existingOrder) {
-				return OrderResponseMapper.toDTO(existingOrder);
+				let paymentDraft = null;
+				if (
+					existingOrder.paymentMode === PaymentMode.ONLINE &&
+					existingOrder.paymentStatus === PaymentStatus.PENDING
+				) {
+					const amountPaise = Math.round(existingOrder.grandTotal * 100);
+					paymentDraft = await this.paymentServiceClient.createGatewayOrder({
+						orderId: existingOrder.id,
+						customerId: existingOrder.userId ?? dto.userId,
+						restaurantId: existingOrder.restaurantId,
+						amountPaise,
+						currency: "INR",
+					});
+				}
+				return OrderResponseMapper.toDTO(existingOrder, paymentDraft);
 			}
 		}
 
