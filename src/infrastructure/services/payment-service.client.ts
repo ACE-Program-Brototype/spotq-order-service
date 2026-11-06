@@ -9,14 +9,9 @@ import logger from "@infrastructure/observability/logger.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
 import { PAYMENT_SERVICE_ROUTES } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";
+import type { ApiResponseSuccess } from "@shared/responses/api-response.ts";
 import axios, { isAxiosError } from "axios";
 import { injectable } from "inversify";
-
-interface ApiResponseEnvelope<T> {
-	success: boolean;
-	data?: T;
-	message?: string;
-}
 
 @injectable()
 export class PaymentServiceClient implements IPaymentServiceClient {
@@ -32,16 +27,13 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 
 		try {
 			const response = await axios.post<
-				ApiResponseEnvelope<CreateOrderPaymentResponseDTO>
+				ApiResponseSuccess<CreateOrderPaymentResponseDTO>
 			>(targetUrl, data, {
-				headers: {
-					...getS2SInternalHeaders(
-						SERVICES.PAYMENT_SERVICE,
-						this.s2sPrivateKey,
-						this.s2sServiceName,
-					),
-					"Content-Type": "application/json",
-				},
+				headers: getS2SInternalHeaders(
+					SERVICES.PAYMENT_SERVICE,
+					this.s2sPrivateKey,
+					this.s2sServiceName,
+				),
 				timeout: this.requestTimeoutMs,
 			});
 

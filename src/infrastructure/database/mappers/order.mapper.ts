@@ -3,6 +3,7 @@ import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import type {
 	CancelledOrderData,
 	CustomerOrderHistoryItemData,
@@ -113,11 +114,10 @@ export const OrderPersistenceMapper = {
 			idempotencyKey: record.idempotencyKey,
 			restaurantId: record.restaurantId,
 			restaurantName: record.restaurantName,
-			restaurantPlan: record.restaurantPlan,
+			restaurantPlan: (record.restaurantPlan as RestaurantPlan) ?? null,
 			userId: record.userId,
 			userName: record.userName,
 			userPhone: record.userPhone,
-			tableId: record.tableId,
 			tableNumber: record.tableNumber,
 			queueEntryId: record.queueEntryId,
 			paymentId: record.paymentId,

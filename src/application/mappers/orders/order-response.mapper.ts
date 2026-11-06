@@ -18,7 +18,6 @@ export const OrderResponseMapper = {
 			userId: order.userId,
 			userName: order.userName,
 			userPhone: order.userPhone,
-			tableId: order.tableId,
 			tableNumber: order.tableNumber,
 			queueEntryId: order.queueEntryId,
 			paymentId: order.paymentId,

@@ -11,6 +11,7 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart.errors.ts";
 import {
 	ActiveQueueEntryRequiredError,
@@ -24,11 +25,10 @@ export interface OrderProps {
 	idempotencyKey?: string | null;
 	restaurantId: string;
 	restaurantName?: string | null;
-	restaurantPlan?: string | null;
+	restaurantPlan?: RestaurantPlan | null;
 	userId?: string | null;
 	userName?: string | null;
 	userPhone?: string | null;
-	tableId?: string | null;
 	tableNumber?: number | null;
 	queueEntryId?: string | null;
 	paymentId?: string | null;
@@ -59,11 +59,10 @@ export class Order {
 	public readonly idempotencyKey: string | null;
 	public readonly restaurantId: string;
 	public readonly restaurantName: string | null;
-	public readonly restaurantPlan: string | null;
+	public readonly restaurantPlan: RestaurantPlan | null;
 	public readonly userId: string | null;
 	public readonly userName: string | null;
 	public readonly userPhone: string | null;
-	public readonly tableId: string | null;
 	public readonly tableNumber: number | null;
 	public readonly queueEntryId: string | null;
 	private currentPaymentId: string | null;
@@ -115,7 +114,6 @@ export class Order {
 		this.userId = props.userId ?? null;
 		this.userName = props.userName ?? null;
 		this.userPhone = props.userPhone ?? null;
-		this.tableId = props.tableId ?? null;
 		this.tableNumber = props.tableNumber ?? null;
 		this.queueEntryId = props.queueEntryId ?? null;
 		this.currentPaymentId = props.paymentId ?? null;

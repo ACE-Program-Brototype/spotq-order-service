@@ -1,9 +1,4 @@
 import type { OrderPaymentInvoiceEventDTO } from "@application/dtos/events/order-payment-invoice-event.dto.ts";
-import {
-	basePaymentEventSchema,
-	paymentOrderCapturedEventSchema,
-	paymentOrderFailedEventSchema,
-} from "@application/dtos/events/payment-event.dto.ts";
 import type { IOrderPaymentEventsConsumer } from "@application/ports/messaging/order-payment-events.consumer.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
@@ -11,6 +6,11 @@ import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import logger from "@infrastructure/observability/logger.ts";
 import type { RabbitMQService } from "@infrastructure/rabbitmq/rabbitmq.service.ts";
+import {
+	basePaymentEventSchema,
+	paymentOrderCapturedEventSchema,
+	paymentOrderFailedEventSchema,
+} from "@presentation/http/validators/events/payment-event.schema.ts";
 import {
 	ORDER_EVENTS,
 	PAYMENT_EVENTS,
@@ -144,7 +144,6 @@ export class OrderPaymentEventsConsumer implements IOrderPaymentEventsConsumer {
 					customerName: order.userName,
 					customerPhone: order.userPhone,
 					orderingMode: order.orderingMode,
-					tableId: order.tableId,
 					tableNumber: order.tableNumber,
 					queueEntryId: order.queueEntryId,
 					paymentMode: order.paymentMode,

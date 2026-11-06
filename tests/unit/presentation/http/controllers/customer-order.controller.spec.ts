@@ -12,6 +12,7 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import { CartEmptyError } from "@domain/errors/cart.errors.ts";
 import { InvalidPaymentModeError } from "@domain/errors/order.errors.ts";
 import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
@@ -44,11 +45,10 @@ describe("CustomerOrderController", () => {
 		userId: "user-123",
 		userName: "John Doe",
 		userPhone: "9876543210",
-		tableId: "table-1",
 		tableNumber: 4,
 		queueEntryId: null,
 		paymentId: null,
-		restaurantPlan: "SELF_PRO",
+		restaurantPlan: RestaurantPlan.SELF_PRO,
 		orderingMode: OrderingMode.SELF_ORDER,
 		paymentMode: PaymentMode.ONLINE,
 		paymentStatus: PaymentStatus.PENDING,
@@ -98,10 +98,10 @@ describe("CustomerOrderController", () => {
 			const { res, getStatus, getBody } = createMockResponse();
 			const req = {
 				user: { userId: "user-123" },
+				headers: { "x-idempotency-key": "idempotency-key-test-1" },
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
 					cartId: "00000000-0000-0000-0000-000000000001",
-					tableId: "33333333-3333-3333-3333-333333333333",
 					paymentMode: PaymentMode.ONLINE,
 					userName: "Jane Customer",
 					userPhone: "+919876543210",
@@ -149,10 +149,10 @@ describe("CustomerOrderController", () => {
 					name: "John Fallback",
 					phone: "+919999999999",
 				},
+				headers: { "x-idempotency-key": "idempotency-key-test-2" },
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
 					cartId: "00000000-0000-0000-0000-000000000001",
-					tableId: "33333333-3333-3333-3333-333333333333",
 					paymentMode: PaymentMode.ONLINE,
 				},
 			} as unknown as Request;
@@ -183,10 +183,10 @@ describe("CustomerOrderController", () => {
 			const { res } = createMockResponse();
 			const req = {
 				user: { userId: "user-123" },
+				headers: { "x-idempotency-key": "idempotency-key-test-1" },
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
 					cartId: "00000000-0000-0000-0000-000000000001",
-					tableId: "33333333-3333-3333-3333-333333333333",
 					paymentMode: PaymentMode.ONLINE,
 				},
 			} as unknown as Request;
@@ -210,10 +210,10 @@ describe("CustomerOrderController", () => {
 			const { res } = createMockResponse();
 			const req = {
 				user: { userId: "user-123" },
+				headers: { "x-idempotency-key": "idempotency-key-test-1" },
 				body: {
 					restaurantId: "22222222-2222-2222-2222-222222222222",
 					cartId: "00000000-0000-0000-0000-000000000001",
-					tableId: "33333333-3333-3333-3333-333333333333",
 					paymentMode: PaymentMode.ONLINE,
 				},
 			} as unknown as Request;
@@ -222,6 +222,27 @@ describe("CustomerOrderController", () => {
 				async () => controller.placeOrder(req, res),
 				InvalidPaymentModeError,
 			);
+		});
+
+		it("should return 400 Bad Request when x-idempotency-key header is missing", async () => {
+			const controller = createController();
+			const { res, getStatus, getBody } = createMockResponse();
+			const req = {
+				user: { userId: "user-123" },
+				headers: {},
+				body: {
+					restaurantId: "22222222-2222-2222-2222-222222222222",
+					cartId: "00000000-0000-0000-0000-000000000001",
+					paymentMode: PaymentMode.ONLINE,
+				},
+			} as unknown as Request;
+
+			await controller.placeOrder(req, res);
+
+			assert.equal(getStatus(), HttpStatus.BAD_REQUEST);
+			const body = getBody() as { success: boolean; message: string };
+			assert.equal(body.success, false);
+			assert.equal(body.message, ORDER_MESSAGES.IDEMPOTENCY_KEY_REQUIRED);
 		});
 	});
 
@@ -319,6 +340,7 @@ describe("CustomerOrderController", () => {
 				params: {
 					orderId: "ord-123",
 				},
+				headers: { "x-idempotency-key": "idempotency-key-test-2" },
 				body: {
 					cancellation_reason: "Changed my mind",
 				},

@@ -26,6 +26,7 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import {
 	CartEmptyError,
 	CartExpiredError,
@@ -268,7 +269,6 @@ describe("PlaceOrderUseCase", () => {
 	const userId = "user-101";
 	const restaurantId = "rest-1";
 	const cartId = "cart-555";
-	const tableId = "table-777";
 	const menuItemId = "item-pizza";
 	const addonId = "addon-extra-cheese";
 
@@ -357,7 +357,6 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId,
-					tableId,
 					paymentMode: "PAY_AT_COUNTER" as unknown as PaymentMode,
 				}),
 			InvalidPaymentModeError,
@@ -374,7 +373,6 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId: "non-existent-cart",
-					tableId,
 					paymentMode: PaymentMode.ONLINE,
 				}),
 			CartNotFoundError,
@@ -390,7 +388,6 @@ describe("PlaceOrderUseCase", () => {
 					userId: "different-user",
 					restaurantId,
 					cartId,
-					tableId,
 					paymentMode: PaymentMode.ONLINE,
 				}),
 			ForbiddenCartAccessError,
@@ -415,7 +412,6 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId,
-					tableId,
 					paymentMode: PaymentMode.ONLINE,
 				}),
 			CartExpiredError,
@@ -442,14 +438,13 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId,
-					tableId,
 					paymentMode: PaymentMode.ONLINE,
 				}),
 			CartEmptyError,
 		);
 	});
 
-	it("successfully places SELF_ORDER when tableId is omitted", async () => {
+	it("successfully places SELF_ORDER and sets restaurantPlan", async () => {
 		const { useCase } = setupFixture();
 
 		const result = await useCase.execute({
@@ -460,24 +455,7 @@ describe("PlaceOrderUseCase", () => {
 		});
 
 		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
-		assert.equal(result.tableId, null);
-	});
-
-	it("successfully places SELF_ORDER when restaurant plan is SELF_SERVICE_PRO", async () => {
-		const { useCase, restaurantClient } = setupFixture();
-		restaurantClient.validationResult = {
-			...restaurantClient.validationResult,
-			subscriptionPlanCode: "SELF_SERVICE_PRO",
-		};
-
-		const result = await useCase.execute({
-			userId,
-			restaurantId,
-			cartId,
-			paymentMode: PaymentMode.ONLINE,
-		});
-
-		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
+		assert.equal(result.restaurantPlan, RestaurantPlan.SELF_PRO);
 	});
 
 	it("returns existing order when idempotencyKey matches an existing order", async () => {
@@ -541,12 +519,10 @@ describe("PlaceOrderUseCase", () => {
 			userId,
 			restaurantId,
 			cartId,
-			tableId,
 			paymentMode: PaymentMode.ONLINE,
 		});
 
 		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
-		assert.equal(result.tableId, tableId);
 		assert.equal(result.queueEntryId, null);
 		assert.equal(result.paymentMode, PaymentMode.ONLINE);
 		assert.equal(result.paymentStatus, PaymentStatus.PENDING);
@@ -581,7 +557,6 @@ describe("PlaceOrderUseCase", () => {
 					userId,
 					restaurantId,
 					cartId,
-					tableId,
 					paymentMode: PaymentMode.ONLINE,
 				}),
 			/Payment gateway service unavailable/,
@@ -616,7 +591,7 @@ describe("PlaceOrderUseCase", () => {
 
 		assert.equal(result.orderingMode, OrderingMode.QUEUE_ORDER);
 		assert.equal(result.queueEntryId, "queue-entry-999");
-		assert.equal(result.tableId, null);
+		assert.equal(result.restaurantPlan, RestaurantPlan.QUEUE_PRO);
 		assert.equal(result.paymentMode, PaymentMode.ONLINE);
 		assert.equal(result.paymentStatus, PaymentStatus.PENDING);
 		assert.equal(result.orderStatus, OrderStatus.PLACED);
@@ -699,12 +674,10 @@ describe("PlaceOrderUseCase", () => {
 			userId,
 			restaurantId,
 			cartId,
-			tableId: "table-auto-1",
 			paymentMode: PaymentMode.ONLINE,
 		});
 
 		assert.equal(result.orderingMode, OrderingMode.SELF_ORDER);
 		assert.equal(result.queueEntryId, null);
-		assert.equal(result.tableId, "table-auto-1");
 	});
 });

@@ -21,7 +21,6 @@ function createTestOrder(props: Partial<OrderProps> = {}): Order {
 		orderNumber: props.orderNumber ?? "SQ-101",
 		restaurantId: props.restaurantId ?? "rest-1",
 		userId: props.userId === undefined ? "cust-owner" : props.userId,
-		tableId: props.tableId ?? "table-1",
 		orderingMode: props.orderingMode ?? OrderingMode.SELF_ORDER,
 		paymentMode: props.paymentMode ?? PaymentMode.ONLINE,
 		paymentStatus: props.paymentStatus ?? PaymentStatus.PENDING,

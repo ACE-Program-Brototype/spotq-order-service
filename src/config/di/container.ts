@@ -157,4 +157,10 @@ container
 	.to(GetCheckoutDetailsUseCase)
 	.inSingletonScope();
 
+export const rabbitMQService = container.get<RabbitMQService>(
+	TYPES.RabbitMQService,
+);
+export const orderPaymentEventsConsumer =
+	container.get<IOrderPaymentEventsConsumer>(TYPES.OrderPaymentEventsConsumer);
+
 export { container };

@@ -47,7 +47,6 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			tableId: "table-1",
 			tableNumber: 5,
 			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
@@ -87,7 +86,6 @@ describe("Order Domain Entity", () => {
 			items: [item],
 		});
 
-		assert.equal(order.tableId, null);
 		assert.equal(order.subtotal, 350);
 		// taxAmount = 350 * 5% = 17.5
 		assert.equal(order.taxAmount, 17.5);
@@ -123,7 +121,6 @@ describe("Order Domain Entity", () => {
 					orderNumber: "ORD-001",
 					restaurantId,
 					userId: customerId,
-					tableId: "table-1",
 					orderingMode: OrderingMode.SELF_ORDER,
 					paymentMode: PaymentMode.ONLINE,
 					paymentStatus: PaymentStatus.PENDING,
@@ -141,7 +138,6 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			tableId: "table-1",
 			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
@@ -163,7 +159,6 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			tableId: "table-1",
 			orderingMode: OrderingMode.SELF_ORDER,
 			orderStatus: OrderStatus.CONFIRMED,
 			paymentStatus: PaymentStatus.PAID,
@@ -185,7 +180,6 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			tableId: "table-1",
 			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
@@ -208,7 +202,6 @@ describe("Order Domain Entity", () => {
 			orderNumber: "ORD-001",
 			restaurantId,
 			userId: customerId,
-			tableId: "table-1",
 			orderingMode: OrderingMode.SELF_ORDER,
 			orderStatus: OrderStatus.CANCELLED,
 			paymentStatus: PaymentStatus.PENDING,
@@ -239,7 +232,6 @@ describe("Order Domain Entity", () => {
 				orderNumber: "ORD-001",
 				restaurantId,
 				userId: customerId,
-				tableId: "table-1",
 				orderingMode: OrderingMode.SELF_ORDER,
 				orderStatus: status,
 				paymentStatus: PaymentStatus.PAID,

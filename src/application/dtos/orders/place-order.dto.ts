@@ -2,12 +2,12 @@ import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 
 export interface PlaceOrderInputDTO {
 	userId: string;
 	restaurantId: string;
 	cartId: string;
-	tableId?: string | null | undefined;
 	idempotencyKey?: string | null | undefined;
 	paymentMode: PaymentMode;
 	specialInstructions?: string | undefined;
@@ -49,11 +49,10 @@ export interface OrderResponseDTO {
 	orderNumber: string;
 	restaurantId: string;
 	restaurantName: string | null;
-	restaurantPlan: string | null;
+	restaurantPlan: RestaurantPlan | null;
 	userId: string | null;
 	userName: string | null;
 	userPhone: string | null;
-	tableId: string | null;
 	tableNumber: number | null;
 	queueEntryId: string | null;
 	paymentId: string | null;

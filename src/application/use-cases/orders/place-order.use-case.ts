@@ -19,6 +19,7 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import {
 	CartEmptyError,
 	CartExpiredError,
@@ -94,10 +95,7 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 		}
 
 		cart.validateAccess(dto.userId);
-
-		if (dto.restaurantId) {
-			cart.validateRestaurant(dto.restaurantId);
-		}
+		cart.validateRestaurant(dto.restaurantId);
 
 		if (cart.isExpired()) {
 			if (cart.status !== CartStatus.EXPIRED) {
@@ -117,13 +115,14 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 
 		let orderingMode: OrderingMode;
 		let queueEntryId: string | null = null;
-		const tableId: string | null = dto.tableId ?? null;
+		let restaurantPlan: RestaurantPlan;
 
 		const planCode = restaurantValidation.subscriptionPlanCode
 			?.toUpperCase()
 			.trim();
 
-		if (planCode === "QUEUE_PRO") {
+		if (planCode === RestaurantPlan.QUEUE_PRO) {
+			restaurantPlan = RestaurantPlan.QUEUE_PRO;
 			const activeQueue = await this.queueServiceClient.checkUserActiveQueue(
 				cart.restaurantId,
 				dto.userId,
@@ -138,7 +137,8 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 
 			queueEntryId = activeQueue.queueEntry.queueEntryId;
 			orderingMode = OrderingMode.QUEUE_ORDER;
-		} else if (planCode === "SELF_PRO" || planCode === "SELF_SERVICE_PRO") {
+		} else if (planCode === RestaurantPlan.SELF_PRO) {
+			restaurantPlan = RestaurantPlan.SELF_PRO;
 			orderingMode = OrderingMode.SELF_ORDER;
 		} else {
 			throw new OrderingModeNotSupportedError(
@@ -207,11 +207,10 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 			idempotencyKey: dto.idempotencyKey ?? null,
 			restaurantId: cart.restaurantId,
 			restaurantName: restaurantValidation.restaurantName,
-			restaurantPlan: restaurantValidation.subscriptionPlanCode ?? null,
+			restaurantPlan,
 			userId: dto.userId,
 			userName: dto.userName ?? null,
 			userPhone: dto.userPhone ?? null,
-			tableId,
 			queueEntryId,
 			orderingMode,
 			paymentMode: PaymentMode.ONLINE,
@@ -245,11 +244,11 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 				currency: "INR",
 			});
 
+			createdOrder.associatePayment(paymentDraft.paymentId);
 			await this.orderRepository.updatePaymentReference(
 				createdOrder.id,
 				paymentDraft.paymentId,
 			);
-			createdOrder.associatePayment(paymentDraft.paymentId);
 
 			await this.cartRepository.clearCart(cart.id);
 		} catch (error) {

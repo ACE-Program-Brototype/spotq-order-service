@@ -5,13 +5,10 @@ import { placeOrderBodySchema } from "@presentation/http/validators/orders/place
 describe("placeOrderBodySchema validation", () => {
 	const validRestaurantId = "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e";
 	const validCartId = "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d";
-	const validTableId = "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f";
-
-	it("should succeed with a complete valid body (with tableId)", async () => {
+	it("should succeed with a complete valid body", async () => {
 		const payload = {
 			restaurantId: validRestaurantId,
 			cartId: validCartId,
-			tableId: validTableId,
 			paymentMode: "ONLINE",
 			specialInstructions: "Extra spicy",
 		};
@@ -19,23 +16,26 @@ describe("placeOrderBodySchema validation", () => {
 		const parsed = await placeOrderBodySchema.parseAsync(payload);
 		assert.equal(parsed.restaurantId, validRestaurantId);
 		assert.equal(parsed.cartId, validCartId);
-		assert.equal(parsed.tableId, validTableId);
 		assert.equal(parsed.paymentMode, "ONLINE");
 		assert.equal(parsed.specialInstructions, "Extra spicy");
 	});
 
-	it("should succeed without tableId", async () => {
+	it("should reject unknown field tableId due to strict mode", async () => {
 		const payload = {
 			restaurantId: validRestaurantId,
 			cartId: validCartId,
 			paymentMode: "ONLINE",
+			tableId: "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f",
 		};
 
-		const parsed = await placeOrderBodySchema.parseAsync(payload);
-		assert.equal(parsed.restaurantId, validRestaurantId);
-		assert.equal(parsed.cartId, validCartId);
-		assert.equal(parsed.paymentMode, "ONLINE");
-		assert.equal(parsed.tableId, undefined);
+		await assert.rejects(
+			async () => placeOrderBodySchema.parseAsync(payload),
+			(err: unknown) => {
+				const error = err as Error;
+				assert.equal(error.name, "ZodError");
+				return true;
+			},
+		);
 	});
 
 	it("should reject unknown field orderingMode due to strict mode", async () => {
@@ -44,6 +44,24 @@ describe("placeOrderBodySchema validation", () => {
 			cartId: validCartId,
 			paymentMode: "ONLINE",
 			orderingMode: "SELF_ORDER",
+		};
+
+		await assert.rejects(
+			async () => placeOrderBodySchema.parseAsync(payload),
+			(err: unknown) => {
+				const error = err as Error;
+				assert.equal(error.name, "ZodError");
+				return true;
+			},
+		);
+	});
+
+	it("should reject idempotencyKey in request body due to strict mode", async () => {
+		const payload = {
+			restaurantId: validRestaurantId,
+			cartId: validCartId,
+			paymentMode: "ONLINE",
+			idempotencyKey: "header-only-key",
 		};
 
 		await assert.rejects(

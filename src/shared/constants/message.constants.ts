@@ -107,6 +107,7 @@ export const ORDER_MESSAGES = {
 	INVALID_STATUS_TRANSITION: "Invalid order status transition",
 	PAYMENT_GATEWAY_DRAFT_FAILED:
 		"Failed to initiate payment gateway order draft",
+	IDEMPOTENCY_KEY_REQUIRED: "X-Idempotency-Key header is required",
 };
 
 export const ORDER_DEFAULTS = {
