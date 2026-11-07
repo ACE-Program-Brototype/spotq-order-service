@@ -1,6 +1,6 @@
 import type { GetStaffOrderDetailsInputDTO } from "@application/dtos/orders/get-staff-order-details.dto.ts";
 import type { UpdateOrderStatusInputDTO } from "@application/dtos/orders/update-order-status.dto.ts";
-import type { RestaurantOrderDetailsParam } from "@presentation/http/validators/orders/restaurant-order-details-param.schema.ts";
+import type { StaffOrderDetailsParam } from "@presentation/http/validators/orders/order-details-param.schema.ts";
 import type {
 	UpdateOrderStatusBody,
 	UpdateOrderStatusParam,
@@ -23,7 +23,7 @@ export const StaffOrderRequestMapper = {
 	},
 
 	toGetStaffOrderDetailsInputDto(req: Request): GetStaffOrderDetailsInputDTO {
-		const params = req.params as unknown as RestaurantOrderDetailsParam;
+		const params = req.params as unknown as StaffOrderDetailsParam;
 
 		return {
 			restaurantId: params.restaurantId,

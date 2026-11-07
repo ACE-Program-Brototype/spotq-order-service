@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { restaurantOrderDetailsParamSchema } from "@presentation/http/validators/orders/restaurant-order-details-param.schema.ts";
+import { orderDetailsParamSchema } from "@presentation/http/validators/orders/order-details-param.schema.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 
-describe("restaurantOrderDetailsParamSchema validation", () => {
+describe("orderDetailsParamSchema validation", () => {
 	const validRestaurantId = "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22";
 	const validOrderId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 
 	it("should succeed with valid restaurantId and orderId UUIDs", () => {
-		const result = restaurantOrderDetailsParamSchema.safeParse({
+		const result = orderDetailsParamSchema.safeParse({
 			restaurantId: validRestaurantId,
 			orderId: validOrderId,
 		});
@@ -21,7 +21,7 @@ describe("restaurantOrderDetailsParamSchema validation", () => {
 	});
 
 	it("should fail validation when restaurantId is not a valid UUID format", () => {
-		const result = restaurantOrderDetailsParamSchema.safeParse({
+		const result = orderDetailsParamSchema.safeParse({
 			restaurantId: "invalid-restaurant-uuid",
 			orderId: validOrderId,
 		});
@@ -36,7 +36,7 @@ describe("restaurantOrderDetailsParamSchema validation", () => {
 	});
 
 	it("should fail validation when orderId is not a valid UUID format", () => {
-		const result = restaurantOrderDetailsParamSchema.safeParse({
+		const result = orderDetailsParamSchema.safeParse({
 			restaurantId: validRestaurantId,
 			orderId: "invalid-order-uuid",
 		});
@@ -51,7 +51,7 @@ describe("restaurantOrderDetailsParamSchema validation", () => {
 	});
 
 	it("should fail validation when restaurantId is missing", () => {
-		const result = restaurantOrderDetailsParamSchema.safeParse({
+		const result = orderDetailsParamSchema.safeParse({
 			orderId: validOrderId,
 		});
 
@@ -59,7 +59,7 @@ describe("restaurantOrderDetailsParamSchema validation", () => {
 	});
 
 	it("should fail validation when orderId is missing", () => {
-		const result = restaurantOrderDetailsParamSchema.safeParse({
+		const result = orderDetailsParamSchema.safeParse({
 			restaurantId: validRestaurantId,
 		});
 
@@ -67,7 +67,7 @@ describe("restaurantOrderDetailsParamSchema validation", () => {
 	});
 
 	it("should reject unexpected fields because schema is strict", () => {
-		const result = restaurantOrderDetailsParamSchema.safeParse({
+		const result = orderDetailsParamSchema.safeParse({
 			restaurantId: validRestaurantId,
 			orderId: validOrderId,
 			extraField: "disallowed",

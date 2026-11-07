@@ -6,7 +6,7 @@ import {
 	validateRequestBody,
 	validateRequestParams,
 } from "@presentation/http/middleware/validation.middleware.ts";
-import { restaurantOrderDetailsParamSchema } from "@presentation/http/validators/orders/restaurant-order-details-param.schema.ts";
+import { orderDetailsParamSchema } from "@presentation/http/validators/orders/order-details-param.schema.ts";
 import {
 	updateOrderStatusBodySchema,
 	updateOrderStatusParamSchema,
@@ -111,7 +111,7 @@ staffOrderRouter.patch(
 staffOrderRouter.get(
 	STAFF_ORDER_ROUTES.DETAILS,
 	restaurantStaffAuthMiddleware,
-	validateRequestParams(restaurantOrderDetailsParamSchema),
+	validateRequestParams(orderDetailsParamSchema),
 	staffOrderController.getOrderDetails,
 );
 

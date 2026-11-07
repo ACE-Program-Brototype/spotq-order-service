@@ -2,7 +2,7 @@ import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { REGEX } from "@shared/constants/regex.constants.ts";
 import { z } from "zod";
 
-export const restaurantOrderDetailsParamSchema = z
+export const orderDetailsParamSchema = z
 	.object({
 		restaurantId: z
 			.string()
@@ -13,6 +13,10 @@ export const restaurantOrderDetailsParamSchema = z
 	})
 	.strict();
 
-export type RestaurantOrderDetailsParam = z.infer<
-	typeof restaurantOrderDetailsParamSchema
->;
+export type OrderDetailsParam = z.infer<typeof orderDetailsParamSchema>;
+
+export const restaurantOrderDetailsParamSchema = orderDetailsParamSchema;
+export type RestaurantOrderDetailsParam = OrderDetailsParam;
+
+export const staffOrderDetailsParamSchema = orderDetailsParamSchema;
+export type StaffOrderDetailsParam = OrderDetailsParam;
