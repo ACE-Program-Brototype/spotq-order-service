@@ -48,6 +48,9 @@ describe("GetOrderHistoryUseCase", () => {
 				};
 			},
 			findById: async () => null,
+			findByIdempotencyKey: async () => null,
+			updatePaymentReference: async () => {},
+			updatePaymentAndOrderStatus: async () => {},
 			findByRestaurantAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],
@@ -105,6 +108,9 @@ describe("GetOrderHistoryUseCase", () => {
 				hasNext: false,
 			}),
 			findById: async () => null,
+			findByIdempotencyKey: async () => null,
+			updatePaymentReference: async () => {},
+			updatePaymentAndOrderStatus: async () => {},
 			findByRestaurantAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],

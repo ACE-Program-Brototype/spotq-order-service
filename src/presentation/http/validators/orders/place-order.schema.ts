@@ -11,14 +11,10 @@ export const placeOrderBodySchema = z
 			.regex(REGEX.UUID, { message: ORDER_MESSAGES.INVALID_RESTAURANT_ID }),
 		cartId: z
 			.string()
-			.regex(REGEX.UUID, { message: ORDER_MESSAGES.INVALID_CART_ID })
-			.optional(),
-		paymentMode: z.enum(
-			[PaymentMode.ONLINE, PaymentMode.PAY_AT_COUNTER] as const,
-			{
-				message: ORDER_MESSAGES.INVALID_PAYMENT_MODE_SELECTION,
-			},
-		),
+			.regex(REGEX.UUID, { message: ORDER_MESSAGES.INVALID_CART_ID }),
+		paymentMode: z.nativeEnum(PaymentMode, {
+			message: ORDER_MESSAGES.INVALID_PAYMENT_MODE_SELECTION,
+		}),
 		userName: z
 			.string()
 			.trim()

@@ -3,9 +3,8 @@ import { describe, it } from "node:test";
 import { UpdateOrderStatusUseCase } from "@application/use-cases/orders/update-order-status.use-case.ts";
 import { ORDER_DEFAULTS } from "@domain/constants/order.constants.ts";
 import { Order } from "@domain/entities/order.entity.ts";
-import { OrderPriority } from "@domain/enums/order-priority.enum.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import {
@@ -30,9 +29,8 @@ function createSampleOrder(overrides: {
 		userName: "John Doe",
 		userPhone: "9876543210",
 		tableNumber: 4,
-		priority: OrderPriority.NORMAL,
-		orderType: OrderType.DINE_IN,
-		paymentMode: PaymentMode.PAY_AT_COUNTER,
+		orderingMode: OrderingMode.SELF_ORDER,
+		paymentMode: PaymentMode.ONLINE,
 		paymentStatus: PaymentStatus.PENDING,
 		orderStatus: overrides.status ?? OrderStatus.PLACED,
 		subtotal: 300,
@@ -91,6 +89,9 @@ function createMockOrderRepo(overrides: {
 		findByRestaurantAndOrderId: async () => {
 			throw new Error("Not implemented");
 		},
+		findByIdempotencyKey: async () => null,
+		updatePaymentReference: async () => {},
+		updatePaymentAndOrderStatus: async () => {},
 		updateOrderStatus: async (order, previousStatus, actorId, notes) => {
 			if (overrides.conflict) {
 				throw new OrderStatusConflictError();

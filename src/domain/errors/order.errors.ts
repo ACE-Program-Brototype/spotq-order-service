@@ -55,6 +55,24 @@ export class InvalidTaxPercentError extends DomainError {
 	}
 }
 
+export class OrderingModeNotSupportedError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.ORDERING_MODE_NOT_SUPPORTED) {
+		super(message, ORDER_ERROR_CODES.ORDERING_MODE_NOT_SUPPORTED);
+	}
+}
+
+export class ActiveQueueEntryRequiredError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.ACTIVE_QUEUE_REQUIRED) {
+		super(message, ORDER_ERROR_CODES.ACTIVE_QUEUE_REQUIRED);
+	}
+}
+
+export class TableRequiredForSelfOrderError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.TABLE_REQUIRED_FOR_SELF_ORDER) {
+		super(message, ORDER_ERROR_CODES.TABLE_REQUIRED_FOR_SELF_ORDER);
+	}
+}
+
 export class InvalidOrderStatusTransitionError extends DomainError {
 	constructor(message: string = ORDER_MESSAGES.INVALID_STATUS_TRANSITION) {
 		super(message, ORDER_ERROR_CODES.INVALID_STATUS_TRANSITION);

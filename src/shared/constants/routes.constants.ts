@@ -51,4 +51,10 @@ export const QUEUE_SERVICE_ROUTES = {
 		`/api/internal/v1/restaurants/${encodeURIComponent(restaurantId)}/queue/users/${encodeURIComponent(userId)}/active`,
 } as const;
 
+export const PAYMENT_SERVICE_ROUTES = {
+	CREATE_GATEWAY_ORDER: "/api/internal/v1/payments/orders",
+	ORDER_STATUS: (orderId: string) =>
+		`/orders/${encodeURIComponent(orderId)}/status`,
+} as const;
+
 export default ROUTES;

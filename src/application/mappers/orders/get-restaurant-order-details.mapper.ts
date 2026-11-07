@@ -7,7 +7,7 @@ export const GetRestaurantOrderDetailsMapper = {
 			orderId: order.id,
 			orderNumber: order.orderNumber,
 			orderStatus: order.orderStatus,
-			orderType: order.orderType,
+			orderingMode: order.orderingMode,
 			paymentMode: order.paymentMode,
 			paymentStatus: order.paymentStatus,
 
@@ -51,7 +51,6 @@ export const GetRestaurantOrderDetailsMapper = {
 				subtotal: order.subtotal,
 				taxAmount: order.taxAmount,
 				discountAmount: order.discountAmount,
-				couponCode: order.couponCode,
 				platformFee: order.platformFee,
 				grandTotal: order.grandTotal,
 			},

@@ -5,7 +5,7 @@ import type { IRestaurantServiceClient } from "@application/ports/external/resta
 import { GetStaffOrderDetailsUseCase } from "@application/use-cases/orders/get-staff-order-details.use-case.ts";
 import { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import {
@@ -47,8 +47,8 @@ describe("GetStaffOrderDetailsUseCase", () => {
 			id: orderId,
 			orderNumber: "SQ-201",
 			restaurantId,
-			orderType: OrderType.DINE_IN,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
+			orderingMode: OrderingMode.SELF_ORDER,
+			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
 			specialInstructions: "Less oil",

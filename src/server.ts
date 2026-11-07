@@ -3,7 +3,12 @@ import {
 	connectDatabase,
 	disconnectDatabase,
 } from "@infrastructure/database/prisma.connect.ts";
+import { startOrderPaymentEventsConsumer } from "@infrastructure/messaging/index.ts";
 import logger from "@infrastructure/observability/logger.ts";
+import {
+	connectRabbitMQ,
+	disconnectRabbitMQ,
+} from "@infrastructure/rabbitmq/index.ts";
 import {
 	connectRedis,
 	disconnectRedis,
@@ -14,6 +19,8 @@ async function startServer() {
 	try {
 		await connectDatabase();
 		await connectRedis();
+		await connectRabbitMQ();
+		await startOrderPaymentEventsConsumer();
 
 		const server = app.listen(env.PORT, () => {
 			logger.info(`Order Service running on port ${env.PORT}`);
@@ -40,6 +47,7 @@ async function startServer() {
 				try {
 					await disconnectDatabase();
 					await disconnectRedis();
+					await disconnectRabbitMQ();
 
 					logger.info("Graceful shutdown completed");
 					process.exit(0);

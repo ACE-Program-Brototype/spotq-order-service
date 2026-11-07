@@ -216,6 +216,9 @@ importers:
       '@prisma/client':
         specifier: ^7.9.1
         version: 7.9.1(prisma@7.9.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2))(typescript@7.0.2)
+      '@spotq-org/rabbitmq-client':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@spotq-org/s2s-core':
         specifier: ^1.0.0
         version: 1.0.0(express@5.2.1)
@@ -1097,6 +1100,10 @@ packages:
   '@scarf/scarf@1.4.0':
     resolution: {integrity: sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==}
 
+  '@spotq-org/rabbitmq-client@1.0.1':
+    resolution: {integrity: sha512-WS8Gjw2uCFFvxMeQDY4LbfjEr7xzrD+8AIg9lK+PNg9wuJ2ynf1wzqOsD2DmbTKEFDgSiB4nhiUXuouaxC5QxA==}
+    engines: {node: '>=18.0.0'}
+
   '@spotq-org/s2s-core@1.0.0':
     resolution: {integrity: sha512-kDht1s0zEiRqDNo34h30CSonmD8hUsPjLcQ7M6oQ6XeloNn8HmH/tcZvZRkpPrqmfqGRr8sPWPsngbmKueGUEA==}
     engines: {node: '>=18.0.0'}
@@ -1383,6 +1390,10 @@ packages:
 
   ajv@8.20.0:
     resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
+
+  amqplib@2.2.1:
+    resolution: {integrity: sha512-J3JjAydC2vJ/AgkgVAE0kVH5M4RNfm51zUaspHpwSai3W35lD3hKryvYY/xqMnYcNfR66NYL06Eik+Adn293dQ==}
+    engines: {node: '>=18'}
 
   any-promise@1.3.0:
     resolution: {integrity: sha512-7UvmKalWRt1wgjL1RrGxoSJW/0QZFIegpeGvZG9kjp8vrRu55XTHbwnqq2GpXm9uLbcuhxm3IqX9OB4MZR1b2A==}
@@ -3250,6 +3261,10 @@ snapshots:
 
   '@scarf/scarf@1.4.0': {}
 
+  '@spotq-org/rabbitmq-client@1.0.1':
+    dependencies:
+      amqplib: 2.2.1
+
   '@spotq-org/s2s-core@1.0.0(express@5.2.1)':
     dependencies:
       '@types/jsonwebtoken': 9.0.10
@@ -3530,6 +3545,8 @@ snapshots:
       fast-uri: 3.1.5
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
+
+  amqplib@2.2.1: {}
 
   any-promise@1.3.0: {}
 

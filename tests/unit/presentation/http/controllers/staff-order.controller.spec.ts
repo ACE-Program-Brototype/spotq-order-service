@@ -91,7 +91,7 @@ describe("StaffOrderController", () => {
 					items: [],
 					createdAt: new Date().toISOString(),
 					order: {} as unknown as UpdateOrderStatusResponseDTO["order"],
-				} as UpdateOrderStatusResponseDTO;
+				} as unknown as UpdateOrderStatusResponseDTO;
 			},
 		};
 
@@ -162,7 +162,7 @@ describe("StaffOrderController", () => {
 					items: [],
 					createdAt: new Date().toISOString(),
 					order: {} as unknown as UpdateOrderStatusResponseDTO["order"],
-				} as UpdateOrderStatusResponseDTO;
+				} as unknown as UpdateOrderStatusResponseDTO;
 			},
 		};
 

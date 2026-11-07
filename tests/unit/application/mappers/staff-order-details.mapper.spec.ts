@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import { StaffOrderDetailsMapper } from "@application/mappers/orders/staff-order-details.mapper.ts";
 import { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { OrderType } from "@domain/enums/order-type.enum.ts";
+import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 
@@ -15,8 +15,8 @@ describe("StaffOrderDetailsMapper", () => {
 			id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
 			orderNumber: "SQ-101",
 			restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
-			orderType: OrderType.DINE_IN,
-			paymentMode: PaymentMode.PAY_AT_COUNTER,
+			orderingMode: OrderingMode.SELF_ORDER,
+			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PENDING,
 			orderStatus: OrderStatus.PLACED,
 			specialInstructions: "Please provide extra napkins.",
@@ -75,7 +75,7 @@ describe("StaffOrderDetailsMapper", () => {
 			id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
 			orderNumber: "SQ-102",
 			restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
-			orderType: OrderType.TAKEAWAY,
+			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PAID,
 			orderStatus: OrderStatus.CONFIRMED,
@@ -112,7 +112,7 @@ describe("StaffOrderDetailsMapper", () => {
 			id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
 			orderNumber: "SQ-103",
 			restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
-			orderType: OrderType.DINE_IN,
+			orderingMode: OrderingMode.SELF_ORDER,
 			paymentMode: PaymentMode.ONLINE,
 			paymentStatus: PaymentStatus.PAID,
 			orderStatus: OrderStatus.PREPARING,

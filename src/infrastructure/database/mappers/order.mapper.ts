@@ -1,8 +1,9 @@
 import { Order } from "@domain/entities/order.entity.ts";
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import type { OrderType } from "@domain/enums/order-type.enum.ts";
+import type { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import type {
 	CancelledOrderData,
 	CustomerOrderHistoryItemData,
@@ -143,17 +144,17 @@ export const OrderPersistenceMapper = {
 		return new Order({
 			id: record.id,
 			orderNumber: record.orderNumber,
+			idempotencyKey: record.idempotencyKey,
 			restaurantId: record.restaurantId,
 			restaurantName: record.restaurantName,
+			restaurantPlan: (record.restaurantPlan as RestaurantPlan) ?? null,
 			userId: record.userId,
 			userName: record.userName,
 			userPhone: record.userPhone,
-			tableId: record.tableId,
 			tableNumber: record.tableNumber,
 			queueEntryId: record.queueEntryId,
 			paymentId: record.paymentId,
-			priority: record.priority,
-			orderType: record.orderType as OrderType,
+			orderingMode: record.orderingMode as OrderingMode,
 			paymentMode: record.paymentMode as PaymentMode,
 			paymentStatus: record.paymentStatus as PaymentStatus,
 			orderStatus: record.orderStatus as OrderStatus,
@@ -161,7 +162,6 @@ export const OrderPersistenceMapper = {
 			taxAmount: Number(record.taxAmount),
 			platformFee: Number(record.platformFee),
 			discountAmount: Number(record.discountAmount),
-			couponCode: record.couponCode,
 			grandTotal: Number(record.grandTotal),
 			estimatedReadyAt: record.estimatedReadyAt,
 			specialInstructions: record.specialInstructions,

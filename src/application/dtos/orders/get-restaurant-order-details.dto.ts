@@ -1,5 +1,5 @@
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import type { OrderType } from "@domain/enums/order-type.enum.ts";
+import type { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 
@@ -38,7 +38,7 @@ export interface GetRestaurantOrderDetailsOutputDTO {
 	orderId: string;
 	orderNumber: string;
 	orderStatus: OrderStatus;
-	orderType: OrderType;
+	orderingMode: OrderingMode;
 	paymentMode: PaymentMode;
 	paymentStatus: PaymentStatus;
 
@@ -60,7 +60,6 @@ export interface GetRestaurantOrderDetailsOutputDTO {
 		subtotal: number;
 		taxAmount: number;
 		discountAmount: number;
-		couponCode: string | null;
 		platformFee: number;
 		grandTotal: number;
 	};

@@ -1,21 +1,27 @@
-import type { OrderResponseDTO } from "@application/dtos/orders/place-order.dto.ts";
+import type {
+	OrderResponseDTO,
+	PaymentDraftResponseDTO,
+} from "@application/dtos/orders/place-order.dto.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 
 export const OrderResponseMapper = {
-	toDTO(order: Order): OrderResponseDTO {
+	toDTO(
+		order: Order,
+		paymentDraft?: PaymentDraftResponseDTO | null,
+	): OrderResponseDTO {
 		return {
 			id: order.id,
 			orderNumber: order.orderNumber,
 			restaurantId: order.restaurantId,
 			restaurantName: order.restaurantName,
+			restaurantPlan: order.restaurantPlan,
 			userId: order.userId,
 			userName: order.userName,
 			userPhone: order.userPhone,
-			tableId: order.tableId,
 			tableNumber: order.tableNumber,
 			queueEntryId: order.queueEntryId,
-			priority: order.priority,
-			orderType: order.orderType,
+			paymentId: order.paymentId,
+			orderingMode: order.orderingMode,
 			paymentMode: order.paymentMode,
 			paymentStatus: order.paymentStatus,
 			orderStatus: order.orderStatus,
@@ -24,7 +30,9 @@ export const OrderResponseMapper = {
 			platformFee: order.platformFee,
 			discountAmount: order.discountAmount,
 			grandTotal: order.grandTotal,
+			estimatedReadyAt: order.estimatedReadyAt?.toISOString() ?? null,
 			specialInstructions: order.specialInstructions,
+			paymentDraft: paymentDraft ?? null,
 			items: order.items.map((item) => ({
 				id: item.id,
 				menuItemId: item.menuItemId,

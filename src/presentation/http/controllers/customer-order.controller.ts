@@ -6,9 +6,13 @@ import { TYPES } from "@config/di/types.ts";
 import { OrderRequestMapper } from "@presentation/http/mappers/order-request.mapper.ts";
 import type { CheckoutQuery } from "@presentation/http/validators/orders/checkout-query.schema.ts";
 import type { PlaceOrderBody } from "@presentation/http/validators/orders/place-order.schema.ts";
+import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
-import { sendSuccessResponse } from "@shared/response/api-response.ts";
+import {
+	sendErrorResponse,
+	sendSuccessResponse,
+} from "@shared/response/api-response.ts";
 import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 
@@ -47,6 +51,19 @@ export class CustomerOrderController {
 	};
 
 	public placeOrder = async (req: Request, res: Response): Promise<void> => {
+		const rawKey = req.headers?.["x-idempotency-key"];
+		const idempotencyKey = typeof rawKey === "string" ? rawKey.trim() : "";
+
+		if (!idempotencyKey) {
+			sendErrorResponse(
+				res,
+				ORDER_MESSAGES.IDEMPOTENCY_KEY_REQUIRED,
+				COMMON_ERROR_CODES.VALIDATION_ERROR,
+				HttpStatus.BAD_REQUEST,
+			);
+			return;
+		}
+
 		const userId = req.user?.userId as string;
 		const body = req.body as PlaceOrderBody;
 
@@ -56,6 +73,7 @@ export class CustomerOrderController {
 			userPhone: body.userPhone ?? req.user?.phone,
 			restaurantId: body.restaurantId,
 			cartId: body.cartId,
+			idempotencyKey,
 			paymentMode: body.paymentMode,
 			specialInstructions: body.specialInstructions ?? undefined,
 		});

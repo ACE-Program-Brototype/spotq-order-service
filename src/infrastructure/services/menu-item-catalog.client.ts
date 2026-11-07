@@ -79,6 +79,7 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				menuItemId: rawItemId,
 				name: item.name,
 				price: Number(item.price),
+				preparationTime: item.preparationTime ?? null,
 				isAvailable: item.isAvailable !== false,
 				variant: variant
 					? {
