@@ -1,10 +1,10 @@
 import type {
 	GetStaffOrderDetailsInputDTO,
-	StaffOrderDetailsResponseDTO,
+	GetStaffOrderDetailsOutputDTO,
 } from "@application/dtos/orders/get-staff-order-details.dto.ts";
 
 export interface IGetStaffOrderDetailsUseCase {
 	execute(
 		dto: GetStaffOrderDetailsInputDTO,
-	): Promise<StaffOrderDetailsResponseDTO>;
+	): Promise<GetStaffOrderDetailsOutputDTO>;
 }

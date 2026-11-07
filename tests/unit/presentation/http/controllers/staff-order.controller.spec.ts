@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
 	GetStaffOrderDetailsInputDTO,
-	StaffOrderDetailsResponseDTO,
+	GetStaffOrderDetailsOutputDTO,
 } from "@application/dtos/orders/get-staff-order-details.dto.ts";
 import type {
 	UpdateOrderStatusInputDTO,
@@ -47,7 +47,7 @@ describe("StaffOrderController", () => {
 	const defaultMockGetStaffOrderDetailsUseCase: IGetStaffOrderDetailsUseCase = {
 		execute: async (
 			_dto: GetStaffOrderDetailsInputDTO,
-		): Promise<StaffOrderDetailsResponseDTO> => ({
+		): Promise<GetStaffOrderDetailsOutputDTO> => ({
 			order_id: "ord-123",
 			order_number: "SQ-101",
 			status: OrderStatus.PLACED,
@@ -198,7 +198,7 @@ describe("StaffOrderController", () => {
 	it("should retrieve staff order details successfully with 200 OK", async () => {
 		let capturedInputDto: GetStaffOrderDetailsInputDTO | null = null;
 
-		const expectedResult: StaffOrderDetailsResponseDTO = {
+		const expectedResult: GetStaffOrderDetailsOutputDTO = {
 			order_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
 			order_number: "SQ-101",
 			status: OrderStatus.PLACED,

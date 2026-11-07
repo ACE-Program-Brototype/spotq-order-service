@@ -18,7 +18,7 @@ export interface StaffOrderItemDTO {
 	special_instructions: string | null;
 }
 
-export interface StaffOrderDetailsResponseDTO {
+export interface GetStaffOrderDetailsOutputDTO {
 	order_id: string;
 	order_number: string;
 	status: string;

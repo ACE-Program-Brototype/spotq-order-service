@@ -1,13 +1,13 @@
 import type {
+	GetStaffOrderDetailsOutputDTO,
 	StaffOrderAddonDTO,
-	StaffOrderDetailsResponseDTO,
 	StaffOrderItemDTO,
 } from "@application/dtos/orders/get-staff-order-details.dto.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import type { OrderItem } from "@domain/entities/order-item.entity.ts";
 
 export const StaffOrderDetailsMapper = {
-	toDTO(order: Order): StaffOrderDetailsResponseDTO {
+	toDTO(order: Order): GetStaffOrderDetailsOutputDTO {
 		const items: StaffOrderItemDTO[] = (order.items ?? []).map(
 			(item: OrderItem) => {
 				const addons: StaffOrderAddonDTO[] = (item.addons ?? []).map(

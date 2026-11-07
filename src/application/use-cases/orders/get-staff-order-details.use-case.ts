@@ -1,6 +1,6 @@
 import type {
 	GetStaffOrderDetailsInputDTO,
-	StaffOrderDetailsResponseDTO,
+	GetStaffOrderDetailsOutputDTO,
 } from "@application/dtos/orders/get-staff-order-details.dto.ts";
 import { StaffOrderDetailsMapper } from "@application/mappers/orders/staff-order-details.mapper.ts";
 import type { IRestaurantServiceClient } from "@application/ports/external/restaurant-service.client.port.ts";
@@ -24,7 +24,7 @@ export class GetStaffOrderDetailsUseCase
 
 	public async execute(
 		dto: GetStaffOrderDetailsInputDTO,
-	): Promise<StaffOrderDetailsResponseDTO> {
+	): Promise<GetStaffOrderDetailsOutputDTO> {
 		await this.restaurantServiceClient.validateRestaurant(dto.restaurantId);
 
 		const order = await this.orderRepository.findByRestaurantAndOrderId(
