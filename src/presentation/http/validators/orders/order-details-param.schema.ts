@@ -14,9 +14,3 @@ export const orderDetailsParamSchema = z
 	.strict();
 
 export type OrderDetailsParam = z.infer<typeof orderDetailsParamSchema>;
-
-export const restaurantOrderDetailsParamSchema = orderDetailsParamSchema;
-export type RestaurantOrderDetailsParam = OrderDetailsParam;
-
-export const staffOrderDetailsParamSchema = orderDetailsParamSchema;
-export type StaffOrderDetailsParam = OrderDetailsParam;
