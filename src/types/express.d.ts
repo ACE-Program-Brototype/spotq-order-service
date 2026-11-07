@@ -6,20 +6,13 @@ export interface AuthenticatedUser {
 	email?: string | undefined;
 	name?: string | undefined;
 	phone?: string | undefined;
-}
-
-export interface AuthenticatedRestaurantAdmin {
-	userId: string;
-	restaurantId: string;
-	role: string;
-	email?: string | undefined;
+	restaurantId?: string | undefined;
 }
 
 declare global {
 	namespace Express {
 		interface Request {
 			user?: AuthenticatedUser;
-			restaurantAdmin?: AuthenticatedRestaurantAdmin;
 		}
 	}
 }

@@ -61,6 +61,14 @@ function createMockOrderRepo(options: {
 		findByIdempotencyKey: async () => options.order ?? null,
 		updatePaymentReference: async () => {},
 		updatePaymentAndOrderStatus: async () => {},
+		findByRestaurantAndOrderId: async () => options.order ?? null,
+		getRestaurantOrders: async () => ({
+			orders: [],
+			totalOrders: 0,
+			totalPages: 0,
+			currentPage: 1,
+			hasNext: false,
+		}),
 		cancelOrder: async (order, previousStatus) => {
 			if (options.onCancel) {
 				options.onCancel(order, previousStatus);
@@ -74,6 +82,9 @@ function createMockOrderRepo(options: {
 					cancelledAt: order.cancelledAt as Date,
 				}
 			);
+		},
+		updateOrderStatus: async () => {
+			throw new Error("Not implemented");
 		},
 	};
 }

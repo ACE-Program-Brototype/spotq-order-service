@@ -11,6 +11,8 @@ import { CartEmptyError } from "@domain/errors/cart.errors.ts";
 import {
 	ActiveQueueEntryRequiredError,
 	ForbiddenOrderAccessError,
+	ForbiddenRestaurantAccessError,
+	InvalidOrderStatusTransitionError,
 	OrderCancellationNotAllowedError,
 } from "@domain/errors/order.errors.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
@@ -246,5 +248,196 @@ describe("Order Domain Entity", () => {
 					err.message === ORDER_MESSAGES.ORDER_ALREADY_IN_PREPARATION,
 			);
 		}
+	});
+
+	describe("updateStatus", () => {
+		const createOrderWithStatus = (status: OrderStatus) => {
+			const item = createSampleItem();
+			return new Order({
+				id: "order-1",
+				orderNumber: "ORD-001",
+				restaurantId,
+				userId: customerId,
+				orderingMode: OrderingMode.SELF_ORDER,
+				orderStatus: status,
+				paymentStatus: PaymentStatus.PAID,
+				paymentMode: PaymentMode.ONLINE,
+				items: [item],
+			});
+		};
+
+		it("should allow valid transitions: PLACED -> CONFIRMED, CANCELLED", () => {
+			const order1 = createOrderWithStatus(OrderStatus.PLACED);
+			order1.updateStatus(OrderStatus.CONFIRMED);
+			assert.equal(order1.orderStatus, OrderStatus.CONFIRMED);
+
+			const order2 = createOrderWithStatus(OrderStatus.PLACED);
+			order2.updateStatus(OrderStatus.CANCELLED);
+			assert.equal(order2.orderStatus, OrderStatus.CANCELLED);
+			assert.ok(order2.cancelledAt);
+		});
+
+		it("should allow valid transitions: CONFIRMED -> PREPARING, CANCELLED", () => {
+			const order1 = createOrderWithStatus(OrderStatus.CONFIRMED);
+			order1.updateStatus(OrderStatus.PREPARING);
+			assert.equal(order1.orderStatus, OrderStatus.PREPARING);
+
+			const order2 = createOrderWithStatus(OrderStatus.CONFIRMED);
+			order2.updateStatus(OrderStatus.CANCELLED);
+			assert.equal(order2.orderStatus, OrderStatus.CANCELLED);
+		});
+
+		it("should allow valid transition: PREPARING -> READY", () => {
+			const order = createOrderWithStatus(OrderStatus.PREPARING);
+			order.updateStatus(OrderStatus.READY);
+			assert.equal(order.orderStatus, OrderStatus.READY);
+		});
+
+		it("should allow valid transition: READY -> COMPLETED and READY -> SERVED -> COMPLETED", () => {
+			const order1 = createOrderWithStatus(OrderStatus.READY);
+			order1.updateStatus(OrderStatus.COMPLETED);
+			assert.equal(order1.orderStatus, OrderStatus.COMPLETED);
+
+			const order2 = createOrderWithStatus(OrderStatus.READY);
+			order2.updateStatus(OrderStatus.SERVED);
+			assert.equal(order2.orderStatus, OrderStatus.SERVED);
+
+			order2.updateStatus(OrderStatus.COMPLETED);
+			assert.equal(order2.orderStatus, OrderStatus.COMPLETED);
+		});
+
+		it("should reject invalid transitions from PLACED", () => {
+			const invalidTargets = [
+				OrderStatus.PREPARING,
+				OrderStatus.READY,
+				OrderStatus.COMPLETED,
+				OrderStatus.PLACED,
+			];
+			for (const target of invalidTargets) {
+				const order = createOrderWithStatus(OrderStatus.PLACED);
+				assert.throws(
+					() => order.updateStatus(target),
+					(err: unknown) => err instanceof InvalidOrderStatusTransitionError,
+				);
+			}
+		});
+
+		it("should reject invalid transitions from CONFIRMED", () => {
+			const invalidTargets = [
+				OrderStatus.PLACED,
+				OrderStatus.READY,
+				OrderStatus.COMPLETED,
+				OrderStatus.CONFIRMED,
+			];
+			for (const target of invalidTargets) {
+				const order = createOrderWithStatus(OrderStatus.CONFIRMED);
+				assert.throws(
+					() => order.updateStatus(target),
+					(err: unknown) => err instanceof InvalidOrderStatusTransitionError,
+				);
+			}
+		});
+
+		it("should reject invalid transitions from PREPARING", () => {
+			const invalidTargets = [
+				OrderStatus.PLACED,
+				OrderStatus.CONFIRMED,
+				OrderStatus.COMPLETED,
+				OrderStatus.CANCELLED,
+				OrderStatus.PREPARING,
+			];
+			for (const target of invalidTargets) {
+				const order = createOrderWithStatus(OrderStatus.PREPARING);
+				assert.throws(
+					() => order.updateStatus(target),
+					(err: unknown) => err instanceof InvalidOrderStatusTransitionError,
+				);
+			}
+		});
+
+		it("should reject invalid transitions from READY", () => {
+			const invalidTargets = [
+				OrderStatus.PLACED,
+				OrderStatus.CONFIRMED,
+				OrderStatus.PREPARING,
+				OrderStatus.CANCELLED,
+				OrderStatus.READY,
+			];
+			for (const target of invalidTargets) {
+				const order = createOrderWithStatus(OrderStatus.READY);
+				assert.throws(
+					() => order.updateStatus(target),
+					(err: unknown) => err instanceof InvalidOrderStatusTransitionError,
+				);
+			}
+		});
+
+		it("should reject invalid transitions from SERVED", () => {
+			const invalidTargets = [
+				OrderStatus.PLACED,
+				OrderStatus.CONFIRMED,
+				OrderStatus.PREPARING,
+				OrderStatus.READY,
+				OrderStatus.CANCELLED,
+				OrderStatus.SERVED,
+			];
+			for (const target of invalidTargets) {
+				const order = createOrderWithStatus(OrderStatus.SERVED);
+				assert.throws(
+					() => order.updateStatus(target),
+					(err: unknown) => err instanceof InvalidOrderStatusTransitionError,
+				);
+			}
+		});
+
+		it("should reject all transitions from COMPLETED", () => {
+			const allStatuses = Object.values(OrderStatus);
+			for (const target of allStatuses) {
+				const order = createOrderWithStatus(OrderStatus.COMPLETED);
+				assert.throws(
+					() => order.updateStatus(target),
+					(err: unknown) => err instanceof InvalidOrderStatusTransitionError,
+				);
+			}
+		});
+
+		it("should reject all transitions from CANCELLED", () => {
+			const allStatuses = Object.values(OrderStatus);
+			for (const target of allStatuses) {
+				const order = createOrderWithStatus(OrderStatus.CANCELLED);
+				assert.throws(
+					() => order.updateStatus(target),
+					(err: unknown) => err instanceof InvalidOrderStatusTransitionError,
+				);
+			}
+		});
+
+		it("should validate restaurant ownership in updateStatus (CQS command)", () => {
+			const order = createOrderWithStatus(OrderStatus.PREPARING);
+
+			assert.throws(
+				() => order.updateStatus(OrderStatus.READY, "wrong-restaurant"),
+				(err: unknown) => err instanceof ForbiddenRestaurantAccessError,
+			);
+
+			order.updateStatus(OrderStatus.READY, restaurantId);
+			assert.equal(order.orderStatus, OrderStatus.READY);
+		});
+
+		it("should expose canTransitionTo as a pure query (CQS query)", () => {
+			const order = createOrderWithStatus(OrderStatus.PREPARING);
+			assert.equal(order.canTransitionTo(OrderStatus.READY), true);
+			assert.equal(order.canTransitionTo(OrderStatus.COMPLETED), false);
+			assert.equal(order.canTransitionTo(OrderStatus.PLACED), false);
+		});
+
+		it("should expose validateRestaurantAccess as a query/guard", () => {
+			const order = createOrderWithStatus(OrderStatus.PREPARING);
+			assert.doesNotThrow(() => order.validateRestaurantAccess(restaurantId));
+			assert.throws(
+				() => order.validateRestaurantAccess("different-rest"),
+				(err: unknown) => err instanceof ForbiddenRestaurantAccessError,
+			);
+		});
 	});
 });

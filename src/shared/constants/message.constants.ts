@@ -100,6 +100,9 @@ export const ORDER_MESSAGES = {
 		"Cancellation reason cannot exceed 500 characters",
 	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
 	INVALID_TAX_PERCENT: "Tax percent cannot be negative",
+	ORDER_LIST_FETCHED_SUCCESS: "Orders list fetched",
+	ORDER_DETAILS_FETCHED_SUCCESS: "Order details retrieved successfully",
+	STAFF_ORDER_DETAILS_FETCHED_SUCCESS: "Order details retrieved successfully",
 	ORDER_STATUS_UPDATED_SUCCESS: "Order status updated successfully",
 	ORDER_COMPLETED_SUCCESS: "Order completed successfully",
 	ORDER_STATUS_CONFLICT:
@@ -115,6 +118,9 @@ export const ORDER_DEFAULTS = {
 	ADDON_NAME: "Addon",
 	AUDIT_NOTE: "Order placed by customer",
 	CANCEL_AUDIT_NOTE: "Order cancelled by customer",
+	COMPLETED_AUDIT_NOTE: "Order completed successfully",
+	STATUS_UPDATED_AUDIT_NOTE: (from: string, to: string) =>
+		`Order status updated from ${from} to ${to}`,
 	CHANGED_BY_CUSTOMER: AUTH_ROLES.CUSTOMER,
 } as const;
 

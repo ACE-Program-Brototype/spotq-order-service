@@ -12,6 +12,8 @@ import type {
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
+	GetRestaurantOrdersRepoParams,
+	GetRestaurantOrdersRepoResult,
 } from "@domain/types/order-repository.types.ts";
 import { OrderPaymentEventsConsumer } from "@infrastructure/messaging/order-payment-events.consumer.ts";
 import type { RabbitMQService } from "@infrastructure/rabbitmq/rabbitmq.service.ts";
@@ -130,6 +132,34 @@ class MockOrderRepository implements IOrderRepository {
 				order.markPaymentFailed(reason);
 			}
 		}
+	}
+
+	public async findByRestaurantAndOrderId(
+		_restaurantId: string,
+		_orderId: string,
+	): Promise<Order | null> {
+		return null;
+	}
+
+	public async getRestaurantOrders(
+		_params: GetRestaurantOrdersRepoParams,
+	): Promise<GetRestaurantOrdersRepoResult> {
+		return {
+			orders: [],
+			totalOrders: 0,
+			totalPages: 0,
+			currentPage: 1,
+			hasNext: false,
+		};
+	}
+
+	public async updateOrderStatus(
+		order: Order,
+		_previousStatus: OrderStatus,
+		_actorId: string,
+		_notes?: string | null,
+	): Promise<Order> {
+		return order;
 	}
 }
 

@@ -8,6 +8,7 @@ import type {
 	CancelledOrderData,
 	CustomerOrderHistoryItemData,
 	OrderOverviewItemData,
+	RestaurantOrderListItemData,
 } from "@domain/types/order-repository.types.ts";
 import type { Prisma } from "@generated/prisma/client.ts";
 
@@ -54,6 +55,17 @@ export type PrismaOrderWithRelations = Prisma.OrderGetPayload<{
 	};
 }>;
 
+export interface PrismaRestaurantOrderRecord {
+	id: string;
+	orderNumber: string;
+	orderStatus: string;
+	grandTotal: Prisma.Decimal;
+	_count: {
+		items: number;
+	};
+	createdAt: Date;
+}
+
 export const OrderPersistenceMapper = {
 	toOverviewItem(record: PrismaOrderOverviewRecord): OrderOverviewItemData {
 		return {
@@ -87,6 +99,27 @@ export const OrderPersistenceMapper = {
 			itemsCount: record._count.items,
 			createdAt: record.createdAt,
 		};
+	},
+
+	toRestaurantOrderItem(
+		record: PrismaRestaurantOrderRecord,
+	): RestaurantOrderListItemData {
+		return {
+			orderId: record.id,
+			orderNumber: record.orderNumber,
+			orderStatus: record.orderStatus,
+			itemsCount: record._count.items,
+			grandTotal: Number(record.grandTotal.toFixed(2)),
+			createdAt: record.createdAt,
+		};
+	},
+
+	toRestaurantOrderItemList(
+		records: PrismaRestaurantOrderRecord[],
+	): RestaurantOrderListItemData[] {
+		return records.map((record) =>
+			OrderPersistenceMapper.toRestaurantOrderItem(record),
+		);
 	},
 
 	toCustomerOrderItemList(

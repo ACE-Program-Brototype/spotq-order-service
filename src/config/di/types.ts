@@ -23,6 +23,13 @@ export const TYPES = {
 	OrderPaymentEventsConsumer: Symbol.for("OrderPaymentEventsConsumer"),
 	PlaceOrderUseCase: Symbol.for("PlaceOrderUseCase"),
 	GetCheckoutDetailsUseCase: Symbol.for("GetCheckoutDetailsUseCase"),
+	GetRestaurantOrdersListUseCase: Symbol.for("GetRestaurantOrdersListUsecase"),
+	GetRestaurantOrderDetailsUseCase: Symbol.for(
+		"GetRestaurantOrderDetailsUseCase",
+	),
+	GetStaffOrderDetailsUseCase: Symbol.for("GetStaffOrderDetailsUseCase"),
+	UpdateOrderStatusUseCase: Symbol.for("UpdateOrderStatusUseCase"),
+	StaffOrderController: Symbol.for("StaffOrderController"),
 };
 
 export default TYPES;

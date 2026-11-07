@@ -72,3 +72,15 @@ export class TableRequiredForSelfOrderError extends DomainError {
 		super(message, ORDER_ERROR_CODES.TABLE_REQUIRED_FOR_SELF_ORDER);
 	}
 }
+
+export class InvalidOrderStatusTransitionError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.INVALID_STATUS_TRANSITION) {
+		super(message, ORDER_ERROR_CODES.INVALID_STATUS_TRANSITION);
+	}
+}
+
+export class OrderStatusConflictError extends DomainError {
+	constructor(message: string = ORDER_MESSAGES.ORDER_STATUS_CONFLICT) {
+		super(message, ORDER_ERROR_CODES.ORDER_STATUS_CONFLICT);
+	}
+}

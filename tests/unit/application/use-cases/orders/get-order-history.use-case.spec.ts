@@ -49,11 +49,22 @@ describe("GetOrderHistoryUseCase", () => {
 			},
 			findById: async () => null,
 			findByIdempotencyKey: async () => null,
+			updatePaymentReference: async () => {},
+			updatePaymentAndOrderStatus: async () => {},
+			findByRestaurantAndOrderId: async () => null,
+			getRestaurantOrders: async () => ({
+				orders: [],
+				totalOrders: 0,
+				totalPages: 0,
+				currentPage: 1,
+				hasNext: false,
+			}),
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},
-			updatePaymentReference: async () => {},
-			updatePaymentAndOrderStatus: async () => {},
+			updateOrderStatus: async () => {
+				throw new Error("Not implemented");
+			},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);
@@ -98,11 +109,22 @@ describe("GetOrderHistoryUseCase", () => {
 			}),
 			findById: async () => null,
 			findByIdempotencyKey: async () => null,
+			updatePaymentReference: async () => {},
+			updatePaymentAndOrderStatus: async () => {},
+			findByRestaurantAndOrderId: async () => null,
+			getRestaurantOrders: async () => ({
+				orders: [],
+				totalOrders: 0,
+				totalPages: 0,
+				currentPage: 1,
+				hasNext: false,
+			}),
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},
-			updatePaymentReference: async () => {},
-			updatePaymentAndOrderStatus: async () => {},
+			updateOrderStatus: async () => {
+				throw new Error("Not implemented");
+			},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);

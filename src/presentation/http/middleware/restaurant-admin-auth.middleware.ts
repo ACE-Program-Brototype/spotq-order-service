@@ -9,8 +9,6 @@ import {
 import { sendErrorResponse } from "@shared/response/api-response.ts";
 import type { NextFunction, Request, Response } from "express";
 
-export type { AuthenticatedRestaurantAdmin } from "@/types/express.d.ts";
-
 function getHeaderValue(
 	header: string | string[] | undefined,
 ): string | undefined {
@@ -66,7 +64,7 @@ export function restaurantAdminAuthMiddleware(
 		return;
 	}
 
-	req.restaurantAdmin = {
+	req.user = {
 		userId,
 		restaurantId,
 		role,

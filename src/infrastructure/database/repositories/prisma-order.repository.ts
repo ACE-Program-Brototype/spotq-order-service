@@ -2,6 +2,11 @@ import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import {
+	DomainError,
+	OrderNotFoundError,
+	OrderStatusConflictError,
+} from "@domain/errors/index.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
 	CancelledOrderData,
@@ -9,6 +14,8 @@ import type {
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
+	GetRestaurantOrdersRepoParams,
+	GetRestaurantOrdersRepoResult,
 } from "@domain/types/order-repository.types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
 import {
@@ -16,7 +23,10 @@ import {
 	type PrismaOrderWithRelations,
 } from "@infrastructure/database/mappers/order.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/database/repositories/prisma-base.repository.ts";
-import { ORDER_DEFAULTS } from "@shared/constants/message.constants.ts";
+import {
+	ORDER_DEFAULTS,
+	ORDER_MESSAGES,
+} from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -224,70 +234,27 @@ export class PrismaOrderRepository
 			};
 		}
 
-		const listFilter: Prisma.OrderWhereInput = {
-			...baseDateFilter,
-			...(params.status && { orderStatus: params.status }),
-		};
+		const totalOrders = await this.prisma.order.count({
+			where: baseDateFilter,
+		});
 
-		if (params.search) {
-			listFilter.OR = [
-				{ orderNumber: { contains: params.search, mode: "insensitive" } },
-				{ userName: { contains: params.search, mode: "insensitive" } },
-				{ userPhone: { contains: params.search, mode: "insensitive" } },
-			];
-		}
+		const revenueAggregate = await this.prisma.order.aggregate({
+			where: {
+				...baseDateFilter,
+				orderStatus: OrderStatus.COMPLETED,
+			},
+			_sum: {
+				grandTotal: true,
+			},
+		});
 
-		const skip = (params.page - 1) * params.limit;
-
-		const [
-			totalOrders,
-			revenueAggregate,
-			statusGroups,
-			ordersRecords,
-			totalFilteredItems,
-		] = await Promise.all([
-			this.prisma.order.count({
-				where: baseDateFilter,
-			}),
-
-			this.prisma.order.aggregate({
-				where: {
-					...baseDateFilter,
-					orderStatus: OrderStatus.COMPLETED,
-				},
-				_sum: {
-					grandTotal: true,
-				},
-			}),
-
-			this.prisma.order.groupBy({
-				by: ["orderStatus"],
-				where: baseDateFilter,
-				_count: {
-					id: true,
-				},
-			}),
-
-			this.prisma.order.findMany({
-				where: listFilter,
-				skip,
-				take: params.limit,
-				orderBy: {
-					createdAt: "desc",
-				},
-				include: {
-					_count: {
-						select: {
-							items: true,
-						},
-					},
-				},
-			}),
-
-			this.prisma.order.count({
-				where: listFilter,
-			}),
-		]);
+		const statusGroups = await this.prisma.order.groupBy({
+			by: ["orderStatus"],
+			where: baseDateFilter,
+			_count: {
+				id: true,
+			},
+		});
 
 		const statusCountMap: Record<string, number> = {};
 		for (const group of statusGroups) {
@@ -296,19 +263,10 @@ export class PrismaOrderRepository
 
 		const completedOrders = statusCountMap[OrderStatus.COMPLETED] ?? 0;
 		const cancelledOrders = statusCountMap[OrderStatus.CANCELLED] ?? 0;
-		const pendingOrders =
-			(statusCountMap[OrderStatus.PLACED] ?? 0) +
-			(statusCountMap[OrderStatus.CONFIRMED] ?? 0);
-		const preparingOrders = statusCountMap[OrderStatus.PREPARING] ?? 0;
-		const readyOrders = statusCountMap[OrderStatus.READY] ?? 0;
 
 		const grossRevenue = revenueAggregate._sum.grandTotal
 			? Number(revenueAggregate._sum.grandTotal.toFixed(2))
 			: 0;
-
-		const orders = OrderPersistenceMapper.toOverviewItemList(ordersRecords);
-
-		const totalPages = Math.ceil(totalFilteredItems / params.limit) || 1;
 
 		return {
 			summary: {
@@ -316,15 +274,6 @@ export class PrismaOrderRepository
 				grossRevenue,
 				completedOrders,
 				cancelledOrders,
-				pendingOrders,
-				preparingOrders,
-				readyOrders,
-			},
-			orders,
-			pagination: {
-				currentPage: params.page,
-				totalPages,
-				totalItems: totalFilteredItems,
 			},
 		};
 	}
@@ -443,6 +392,72 @@ export class PrismaOrderRepository
 		}
 	}
 
+	public async getRestaurantOrders(
+		params: GetRestaurantOrdersRepoParams,
+	): Promise<GetRestaurantOrdersRepoResult> {
+		try {
+			const where: Prisma.OrderWhereInput = {
+				restaurantId: params.restaurantId,
+				...(params.search && {
+					orderNumber: {
+						contains: params.search,
+						mode: "insensitive",
+					},
+				}),
+
+				...(params.status && {
+					orderStatus: params.status,
+				}),
+
+				...(params.fromDate || params.toDate
+					? {
+							createdAt: {
+								...(params.fromDate && { gte: params.fromDate }),
+								...(params.toDate && { lte: params.toDate }),
+							},
+						}
+					: {}),
+			};
+
+			const skip = (params.page - 1) * params.limit;
+
+			const [orderRecords, totalOrders] = await this.prisma.$transaction([
+				this.prisma.order.findMany({
+					where,
+					skip,
+					take: params.limit,
+					orderBy: {
+						createdAt: "desc",
+					},
+					include: {
+						_count: {
+							select: {
+								items: true,
+							},
+						},
+					},
+				}),
+
+				this.prisma.order.count({
+					where,
+				}),
+			]);
+
+			const totalPages = Math.ceil(totalOrders / params.limit);
+
+			return {
+				orders: OrderPersistenceMapper.toRestaurantOrderItemList(orderRecords),
+				totalOrders,
+				totalPages,
+				currentPage: params.page,
+				hasNext: params.page < totalPages,
+			};
+		} catch (error) {
+			this.handlePrismaError(error, params);
+			throw error;
+		}
+	}
+
 	public async updatePaymentAndOrderStatus(
 		orderId: string,
 		paymentStatus: PaymentStatus,
@@ -485,6 +500,108 @@ export class PrismaOrderRepository
 			});
 		} catch (error) {
 			this.handlePrismaError(error, { orderId });
+			throw error;
+		}
+	}
+
+	public async findByRestaurantAndOrderId(
+		restaurantId: string,
+		orderId: string,
+	): Promise<Order | null> {
+		const order = await this.prisma.order.findFirst({
+			where: {
+				id: orderId,
+				restaurantId: restaurantId,
+			},
+			include: {
+				items: {
+					include: {
+						addons: true,
+					},
+				},
+				statusHistory: true,
+			},
+		});
+
+		if (!order) {
+			return null;
+		}
+
+		return order ? OrderPersistenceMapper.toDomain(order) : null;
+	}
+	public async updateOrderStatus(
+		order: Order,
+		previousStatus: OrderStatus,
+		actorId: string,
+		notes?: string | null,
+	): Promise<Order> {
+		try {
+			return await this.prisma.$transaction(async (tx) => {
+				const updateResult = await tx.order.updateMany({
+					where: {
+						id: order.id,
+						orderStatus: previousStatus,
+					},
+					data: {
+						orderStatus: order.orderStatus,
+						cancellationReason: order.cancellationReason,
+						cancelledAt: order.cancelledAt,
+						updatedAt: new Date(),
+					},
+				});
+
+				if (updateResult.count === 0) {
+					throw new OrderStatusConflictError(
+						ORDER_MESSAGES.ORDER_STATUS_CONFLICT,
+					);
+				}
+
+				const defaultNote =
+					order.orderStatus === OrderStatus.COMPLETED
+						? ORDER_DEFAULTS.COMPLETED_AUDIT_NOTE
+						: ORDER_DEFAULTS.STATUS_UPDATED_AUDIT_NOTE(
+								previousStatus,
+								order.orderStatus,
+							);
+
+				await tx.orderStatusHistory.create({
+					data: {
+						orderId: order.id,
+						previousStatus,
+						currentStatus: order.orderStatus,
+						changedBy: actorId,
+						notes: notes || defaultNote,
+						createdAt: new Date(),
+					},
+				});
+
+				const updatedRecord = await tx.order.findUnique({
+					where: { id: order.id },
+					include: {
+						items: {
+							include: {
+								addons: true,
+							},
+						},
+						statusHistory: {
+							orderBy: {
+								createdAt: "desc",
+							},
+						},
+					},
+				});
+
+				if (!updatedRecord) {
+					throw new OrderNotFoundError(ORDER_MESSAGES.ORDER_NOT_FOUND);
+				}
+
+				return OrderPersistenceMapper.toDomain(updatedRecord);
+			});
+		} catch (error) {
+			if (error instanceof DomainError) {
+				throw error;
+			}
+			this.handlePrismaError(error, { orderId: order.id });
 			throw error;
 		}
 	}

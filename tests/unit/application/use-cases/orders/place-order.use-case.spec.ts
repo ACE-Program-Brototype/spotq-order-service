@@ -50,6 +50,7 @@ import type {
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
+	GetRestaurantOrdersRepoResult,
 } from "@domain/types/order-repository.types.ts";
 
 class MockCartRepository implements ICartRepository {
@@ -198,6 +199,32 @@ class MockOrderRepository implements IOrderRepository {
 				order.markAsPaid();
 			}
 		}
+	}
+
+	public async findByRestaurantAndOrderId(
+		_restaurantId: string,
+		_orderId: string,
+	): Promise<Order | null> {
+		return null;
+	}
+
+	public async getRestaurantOrders(): Promise<GetRestaurantOrdersRepoResult> {
+		return {
+			orders: [],
+			totalOrders: 0,
+			totalPages: 0,
+			currentPage: 1,
+			hasNext: false,
+		};
+	}
+
+	public async updateOrderStatus(
+		_order: Order,
+		_previousStatus: OrderStatus,
+		_actorId: string,
+		_notes?: string | null,
+	): Promise<Order> {
+		throw new Error("Not implemented in test");
 	}
 }
 

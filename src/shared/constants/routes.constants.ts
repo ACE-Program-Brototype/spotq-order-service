@@ -5,6 +5,12 @@ export const ROUTES = {
 	CARTS: "/carts",
 	RESTAURANTS: "/restaurants",
 	ORDERS: "/orders",
+	STAFF: "/staff",
+} as const;
+
+export const STAFF_ORDER_ROUTES = {
+	UPDATE_STATUS: "/:orderId/status",
+	DETAILS: "/:restaurantId/orders/:orderId",
 } as const;
 
 export const ORDER_ROUTES = {
@@ -30,7 +36,9 @@ export const RESTAURANT_SERVICE_ENDPOINTS = {
 } as const;
 
 export const RESTAURANT_ORDER_ROUTES = {
-	OVERVIEW: "/:restaurantId/overview",
+	OVERVIEW: "/:restaurantId/orders/overview",
+	LIST: "/:restaurantId/orders",
+	DETAILS: "/:restaurantId/orders/:orderId",
 } as const;
 
 export const RESTAURANT_SERVICE_ROUTES = {
