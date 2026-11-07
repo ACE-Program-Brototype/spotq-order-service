@@ -8,7 +8,6 @@ import type { IGetStaffOrderDetailsUseCase } from "@application/ports/use-cases/
 import { TYPES } from "@config/di/types.ts";
 import { OrderNotFoundError } from "@domain/errors/order.errors.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
-import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -33,7 +32,7 @@ export class GetStaffOrderDetailsUseCase
 		);
 
 		if (!order) {
-			throw new OrderNotFoundError(ORDER_MESSAGES.ORDER_NOT_FOUND);
+			throw new OrderNotFoundError();
 		}
 
 		order.validateRestaurantAccess(dto.restaurantId);
