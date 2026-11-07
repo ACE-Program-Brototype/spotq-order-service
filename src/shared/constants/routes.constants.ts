@@ -10,6 +10,7 @@ export const ROUTES = {
 
 export const STAFF_ORDER_ROUTES = {
 	UPDATE_STATUS: "/:orderId/status",
+	DETAILS: "/:restaurantId/orders/:orderId",
 } as const;
 
 export const ORDER_ROUTES = {

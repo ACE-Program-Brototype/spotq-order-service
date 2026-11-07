@@ -6,6 +6,7 @@ import {
 	validateRequestBody,
 	validateRequestParams,
 } from "@presentation/http/middleware/validation.middleware.ts";
+import { orderDetailsParamSchema } from "@presentation/http/validators/orders/order-details-param.schema.ts";
 import {
 	updateOrderStatusBodySchema,
 	updateOrderStatusParamSchema,
@@ -69,6 +70,49 @@ staffOrderRouter.patch(
 	validateRequestParams(updateOrderStatusParamSchema),
 	validateRequestBody(updateOrderStatusBodySchema),
 	staffOrderController.updateOrderStatus,
+);
+
+/**
+ * @openapi
+ * /staff/{restaurantId}/orders/{orderId}:
+ *   get:
+ *     summary: Retrieve complete order details for kitchen staff
+ *     tags:
+ *       - Staff Orders
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: restaurantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Order details retrieved successfully
+ *       400:
+ *         description: Invalid restaurant or order ID format
+ *       401:
+ *         description: Missing, invalid, or expired JWT
+ *       403:
+ *         description: Caller is not authorized as Restaurant Staff or lacks access to the restaurant
+ *       404:
+ *         description: Order does not exist or does not belong to the specified restaurant
+ *       500:
+ *         description: Unexpected server or data-access failure
+ */
+staffOrderRouter.get(
+	STAFF_ORDER_ROUTES.DETAILS,
+	restaurantStaffAuthMiddleware,
+	validateRequestParams(orderDetailsParamSchema),
+	staffOrderController.getOrderDetails,
 );
 
 export default staffOrderRouter;

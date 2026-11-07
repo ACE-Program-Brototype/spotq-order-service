@@ -14,6 +14,7 @@ import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/order
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import type { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
 import type { IGetRestaurantOrdersListUseCase } from "@application/ports/use-cases/orders/get-restaurant-orders.use-case.port";
+import type { IGetStaffOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-staff-order-details.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import type { IUpdateOrderStatusUseCase } from "@application/ports/use-cases/orders/update-order-status.use-case.port.ts";
 import { AddBatchCartItemsUseCase } from "@application/use-cases/cart/add-batch-cart-items.use-case.ts";
@@ -28,6 +29,7 @@ import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-
 import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orders-overview.use-case.ts";
 import { GetRestaurantOrderDetailsUseCase } from "@application/use-cases/orders/get-restaurant-order-details.use-case";
 import { GetRestaurantOrdersListUseCase } from "@application/use-cases/orders/get-restaurant-orders.use-case";
+import { GetStaffOrderDetailsUseCase } from "@application/use-cases/orders/get-staff-order-details.use-case.ts";
 import { PlaceOrderUseCase } from "@application/use-cases/orders/place-order.use-case.ts";
 import { UpdateOrderStatusUseCase } from "@application/use-cases/orders/update-order-status.use-case.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -154,6 +156,11 @@ container
 		TYPES.GetRestaurantOrderDetailsUseCase,
 	)
 	.to(GetRestaurantOrderDetailsUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IGetStaffOrderDetailsUseCase>(TYPES.GetStaffOrderDetailsUseCase)
+	.to(GetStaffOrderDetailsUseCase)
 	.inSingletonScope();
 
 container
