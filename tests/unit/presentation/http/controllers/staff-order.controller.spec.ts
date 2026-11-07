@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
+	GetStaffOrderDetailsInputDTO,
+	StaffOrderDetailsResponseDTO,
+} from "@application/dtos/orders/get-staff-order-details.dto.ts";
+import type {
 	UpdateOrderStatusInputDTO,
 	UpdateOrderStatusResponseDTO,
 } from "@application/dtos/orders/update-order-status.dto.ts";
+import type { IGetStaffOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-staff-order-details.use-case.port.ts";
 import type { IUpdateOrderStatusUseCase } from "@application/ports/use-cases/orders/update-order-status.use-case.port.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { StaffOrderController } from "@presentation/http/controllers/staff-order.controller.ts";
@@ -39,6 +44,19 @@ function createMockResponse() {
 }
 
 describe("StaffOrderController", () => {
+	const defaultMockGetStaffOrderDetailsUseCase: IGetStaffOrderDetailsUseCase = {
+		execute: async (
+			_dto: GetStaffOrderDetailsInputDTO,
+		): Promise<StaffOrderDetailsResponseDTO> => ({
+			order_id: "ord-123",
+			order_number: "SQ-101",
+			status: OrderStatus.PLACED,
+			customer_notes: "Extra spicy",
+			items: [],
+			created_at: new Date().toISOString(),
+		}),
+	};
+
 	it("should update order status successfully with 200 OK and success message", async () => {
 		let capturedDto: UpdateOrderStatusInputDTO | null = null;
 
@@ -77,7 +95,10 @@ describe("StaffOrderController", () => {
 			},
 		};
 
-		const controller = new StaffOrderController(mockUpdateOrderStatusUseCase);
+		const controller = new StaffOrderController(
+			mockUpdateOrderStatusUseCase,
+			defaultMockGetStaffOrderDetailsUseCase,
+		);
 
 		const { res, getStatus, getBody } = createMockResponse();
 		const req = {
@@ -107,7 +128,7 @@ describe("StaffOrderController", () => {
 		});
 	});
 
-	it("should update order status successfully without optional notes", async () => {
+	it("should default notes to null when notes is undefined in update order status", async () => {
 		let capturedDto: UpdateOrderStatusInputDTO | null = null;
 
 		const mockUpdateOrderStatusUseCase: IUpdateOrderStatusUseCase = {
@@ -116,7 +137,7 @@ describe("StaffOrderController", () => {
 				return {
 					id: dto.orderId,
 					orderId: dto.orderId,
-					previousStatus: OrderStatus.PLACED,
+					previousStatus: OrderStatus.CONFIRMED,
 					status: dto.status,
 					orderNumber: "SQ-102",
 					restaurantId: dto.restaurantId,
@@ -145,7 +166,10 @@ describe("StaffOrderController", () => {
 			},
 		};
 
-		const controller = new StaffOrderController(mockUpdateOrderStatusUseCase);
+		const controller = new StaffOrderController(
+			mockUpdateOrderStatusUseCase,
+			defaultMockGetStaffOrderDetailsUseCase,
+		);
 
 		const { res, getStatus, getBody } = createMockResponse();
 		const req = {
@@ -168,6 +192,74 @@ describe("StaffOrderController", () => {
 			restaurantId: "rest-99",
 			actorId: "staff-2",
 			notes: null,
+		});
+	});
+
+	it("should retrieve staff order details successfully with 200 OK", async () => {
+		let capturedInputDto: GetStaffOrderDetailsInputDTO | null = null;
+
+		const expectedResult: StaffOrderDetailsResponseDTO = {
+			order_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+			order_number: "SQ-101",
+			status: OrderStatus.PLACED,
+			customer_notes: "Please provide extra napkins.",
+			items: [
+				{
+					menu_item_id: "item-1",
+					name: "Margherita Pizza",
+					variant_id: "var-1",
+					variant_name: "Large",
+					addons: [{ addon_id: "addon-1", name: "Extra Cheese" }],
+					quantity: 2,
+					special_instructions: "Less spicy please",
+				},
+			],
+			created_at: "2026-10-06T13:50:00.000Z",
+		};
+
+		const mockGetStaffOrderDetailsUseCase: IGetStaffOrderDetailsUseCase = {
+			execute: async (dto: GetStaffOrderDetailsInputDTO) => {
+				capturedInputDto = dto;
+				return expectedResult;
+			},
+		};
+
+		const mockUpdateOrderStatusUseCase: IUpdateOrderStatusUseCase = {
+			execute: async () => {
+				throw new Error("Not implemented");
+			},
+		};
+
+		const controller = new StaffOrderController(
+			mockUpdateOrderStatusUseCase,
+			mockGetStaffOrderDetailsUseCase,
+		);
+
+		const { res, getStatus, getBody } = createMockResponse();
+		const req = {
+			params: {
+				restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+				orderId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+			},
+			user: {
+				userId: "staff-1",
+				restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+				role: AUTH_ROLES.STAFF,
+			},
+		} as unknown as Request;
+
+		await controller.getOrderDetails(req, res);
+
+		assert.equal(getStatus(), HttpStatus.OK);
+		assert.equal(getBody().success, true);
+		assert.equal(
+			getBody().message,
+			ORDER_MESSAGES.STAFF_ORDER_DETAILS_FETCHED_SUCCESS,
+		);
+		assert.deepEqual(getBody().data, expectedResult);
+		assert.deepEqual(capturedInputDto, {
+			restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+			orderId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
 		});
 	});
 });
