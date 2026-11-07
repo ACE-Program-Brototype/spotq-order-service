@@ -97,7 +97,8 @@ export const ORDER_MESSAGES = {
 	DEFAULT_CANCEL_REASON: "Order cancelled by customer",
 	INVALID_TAX_PERCENT: "Tax percent cannot be negative",
 	ORDER_LIST_FETCHED_SUCCESS: "Orders list fetched",
-	ORDER_DETAILS_FETCHED_SUCCESS: "Order detialse fetched to restaurant",
+	ORDER_DETAILS_FETCHED_SUCCESS: "Order details retrieved successfully",
+	STAFF_ORDER_DETAILS_FETCHED_SUCCESS: "Order details retrieved successfully",
 	ORDER_STATUS_UPDATED_SUCCESS: "Order status updated successfully",
 	ORDER_COMPLETED_SUCCESS: "Order completed successfully",
 	ORDER_STATUS_CONFLICT:
