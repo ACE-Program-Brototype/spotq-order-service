@@ -14,6 +14,7 @@ import type {
 	GetOrdersOverviewRepoResult,
 	GetRestaurantOrdersRepoParams,
 	GetRestaurantOrdersRepoResult,
+	GetStaffOrdersRepoResult,
 } from "@domain/types/order-repository.types.ts";
 import { OrderPaymentEventsConsumer } from "@infrastructure/messaging/order-payment-events.consumer.ts";
 import type { RabbitMQService } from "@infrastructure/rabbitmq/rabbitmq.service.ts";
@@ -149,6 +150,17 @@ class MockOrderRepository implements IOrderRepository {
 			totalOrders: 0,
 			totalPages: 0,
 			currentPage: 1,
+			hasNext: false,
+		};
+	}
+
+	public async getStaffOrders(): Promise<GetStaffOrdersRepoResult> {
+		return {
+			orders: [],
+			totalOrders: 0,
+			totalPages: 0,
+			currentPage: 1,
+			limit: 20,
 			hasNext: false,
 		};
 	}

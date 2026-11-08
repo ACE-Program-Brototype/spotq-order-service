@@ -5,6 +5,7 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import {
 	OrderNotFoundError,
 	OrderStatusConflictError,
@@ -659,6 +660,166 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 				() => repository.updateOrderStatus(order, OrderStatus.READY, "staff-1"),
 				(err: unknown) => err instanceof OrderNotFoundError,
 			);
+		});
+	});
+
+	describe("getStaffOrders", () => {
+		it("should query orders with FIFO sorting and return mapped result", async () => {
+			let capturedFindManyArgs: unknown;
+			let capturedCountArgs: unknown;
+
+			const mockRecords = [
+				{
+					id: "ord-1",
+					orderNumber: "ORD-001",
+					restaurantPlan: RestaurantPlan.QUEUE_PRO,
+					orderStatus: OrderStatus.PLACED,
+					createdAt: new Date("2026-10-26T10:30:00.000Z"),
+					queueEntryId: "q-1",
+					items: [
+						{
+							menuItemId: "item-1",
+							itemName: "Veg Burger",
+							quantity: 2,
+							variantId: null,
+							variantName: null,
+							addons: [
+								{
+									addonId: "mod-1",
+									addonName: "Cheese",
+								},
+							],
+						},
+					],
+				},
+			];
+
+			const mockPrisma = {
+				$transaction: async (queries: [Promise<unknown>, Promise<unknown>]) => {
+					return await Promise.all(queries);
+				},
+				order: {
+					findMany: async (args: unknown) => {
+						capturedFindManyArgs = args;
+						return mockRecords;
+					},
+					count: async (args: unknown) => {
+						capturedCountArgs = args;
+						return 1;
+					},
+				},
+			} as unknown as PrismaClient;
+
+			const repository = new PrismaOrderRepository(mockPrisma);
+			const result = await repository.getStaffOrders({
+				restaurantId: "rest-1",
+				search: "ORD",
+				page: 1,
+				limit: 20,
+			});
+
+			assert.equal(result.orders.length, 1);
+			assert.equal(result.totalOrders, 1);
+			assert.equal(result.totalPages, 1);
+			assert.equal(result.currentPage, 1);
+			assert.equal(result.hasNext, false);
+			const firstOrder = result.orders[0];
+			assert.ok(firstOrder);
+			assert.equal(firstOrder.id, "ord-1");
+			const firstItem = firstOrder.items[0];
+			assert.ok(firstItem);
+			const firstAddon = firstItem.addons[0];
+			assert.ok(firstAddon);
+			assert.equal(firstAddon.name, "Cheese");
+
+			const findMany = capturedFindManyArgs as {
+				where: {
+					restaurantId: string;
+					orderNumber: { contains: string; mode: string };
+					orderStatus: { in: OrderStatus[] };
+					restaurantPlan: { in: RestaurantPlan[] };
+				};
+				orderBy: Array<Record<string, string>>;
+				skip: number;
+				take: number;
+			};
+
+			assert.equal(findMany.where.restaurantId, "rest-1");
+			assert.deepEqual(findMany.where.orderNumber, {
+				contains: "ORD",
+				mode: "insensitive",
+			});
+			assert.deepEqual(findMany.where.orderStatus, {
+				in: [
+					OrderStatus.PLACED,
+					OrderStatus.CONFIRMED,
+					OrderStatus.PREPARING,
+					OrderStatus.READY,
+					OrderStatus.COMPLETED,
+				],
+			});
+			assert.deepEqual(findMany.where.restaurantPlan, {
+				in: [RestaurantPlan.QUEUE_PRO, RestaurantPlan.SELF_PRO],
+			});
+			assert.deepEqual(findMany.orderBy, [{ createdAt: "asc" }, { id: "asc" }]);
+			assert.equal(findMany.skip, 0);
+			assert.equal(findMany.take, 20);
+
+			const count = capturedCountArgs as {
+				where: {
+					restaurantId: string;
+				};
+			};
+			assert.equal(count.where.restaurantId, "rest-1");
+		});
+
+		it("should apply explicit status, orderType, and desc sortOrder", async () => {
+			let capturedFindManyArgs: unknown;
+
+			const mockPrisma = {
+				$transaction: async (queries: [Promise<unknown>, Promise<unknown>]) => {
+					return await Promise.all(queries);
+				},
+				order: {
+					findMany: async (args: unknown) => {
+						capturedFindManyArgs = args;
+						return [];
+					},
+					count: async () => 0,
+				},
+			} as unknown as PrismaClient;
+
+			const repository = new PrismaOrderRepository(mockPrisma);
+			await repository.getStaffOrders({
+				restaurantId: "rest-1",
+				status: [OrderStatus.PREPARING],
+				orderType: RestaurantPlan.SELF_PRO,
+				sortOrder: "desc",
+				page: 2,
+				limit: 10,
+			});
+
+			const findMany = capturedFindManyArgs as {
+				where: {
+					restaurantId: string;
+					orderStatus: { in: OrderStatus[] };
+					restaurantPlan: RestaurantPlan;
+				};
+				orderBy: Array<Record<string, string>>;
+				skip: number;
+				take: number;
+			};
+
+			assert.deepEqual(findMany.where.orderStatus, {
+				in: [OrderStatus.PREPARING],
+			});
+			assert.equal(findMany.where.restaurantPlan, RestaurantPlan.SELF_PRO);
+			assert.deepEqual(findMany.orderBy, [
+				{ createdAt: "desc" },
+				{ id: "desc" },
+			]);
+			assert.equal(findMany.skip, 10);
+			assert.equal(findMany.take, 10);
 		});
 	});
 });

@@ -9,6 +9,8 @@ import type {
 	GetOrdersOverviewRepoResult,
 	GetRestaurantOrdersRepoParams,
 	GetRestaurantOrdersRepoResult,
+	GetStaffOrdersRepoParams,
+	GetStaffOrdersRepoResult,
 } from "@domain/types/order-repository.types.ts";
 
 export interface IOrderRepository {
@@ -40,6 +42,9 @@ export interface IOrderRepository {
 	getRestaurantOrders(
 		params: GetRestaurantOrdersRepoParams,
 	): Promise<GetRestaurantOrdersRepoResult>;
+	getStaffOrders(
+		params: GetStaffOrdersRepoParams,
+	): Promise<GetStaffOrdersRepoResult>;
 	findByRestaurantAndOrderId(
 		restaurantId: string,
 		orderId: string,

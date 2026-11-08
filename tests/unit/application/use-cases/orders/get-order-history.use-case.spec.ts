@@ -59,6 +59,14 @@ describe("GetOrderHistoryUseCase", () => {
 				currentPage: 1,
 				hasNext: false,
 			}),
+			getStaffOrders: async () => ({
+				orders: [],
+				totalOrders: 0,
+				totalPages: 0,
+				currentPage: 1,
+				limit: 20,
+				hasNext: false,
+			}),
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},
@@ -117,6 +125,14 @@ describe("GetOrderHistoryUseCase", () => {
 				totalOrders: 0,
 				totalPages: 0,
 				currentPage: 1,
+				hasNext: false,
+			}),
+			getStaffOrders: async () => ({
+				orders: [],
+				totalOrders: 0,
+				totalPages: 0,
+				currentPage: 1,
+				limit: 20,
 				hasNext: false,
 			}),
 			cancelOrder: async () => {

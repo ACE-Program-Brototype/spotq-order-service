@@ -2,6 +2,7 @@ import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import {
 	DomainError,
 	OrderNotFoundError,
@@ -16,6 +17,9 @@ import type {
 	GetOrdersOverviewRepoResult,
 	GetRestaurantOrdersRepoParams,
 	GetRestaurantOrdersRepoResult,
+	GetStaffOrdersRepoParams,
+	GetStaffOrdersRepoResult,
+	StaffOrderListItemData,
 } from "@domain/types/order-repository.types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
 import {
@@ -450,6 +454,98 @@ export class PrismaOrderRepository
 				totalOrders,
 				totalPages,
 				currentPage: params.page,
+				hasNext: params.page < totalPages,
+			};
+		} catch (error) {
+			this.handlePrismaError(error, params);
+			throw error;
+		}
+	}
+
+	public async getStaffOrders(
+		params: GetStaffOrdersRepoParams,
+	): Promise<GetStaffOrdersRepoResult> {
+		try {
+			const defaultStatuses = [
+				OrderStatus.PLACED,
+				OrderStatus.CONFIRMED,
+				OrderStatus.PREPARING,
+				OrderStatus.READY,
+				OrderStatus.COMPLETED,
+			];
+
+			const statusFilter =
+				params.status && params.status.length > 0
+					? { in: params.status }
+					: { in: defaultStatuses };
+
+			const planFilter = params.orderType
+				? params.orderType
+				: { in: [RestaurantPlan.QUEUE_PRO, RestaurantPlan.SELF_PRO] };
+
+			const sortDirection = params.sortOrder ?? "asc";
+
+			const where: Prisma.OrderWhereInput = {
+				restaurantId: params.restaurantId,
+				orderStatus: statusFilter,
+				restaurantPlan: planFilter,
+				...(params.search && {
+					orderNumber: {
+						contains: params.search,
+						mode: "insensitive",
+					},
+				}),
+			};
+
+			const skip = (params.page - 1) * params.limit;
+
+			const [orderRecords, totalOrders] = await this.prisma.$transaction([
+				this.prisma.order.findMany({
+					where,
+					skip,
+					take: params.limit,
+					orderBy: [{ createdAt: sortDirection }, { id: sortDirection }],
+					include: {
+						items: {
+							include: {
+								addons: true,
+							},
+						},
+					},
+				}),
+				this.prisma.order.count({
+					where,
+				}),
+			]);
+
+			const totalPages = Math.ceil(totalOrders / params.limit) || 0;
+
+			const orders: StaffOrderListItemData[] = orderRecords.map((record) => ({
+				id: record.id,
+				orderNumber: record.orderNumber,
+				orderType: record.restaurantPlan as RestaurantPlan,
+				status: record.orderStatus as OrderStatus,
+				createdAt: record.createdAt,
+				queueEntryId: record.queueEntryId,
+				items: record.items.map((item) => ({
+					menuItemId: item.menuItemId,
+					name: item.itemName,
+					quantity: item.quantity,
+					variantId: item.variantId,
+					variantName: item.variantName,
+					addons: item.addons.map((addon) => ({
+						id: addon.addonId,
+						name: addon.addonName,
+					})),
+				})),
+			}));
+
+			return {
+				orders,
+				totalOrders,
+				totalPages,
+				currentPage: params.page,
+				limit: params.limit,
 				hasNext: params.page < totalPages,
 			};
 		} catch (error) {

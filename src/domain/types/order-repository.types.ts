@@ -1,4 +1,5 @@
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import type { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 
 export interface GetOrdersOverviewRepoParams {
 	restaurantId: string;
@@ -102,4 +103,45 @@ export interface CancelledOrderData {
 	status: string;
 	cancellationReason: string | null;
 	cancelledAt: Date | null;
+}
+
+export interface StaffOrderItemRepoData {
+	menuItemId: string;
+	name: string;
+	quantity: number;
+	variantId: string | null;
+	variantName: string | null;
+	addons: Array<{
+		id: string;
+		name: string;
+	}>;
+}
+
+export interface StaffOrderListItemData {
+	id: string;
+	orderNumber: string;
+	orderType: RestaurantPlan;
+	status: OrderStatus;
+	createdAt: Date;
+	queueEntryId: string | null;
+	items: StaffOrderItemRepoData[];
+}
+
+export interface GetStaffOrdersRepoParams {
+	restaurantId: string;
+	search?: string | undefined;
+	status?: OrderStatus[] | undefined;
+	orderType?: RestaurantPlan | undefined;
+	sortOrder?: "asc" | "desc" | undefined;
+	page: number;
+	limit: number;
+}
+
+export interface GetStaffOrdersRepoResult {
+	orders: StaffOrderListItemData[];
+	totalOrders: number;
+	totalPages: number;
+	currentPage: number;
+	limit: number;
+	hasNext: boolean;
 }

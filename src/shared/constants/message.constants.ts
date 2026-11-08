@@ -103,6 +103,14 @@ export const ORDER_MESSAGES = {
 	ORDER_LIST_FETCHED_SUCCESS: "Orders list fetched",
 	ORDER_DETAILS_FETCHED_SUCCESS: "Order details retrieved successfully",
 	STAFF_ORDER_DETAILS_FETCHED_SUCCESS: "Order details retrieved successfully",
+	STAFF_ORDERS_LIST_FETCHED_SUCCESS: "Orders retrieved successfully",
+	INVALID_ORDER_TYPE:
+		"Invalid order type. Supported types: QUEUE_PRO, SELF_PRO",
+	INVALID_SORT_ORDER: "Invalid sort direction. Supported directions: asc, desc",
+	INVALID_STAFF_ORDER_STATUS:
+		"Invalid order status filter. Supported statuses: PLACED, CONFIRMED, PREPARING, READY, COMPLETED",
+	INVALID_ACTIVE_ORDER_STATUS:
+		"Invalid order status filter. Supported statuses: PLACED, CONFIRMED, PREPARING, READY, COMPLETED",
 	ORDER_STATUS_UPDATED_SUCCESS: "Order status updated successfully",
 	ORDER_COMPLETED_SUCCESS: "Order completed successfully",
 	ORDER_STATUS_CONFLICT:
