@@ -20,3 +20,14 @@ export const AUTH_CONSTANTS = {
 	BEARER_PREFIX: "Bearer ",
 	BEARER_PREFIX_LENGTH: 7,
 } as const;
+
+export const S2S_CALLER_SERVICES = {
+	RESTAURANT_SERVICE: "restaurant-service",
+	USER_SERVICE: "user-service",
+	PAYMENT_SERVICE: "payment-service",
+	QUEUE_SERVICE: "queue-service",
+	ORDER_SERVICE: "order-service",
+} as const;
+
+export type S2SCallerService =
+	(typeof S2S_CALLER_SERVICES)[keyof typeof S2S_CALLER_SERVICES];

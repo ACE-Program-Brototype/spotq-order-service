@@ -1,7 +1,7 @@
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import {
 	DomainError,
@@ -15,10 +15,14 @@ import type {
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
+	GetRestaurantOrderAnalyticsRepoParams,
 	GetRestaurantOrdersRepoParams,
 	GetRestaurantOrdersRepoResult,
+	GetRestaurantProductAnalyticsRepoParams,
 	GetStaffOrdersRepoParams,
 	GetStaffOrdersRepoResult,
+	RestaurantOrderAnalyticsRepoResult,
+	RestaurantProductAnalyticsRepoResult,
 } from "@domain/types/order-repository.types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
 import {
@@ -678,5 +682,316 @@ export class PrismaOrderRepository
 			this.handlePrismaError(error, { orderId: order.id });
 			throw error;
 		}
+	}
+
+	public async getRestaurantOrderAnalytics(
+		params: GetRestaurantOrderAnalyticsRepoParams,
+	): Promise<RestaurantOrderAnalyticsRepoResult> {
+		const { restaurantId, startDate, nextPeriodStart, prevStartDate } = params;
+
+		// 1. Current Settled Revenue (COMPLETED & PAID)
+		const currentRevenueAgg = await this.prisma.order.aggregate({
+			where: {
+				restaurantId,
+				createdAt: { gte: startDate, lt: nextPeriodStart },
+				orderStatus: OrderStatus.COMPLETED,
+				paymentStatus: PaymentStatus.PAID,
+			},
+			_sum: {
+				subtotal: true,
+				discountAmount: true,
+				taxAmount: true,
+				grandTotal: true,
+			},
+		});
+
+		const grossSalesRupees = currentRevenueAgg._sum.subtotal
+			? Number(currentRevenueAgg._sum.subtotal.toFixed(2))
+			: 0;
+		const discountRupees = currentRevenueAgg._sum.discountAmount
+			? Number(currentRevenueAgg._sum.discountAmount.toFixed(2))
+			: 0;
+		const netSalesRupees = Number(
+			(grossSalesRupees - discountRupees).toFixed(2),
+		);
+		const taxCollectedRupees = currentRevenueAgg._sum.taxAmount
+			? Number(currentRevenueAgg._sum.taxAmount.toFixed(2))
+			: 0;
+		const totalBillAmountRupees = currentRevenueAgg._sum.grandTotal
+			? Number(currentRevenueAgg._sum.grandTotal.toFixed(2))
+			: 0;
+
+		// 2. Previous Period Revenue for Growth %
+		const prevRevenueAgg = await this.prisma.order.aggregate({
+			where: {
+				restaurantId,
+				createdAt: { gte: prevStartDate, lt: startDate },
+				orderStatus: OrderStatus.COMPLETED,
+				paymentStatus: PaymentStatus.PAID,
+			},
+			_sum: {
+				grandTotal: true,
+			},
+		});
+
+		const prevSales = prevRevenueAgg._sum.grandTotal
+			? Number(prevRevenueAgg._sum.grandTotal.toFixed(2))
+			: 0;
+		const revenueGrowth =
+			prevSales === 0
+				? totalBillAmountRupees > 0
+					? 100
+					: 0
+				: Number(
+						(((totalBillAmountRupees - prevSales) / prevSales) * 100).toFixed(
+							1,
+						),
+					);
+
+		// 3. Current Order Counts (100% of orders created in window)
+		const totalOrderCount = await this.prisma.order.count({
+			where: {
+				restaurantId,
+				createdAt: { gte: startDate, lt: nextPeriodStart },
+			},
+		});
+
+		// Previous Order Count for Order Growth %
+		const prevOrderCount = await this.prisma.order.count({
+			where: {
+				restaurantId,
+				createdAt: { gte: prevStartDate, lt: startDate },
+			},
+		});
+
+		const orderGrowth =
+			prevOrderCount === 0
+				? totalOrderCount > 0
+					? 100
+					: 0
+				: Number(
+						(
+							((totalOrderCount - prevOrderCount) / prevOrderCount) *
+							100
+						).toFixed(1),
+					);
+
+		// 4. Dine-In vs Takeaway Counts
+		// Orders with tableNumber are DINE_IN; orders without tableNumber are TAKEAWAY
+		const dineInCount = await this.prisma.order.count({
+			where: {
+				restaurantId,
+				createdAt: { gte: startDate, lt: nextPeriodStart },
+				tableNumber: { not: null },
+			},
+		});
+		const takeawayCount = totalOrderCount - dineInCount;
+
+		// 5. Operations: Diners Served (Distinct Parties/Tables with Completed Orders)
+		const dinersServedCount = await this.prisma.order.count({
+			where: {
+				restaurantId,
+				createdAt: { gte: startDate, lt: nextPeriodStart },
+				tableNumber: { not: null },
+				orderStatus: OrderStatus.COMPLETED,
+			},
+		});
+
+		// Unique Customers (Database-level COUNT DISTINCT user_id)
+		const customerCountResult = await this.prisma.$queryRaw<
+			Array<{ count: bigint | number }>
+		>`
+			SELECT COUNT(DISTINCT user_id)::int as count 
+			FROM orders 
+			WHERE restaurant_id = ${restaurantId}::uuid
+				AND created_at >= ${startDate}
+				AND created_at < ${nextPeriodStart}
+				AND user_id IS NOT NULL
+		`;
+		const uniqueCustomersCount = Number(customerCountResult[0]?.count ?? 0);
+
+		// 6. Order Status Breakdown (100% of orders created in window)
+		const statusGroups = await this.prisma.order.groupBy({
+			by: ["orderStatus"],
+			where: {
+				restaurantId,
+				createdAt: { gte: startDate, lt: nextPeriodStart },
+			},
+			_count: {
+				id: true,
+			},
+			_sum: {
+				grandTotal: true,
+			},
+		});
+
+		const distribution = statusGroups.map((group) => {
+			const count = group._count.id;
+			const percentage =
+				totalOrderCount === 0
+					? 0
+					: Number(((count / totalOrderCount) * 100).toFixed(2));
+			const amountRupees = group._sum.grandTotal
+				? Number(group._sum.grandTotal.toFixed(2))
+				: 0;
+
+			return {
+				status: group.orderStatus,
+				count,
+				percentage,
+				amountRupees,
+			};
+		});
+
+		return {
+			overview: {
+				revenue: {
+					grossSalesRupees,
+					discountRupees,
+					netSalesRupees,
+					taxCollectedRupees,
+					totalBillAmountRupees,
+					growthPercentage: revenueGrowth,
+				},
+				orders: {
+					totalOrderCount,
+					growthPercentage: orderGrowth,
+					dineInCount,
+					takeawayCount,
+				},
+				operations: {
+					dinersServedCount,
+					uniqueCustomersCount,
+				},
+			},
+			orderStatusBreakdown: {
+				totalOrdersTracked: totalOrderCount,
+				distribution,
+			},
+		};
+	}
+
+	public async getRestaurantProductAnalytics(
+		params: GetRestaurantProductAnalyticsRepoParams,
+	): Promise<RestaurantProductAnalyticsRepoResult> {
+		const { restaurantId, startDate, nextPeriodStart, page, limit } = params;
+
+		// 1. Group order items for completed orders in window
+		const itemAggregates = await this.prisma.orderItem.groupBy({
+			by: ["menuItemId", "itemName"],
+			where: {
+				order: {
+					restaurantId,
+					createdAt: { gte: startDate, lt: nextPeriodStart },
+					orderStatus: OrderStatus.COMPLETED,
+					paymentStatus: PaymentStatus.PAID,
+				},
+			},
+			_sum: {
+				quantity: true,
+				totalPrice: true,
+			},
+		});
+
+		// Total sales across all products for percentageOfTotalSales
+		const totalPeriodSales = itemAggregates.reduce(
+			(acc, item) =>
+				acc + (item._sum.totalPrice ? Number(item._sum.totalPrice) : 0),
+			0,
+		);
+
+		const totalProductsSold = itemAggregates.length;
+
+		// Map to ProductPerformanceItemData
+		const allItems = itemAggregates.map((item) => {
+			const quantitySold = item._sum.quantity ?? 0;
+			const grossSalesRupees = item._sum.totalPrice
+				? Number(item._sum.totalPrice.toFixed(2))
+				: 0;
+			const percentageOfTotalSales =
+				totalPeriodSales === 0
+					? 0
+					: Number(((grossSalesRupees / totalPeriodSales) * 100).toFixed(1));
+
+			const classification: "LOW_VOLUME" | "NORMAL" =
+				quantitySold <= 3 ? "LOW_VOLUME" : "NORMAL";
+
+			return {
+				menuItemId: item.menuItemId,
+				name: item.itemName,
+				quantitySold,
+				grossSalesRupees,
+				percentageOfTotalSales,
+				classification,
+			};
+		});
+
+		// 2. Top Selling: Sorted primarily by quantitySold DESC, secondarily by grossSalesRupees DESC, tertiarily by name ASC
+		const topSellingSorted = [...allItems].sort((a, b) => {
+			if (b.quantitySold !== a.quantitySold) {
+				return b.quantitySold - a.quantitySold;
+			}
+			if (b.grossSalesRupees !== a.grossSalesRupees) {
+				return b.grossSalesRupees - a.grossSalesRupees;
+			}
+			return a.name.localeCompare(b.name);
+		});
+
+		// 3. Slow Moving: Filtered items with quantity <= 3, sorted primarily by quantitySold ASC, secondarily by grossSalesRupees ASC, tertiarily by name ASC
+		const slowMovingItems = allItems.filter(
+			(item) => item.classification === "LOW_VOLUME",
+		);
+		const slowMovingSorted = [...slowMovingItems].sort((a, b) => {
+			if (a.quantitySold !== b.quantitySold) {
+				return a.quantitySold - b.quantitySold;
+			}
+			if (a.grossSalesRupees !== b.grossSalesRupees) {
+				return a.grossSalesRupees - b.grossSalesRupees;
+			}
+			return a.name.localeCompare(b.name);
+		});
+
+		// 4. Pagination Helper
+		const totalTopItems = topSellingSorted.length;
+		const totalTopPages = Math.max(1, Math.ceil(totalTopItems / limit));
+		const topStartIndex = (page - 1) * limit;
+		const topPagedItems = topSellingSorted.slice(
+			topStartIndex,
+			topStartIndex + limit,
+		);
+
+		const totalSlowItems = slowMovingSorted.length;
+		const totalSlowPages = Math.max(1, Math.ceil(totalSlowItems / limit));
+		const slowStartIndex = (page - 1) * limit;
+		const slowPagedItems = slowMovingSorted.slice(
+			slowStartIndex,
+			slowStartIndex + limit,
+		);
+
+		return {
+			totalProductsSold,
+			topSelling: {
+				items: topPagedItems,
+				pagination: {
+					totalItems: totalTopItems,
+					totalPages: totalTopPages,
+					currentPage: page,
+					limit,
+					hasNextPage: page < totalTopPages,
+					hasPrevPage: page > 1,
+				},
+			},
+			slowMoving: {
+				items: slowPagedItems,
+				pagination: {
+					totalItems: totalSlowItems,
+					totalPages: totalSlowPages,
+					currentPage: page,
+					limit,
+					hasNextPage: page < totalSlowPages,
+					hasPrevPage: page > 1,
+				},
+			},
+		};
 	}
 }

@@ -16,11 +16,19 @@ const envSchema = z.object({
 	RESTAURANT_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
 	SERVICE_NAME: z.string().default("order-service"),
 	S2S_SERVICE_NAME: z.string().default("order-service"),
+	S2S_AUDIENCE: z.string().default("order-service"),
 	ORDER_S2S_PRIVATE_KEY: z.preprocess((val) => {
 		const key =
 			typeof val === "string" && val.trim().length > 0
 				? val
 				: process.env.S2S_PRIVATE_KEY;
+		return typeof key === "string" ? key.replace(/\\n/g, "\n").trim() : "";
+	}, z.string().default("")),
+	RESTAURANT_S2S_PUBLIC_KEY: z.preprocess((val) => {
+		const key =
+			typeof val === "string" && val.trim().length > 0
+				? val
+				: process.env.RESTAURANT_S2S_PUBLIC_KEY;
 		return typeof key === "string" ? key.replace(/\\n/g, "\n").trim() : "";
 	}, z.string().default("")),
 	S2S_RESTAURANT_AUDIENCE: z.string().default("restaurant-service"),

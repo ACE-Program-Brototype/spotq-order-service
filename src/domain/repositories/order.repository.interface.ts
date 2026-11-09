@@ -7,10 +7,14 @@ import type {
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
+	GetRestaurantOrderAnalyticsRepoParams,
 	GetRestaurantOrdersRepoParams,
 	GetRestaurantOrdersRepoResult,
+	GetRestaurantProductAnalyticsRepoParams,
 	GetStaffOrdersRepoParams,
 	GetStaffOrdersRepoResult,
+	RestaurantOrderAnalyticsRepoResult,
+	RestaurantProductAnalyticsRepoResult,
 } from "@domain/types/order-repository.types.ts";
 
 export interface IOrderRepository {
@@ -55,4 +59,10 @@ export interface IOrderRepository {
 		actorId: string,
 		notes?: string | null,
 	): Promise<Order>;
+	getRestaurantOrderAnalytics?(
+		params: GetRestaurantOrderAnalyticsRepoParams,
+	): Promise<RestaurantOrderAnalyticsRepoResult>;
+	getRestaurantProductAnalytics?(
+		params: GetRestaurantProductAnalyticsRepoParams,
+	): Promise<RestaurantProductAnalyticsRepoResult>;
 }
