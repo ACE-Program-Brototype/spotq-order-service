@@ -45,4 +45,3 @@ describe("getCustomerOrderDetailsParamSchema validation", () => {
 		assert.equal(result.success, false);
 	});
 });
-
