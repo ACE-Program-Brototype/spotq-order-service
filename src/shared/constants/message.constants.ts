@@ -109,8 +109,6 @@ export const ORDER_MESSAGES = {
 	INVALID_SORT_ORDER: "Invalid sort direction. Supported directions: asc, desc",
 	INVALID_STAFF_ORDER_STATUS:
 		"Invalid order status filter. Supported statuses: PLACED, CONFIRMED, PREPARING, READY, COMPLETED",
-	INVALID_ACTIVE_ORDER_STATUS:
-		"Invalid order status filter. Supported statuses: PLACED, CONFIRMED, PREPARING, READY, COMPLETED",
 	ORDER_STATUS_UPDATED_SUCCESS: "Order status updated successfully",
 	ORDER_COMPLETED_SUCCESS: "Order completed successfully",
 	ORDER_STATUS_CONFLICT:

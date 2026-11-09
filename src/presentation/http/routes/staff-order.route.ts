@@ -77,7 +77,7 @@ staffOrderRouter.patch(
 
 /**
  * @openapi
- * /staff/{restaurantId}/orders/{orderId}:
+ * /staff/restaurants/{restaurantId}/orders/{orderId}:
  *   get:
  *     summary: Retrieve complete order details for kitchen staff
  *     tags:

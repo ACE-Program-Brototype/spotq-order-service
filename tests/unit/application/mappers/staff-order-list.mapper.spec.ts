@@ -56,7 +56,7 @@ describe("StaffOrderListMapper", () => {
 			hasNext: false,
 		};
 
-		const dto = StaffOrderListMapper.toDTO(repoResult);
+		const dto = StaffOrderListMapper.toResponseDTO(repoResult);
 
 		assert.equal(dto.orders.length, 2);
 
@@ -65,8 +65,8 @@ describe("StaffOrderListMapper", () => {
 		assert.ok(order1);
 		assert.equal(order1.id, "ord-1");
 		assert.equal(order1.orderNumber, "ORD-001");
-		assert.equal(order1.orderType, "QUEUE_PRO");
-		assert.equal(order1.status, "PLACED");
+		assert.equal(order1.orderType, RestaurantPlan.QUEUE_PRO);
+		assert.equal(order1.status, OrderStatus.PLACED);
 		assert.equal(order1.createdAt, "2026-10-26T10:30:00.000Z");
 		assert.equal(order1.queueId, "q-token-123");
 		assert.equal(order1.items.length, 1);
@@ -87,8 +87,8 @@ describe("StaffOrderListMapper", () => {
 		assert.ok(order2);
 		assert.equal(order2.id, "ord-2");
 		assert.equal(order2.orderNumber, "ORD-002");
-		assert.equal(order2.orderType, "SELF_PRO");
-		assert.equal(order2.status, "CONFIRMED");
+		assert.equal(order2.orderType, RestaurantPlan.SELF_PRO);
+		assert.equal(order2.status, OrderStatus.CONFIRMED);
 		assert.equal(order2.createdAt, "2026-10-26T10:32:00.000Z");
 		assert.equal(order2.queueId, null);
 		assert.equal(order2.items.length, 1);
@@ -139,7 +139,7 @@ describe("StaffOrderListMapper", () => {
 			hasNext: false,
 		};
 
-		const dto = StaffOrderListMapper.toDTO(repoResult);
+		const dto = StaffOrderListMapper.toResponseDTO(repoResult);
 		const firstOrder = dto.orders[0];
 		const secondOrder = dto.orders[1];
 		assert.ok(firstOrder);

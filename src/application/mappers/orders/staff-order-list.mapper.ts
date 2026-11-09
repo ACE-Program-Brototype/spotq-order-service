@@ -45,7 +45,9 @@ function toOrderItemDTO(order: StaffOrderListItemData): StaffOrderListItemDTO {
 }
 
 export const StaffOrderListMapper = {
-	toDTO(result: GetStaffOrdersRepoResult): GetStaffOrdersListResponseDTO {
+	toResponseDTO(
+		result: GetStaffOrdersRepoResult,
+	): GetStaffOrdersListResponseDTO {
 		return {
 			orders: result.orders.map(toOrderItemDTO),
 			pagination: {

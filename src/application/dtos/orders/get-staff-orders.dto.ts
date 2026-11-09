@@ -32,8 +32,8 @@ export interface StaffOrderItemDTO {
 export interface StaffOrderListItemDTO {
 	id: string;
 	orderNumber: string;
-	orderType: string;
-	status: string;
+	orderType: RestaurantPlan;
+	status: OrderStatus;
 	createdAt: string;
 	queueId: string | null;
 	items: StaffOrderItemDTO[];

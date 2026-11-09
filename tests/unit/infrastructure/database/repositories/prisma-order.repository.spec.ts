@@ -755,7 +755,6 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 					OrderStatus.CONFIRMED,
 					OrderStatus.PREPARING,
 					OrderStatus.READY,
-					OrderStatus.COMPLETED,
 				],
 			});
 			assert.deepEqual(findMany.where.restaurantPlan, {

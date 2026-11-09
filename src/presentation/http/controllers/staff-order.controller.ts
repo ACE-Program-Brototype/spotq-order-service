@@ -2,7 +2,6 @@ import type { IGetStaffOrderDetailsUseCase } from "@application/ports/use-cases/
 import type { IGetStaffOrdersListUseCase } from "@application/ports/use-cases/orders/get-staff-orders.use-case.port.ts";
 import type { IUpdateOrderStatusUseCase } from "@application/ports/use-cases/orders/update-order-status.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
-import { ForbiddenRestaurantAccessError } from "@domain/errors/order.errors.ts";
 import { StaffOrderRequestMapper } from "@presentation/http/mappers/staff-order-request.mapper.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
@@ -56,13 +55,6 @@ export class StaffOrderController {
 		req: Request,
 		res: Response,
 	): Promise<void> => {
-		const user = req.user;
-		const { restaurantId } = req.params;
-
-		if (!user?.restaurantId || user.restaurantId !== restaurantId) {
-			throw new ForbiddenRestaurantAccessError();
-		}
-
 		const inputDto = StaffOrderRequestMapper.toGetStaffOrdersListInputDto(req);
 		const result = await this.getStaffOrdersListUseCase.execute(inputDto);
 
@@ -74,5 +66,3 @@ export class StaffOrderController {
 		);
 	};
 }
-
-export default StaffOrderController;

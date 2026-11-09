@@ -19,7 +19,6 @@ import type {
 	GetRestaurantOrdersRepoResult,
 	GetStaffOrdersRepoParams,
 	GetStaffOrdersRepoResult,
-	StaffOrderListItemData,
 } from "@domain/types/order-repository.types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
 import {
@@ -471,7 +470,6 @@ export class PrismaOrderRepository
 				OrderStatus.CONFIRMED,
 				OrderStatus.PREPARING,
 				OrderStatus.READY,
-				OrderStatus.COMPLETED,
 			];
 
 			const statusFilter =
@@ -520,28 +518,8 @@ export class PrismaOrderRepository
 
 			const totalPages = Math.ceil(totalOrders / params.limit) || 0;
 
-			const orders: StaffOrderListItemData[] = orderRecords.map((record) => ({
-				id: record.id,
-				orderNumber: record.orderNumber,
-				orderType: record.restaurantPlan as RestaurantPlan,
-				status: record.orderStatus as OrderStatus,
-				createdAt: record.createdAt,
-				queueEntryId: record.queueEntryId,
-				items: record.items.map((item) => ({
-					menuItemId: item.menuItemId,
-					name: item.itemName,
-					quantity: item.quantity,
-					variantId: item.variantId,
-					variantName: item.variantName,
-					addons: item.addons.map((addon) => ({
-						id: addon.addonId,
-						name: addon.addonName,
-					})),
-				})),
-			}));
-
 			return {
-				orders,
+				orders: OrderPersistenceMapper.toStaffOrderItemList(orderRecords),
 				totalOrders,
 				totalPages,
 				currentPage: params.page,

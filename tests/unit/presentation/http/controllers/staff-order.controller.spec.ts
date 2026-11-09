@@ -16,7 +16,6 @@ import type { IGetStaffOrderDetailsUseCase } from "@application/ports/use-cases/
 import type { IGetStaffOrdersListUseCase } from "@application/ports/use-cases/orders/get-staff-orders.use-case.port.ts";
 import type { IUpdateOrderStatusUseCase } from "@application/ports/use-cases/orders/update-order-status.use-case.port.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { ForbiddenRestaurantAccessError } from "@domain/errors/order.errors.ts";
 import { StaffOrderController } from "@presentation/http/controllers/staff-order.controller.ts";
 import { AUTH_ROLES } from "@shared/constants/auth.constants.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
@@ -347,44 +346,5 @@ describe("StaffOrderController", () => {
 			sortOrder: "asc",
 			orderType: undefined,
 		});
-	});
-
-	it("should throw ForbiddenRestaurantAccessError when caller's restaurantId does not match params", async () => {
-		const mockGetStaffOrdersListUseCase: IGetStaffOrdersListUseCase = {
-			execute: async () => {
-				throw new Error("Not implemented");
-			},
-		};
-
-		const mockUpdateOrderStatusUseCase: IUpdateOrderStatusUseCase = {
-			execute: async () => {
-				throw new Error("Not implemented");
-			},
-		};
-
-		const controller = new StaffOrderController(
-			mockUpdateOrderStatusUseCase,
-			defaultMockGetStaffOrderDetailsUseCase,
-			mockGetStaffOrdersListUseCase,
-		);
-
-		const { res } = createMockResponse();
-		const req = {
-			params: {
-				restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
-			},
-			user: {
-				userId: "staff-1",
-				restaurantId: "different-restaurant-id",
-				role: AUTH_ROLES.STAFF,
-			},
-		} as unknown as Request;
-
-		await assert.rejects(
-			async () => {
-				await controller.getStaffOrderList(req, res);
-			},
-			(err: unknown) => err instanceof ForbiddenRestaurantAccessError,
-		);
 	});
 });

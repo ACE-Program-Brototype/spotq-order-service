@@ -33,6 +33,6 @@ export class GetStaffOrdersListUseCase implements IGetStaffOrdersListUseCase {
 			limit: dto.limit,
 		});
 
-		return StaffOrderListMapper.toDTO(result);
+		return StaffOrderListMapper.toResponseDTO(result);
 	}
 }

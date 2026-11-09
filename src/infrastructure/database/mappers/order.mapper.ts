@@ -9,6 +9,7 @@ import type {
 	CustomerOrderHistoryItemData,
 	OrderOverviewItemData,
 	RestaurantOrderListItemData,
+	StaffOrderListItemData,
 } from "@domain/types/order-repository.types.ts";
 import type { Prisma } from "@generated/prisma/client.ts";
 
@@ -64,6 +65,30 @@ export interface PrismaRestaurantOrderRecord {
 		items: number;
 	};
 	createdAt: Date;
+}
+
+export interface PrismaStaffOrderItemAddonRecord {
+	addonId: string;
+	addonName: string;
+}
+
+export interface PrismaStaffOrderItemRecord {
+	menuItemId: string;
+	itemName: string;
+	quantity: number;
+	variantId: string | null;
+	variantName: string | null;
+	addons: PrismaStaffOrderItemAddonRecord[];
+}
+
+export interface PrismaStaffOrderRecord {
+	id: string;
+	orderNumber: string;
+	restaurantPlan: string | null;
+	orderStatus: string;
+	createdAt: Date;
+	queueEntryId: string | null;
+	items: PrismaStaffOrderItemRecord[];
 }
 
 export const OrderPersistenceMapper = {
@@ -127,6 +152,36 @@ export const OrderPersistenceMapper = {
 	): CustomerOrderHistoryItemData[] {
 		return records.map((record) =>
 			OrderPersistenceMapper.toCustomerOrderItem(record),
+		);
+	},
+
+	toStaffOrderItem(record: PrismaStaffOrderRecord): StaffOrderListItemData {
+		return {
+			id: record.id,
+			orderNumber: record.orderNumber,
+			orderType: record.restaurantPlan as RestaurantPlan,
+			status: record.orderStatus as OrderStatus,
+			createdAt: record.createdAt,
+			queueEntryId: record.queueEntryId,
+			items: record.items.map((item) => ({
+				menuItemId: item.menuItemId,
+				name: item.itemName,
+				quantity: item.quantity,
+				variantId: item.variantId,
+				variantName: item.variantName,
+				addons: item.addons.map((addon) => ({
+					id: addon.addonId,
+					name: addon.addonName,
+				})),
+			})),
+		};
+	},
+
+	toStaffOrderItemList(
+		records: PrismaStaffOrderRecord[],
+	): StaffOrderListItemData[] {
+		return records.map((record) =>
+			OrderPersistenceMapper.toStaffOrderItem(record),
 		);
 	},
 

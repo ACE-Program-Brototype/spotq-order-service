@@ -146,4 +146,11 @@ describe("staffOrdersListQuerySchema validation", () => {
 		});
 		assert.equal(result.success, false);
 	});
+
+	it("should reject unknown query fields due to strict mode", () => {
+		const result = staffOrdersListQuerySchema.safeParse({
+			unknownParam: "unexpected",
+		});
+		assert.equal(result.success, false);
+	});
 });
