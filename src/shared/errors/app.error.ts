@@ -36,3 +36,12 @@ export class ForbiddenError extends AppError {
 		super(message, HttpStatus.FORBIDDEN, errorCode);
 	}
 }
+
+export class ServiceUnavailableError extends AppError {
+	constructor(
+		message: string = "Service temporarily unavailable",
+		errorCode: string = COMMON_ERROR_CODES.SERVICE_UNAVAILABLE,
+	) {
+		super(message, HttpStatus.SERVICE_UNAVAILABLE, errorCode);
+	}
+}

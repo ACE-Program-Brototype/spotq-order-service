@@ -5,7 +5,10 @@ import { sendErrorResponse } from "@shared/response/api-response.ts";
 import type { NextFunction, Request, Response } from "express";
 import { type ZodType, z } from "zod";
 
-export function validateRequestParams(schema: ZodType) {
+export function validateRequestParams(
+	schema: ZodType,
+	statusCode: HttpStatus = HttpStatus.BAD_REQUEST,
+) {
 	return async (
 		req: Request,
 		res: Response,
@@ -25,7 +28,7 @@ export function validateRequestParams(schema: ZodType) {
 					res,
 					messages.VALIDATION_ERROR,
 					COMMON_ERROR_CODES.VALIDATION_ERROR,
-					HttpStatus.UNPROCESSABLE_ENTITY,
+					statusCode,
 					formattedErrors,
 				);
 				return;

@@ -1,5 +1,6 @@
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
+import type { IGetCustomerOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-customer-order-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -27,6 +28,8 @@ export class CustomerOrderController {
 		private readonly cancelOrderUseCase: ICancelOrderUseCase,
 		@inject(TYPES.GetCheckoutDetailsUseCase)
 		private readonly getCheckoutDetailsUseCase: IGetCheckoutDetailsUseCase,
+		@inject(TYPES.GetCustomerOrderDetailsUseCase)
+		private readonly getCustomerOrderDetailsUseCase: IGetCustomerOrderDetailsUseCase,
 	) {}
 
 	public getCheckoutDetails = async (
@@ -109,6 +112,21 @@ export class CustomerOrderController {
 			res,
 			result,
 			ORDER_MESSAGES.CANCEL_SUCCESS,
+			HttpStatus.OK,
+		);
+	};
+
+	public getOrderDetails = async (
+		req: Request,
+		res: Response,
+	): Promise<void> => {
+		const inputDto = OrderRequestMapper.toGetCustomerOrderDetailsInputDto(req);
+		const result = await this.getCustomerOrderDetailsUseCase.execute(inputDto);
+
+		sendSuccessResponse(
+			res,
+			result,
+			ORDER_MESSAGES.ORDER_DETAILS_FETCHED_SUCCESS,
 			HttpStatus.OK,
 		);
 	};

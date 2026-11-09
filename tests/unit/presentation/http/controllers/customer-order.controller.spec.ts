@@ -6,6 +6,7 @@ import type {
 } from "@application/dtos/orders/place-order.dto.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
+import type { IGetCustomerOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-customer-order-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IPlaceOrderUseCase } from "@application/ports/use-cases/orders/place-order.use-case.port.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
@@ -73,12 +74,14 @@ describe("CustomerOrderController", () => {
 		getOrderHistory?: IGetOrderHistoryUseCase;
 		cancelOrder?: ICancelOrderUseCase;
 		getCheckoutDetails?: IGetCheckoutDetailsUseCase;
+		getCustomerOrderDetails?: IGetCustomerOrderDetailsUseCase;
 	}): CustomerOrderController {
 		return new CustomerOrderController(
 			overrides?.placeOrder ?? { execute: notImplemented },
 			overrides?.getOrderHistory ?? { execute: notImplemented },
 			overrides?.cancelOrder ?? { execute: notImplemented },
 			overrides?.getCheckoutDetails ?? { execute: notImplemented },
+			overrides?.getCustomerOrderDetails ?? { execute: notImplemented },
 		);
 	}
 
@@ -417,6 +420,83 @@ describe("CustomerOrderController", () => {
 				statusCode: HttpStatus.OK,
 				message: ORDER_MESSAGES.CHECKOUT_DETAILS_FETCHED_SUCCESS,
 				data: mockCheckoutResponse,
+			});
+		});
+	});
+
+	describe("getOrderDetails", () => {
+		it("should fetch customer order details successfully with 200 OK", async () => {
+			let capturedDto: unknown = null;
+			const mockOrderDetailsResult = {
+				order: {
+					order_id: "order-uuid-123",
+					order_number: "ORD-992817203",
+					restaurant: {
+						restaurant_id: "rest-uuid-123",
+						name: "Spice Garden Cafe",
+					},
+					order_type: OrderingMode.SELF_ORDER,
+					status: OrderStatus.COMPLETED,
+					created_at: new Date().toISOString(),
+					updated_at: new Date().toISOString(),
+					table_number: 5,
+					queue_entry_id: null,
+					special_instructions: "Extra spicy",
+					items: [
+						{
+							menu_item_id: "item-101",
+							name: "Paneer Biryani",
+							quantity: 2,
+							unit_price: 300,
+							variant: null,
+							addons: [],
+							line_total: 600,
+						},
+					],
+					pricing: {
+						subtotal: 600,
+						discounts: 0,
+						taxes: 30,
+						platform_fee: 2,
+						grand_total: 632,
+						currency: "INR",
+					},
+				},
+			};
+
+			const mockUseCase: IGetCustomerOrderDetailsUseCase = {
+				execute: async (dto) => {
+					capturedDto = dto;
+					return mockOrderDetailsResult;
+				},
+			};
+
+			const controller = createController({
+				getCustomerOrderDetails: mockUseCase,
+			});
+
+			const { res, getStatus, getBody } = createMockResponse();
+			const req = {
+				user: {
+					userId: "user-cust-123",
+				},
+				params: {
+					orderId: "order-uuid-123",
+				},
+			} as unknown as Request;
+
+			await controller.getOrderDetails(req, res);
+
+			assert.equal(getStatus(), HttpStatus.OK);
+			assert.deepEqual(capturedDto, {
+				orderId: "order-uuid-123",
+				customerId: "user-cust-123",
+			});
+			assert.deepEqual(getBody(), {
+				success: true,
+				statusCode: HttpStatus.OK,
+				message: ORDER_MESSAGES.ORDER_DETAILS_FETCHED_SUCCESS,
+				data: mockOrderDetailsResult,
 			});
 		});
 	});
