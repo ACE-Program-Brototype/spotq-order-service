@@ -48,4 +48,32 @@ describe("StaffOrderRequestMapper", () => {
 			notes: "Starting pizza preparation",
 		});
 	});
+
+	it("should map request params and query to GetStaffOrdersListInputDTO correctly", () => {
+		const req = {
+			params: {
+				restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+			},
+			query: {
+				search: "ORD-123",
+				status: [OrderStatus.PLACED, OrderStatus.CONFIRMED],
+				orderType: "QUEUE_PRO",
+				sortOrder: "asc",
+				page: 1,
+				limit: 20,
+			},
+		} as unknown as Request;
+
+		const result = StaffOrderRequestMapper.toGetStaffOrdersListInputDto(req);
+
+		assert.deepEqual(result, {
+			restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+			search: "ORD-123",
+			status: [OrderStatus.PLACED, OrderStatus.CONFIRMED],
+			orderType: "QUEUE_PRO",
+			sortOrder: "asc",
+			page: 1,
+			limit: 20,
+		});
+	});
 });

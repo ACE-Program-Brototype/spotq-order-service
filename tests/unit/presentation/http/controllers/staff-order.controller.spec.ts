@@ -5,10 +5,15 @@ import type {
 	GetStaffOrderDetailsOutputDTO,
 } from "@application/dtos/orders/get-staff-order-details.dto.ts";
 import type {
+	GetStaffOrdersListInputDTO,
+	GetStaffOrdersListResponseDTO,
+} from "@application/dtos/orders/get-staff-orders.dto.ts";
+import type {
 	UpdateOrderStatusInputDTO,
 	UpdateOrderStatusResponseDTO,
 } from "@application/dtos/orders/update-order-status.dto.ts";
 import type { IGetStaffOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-staff-order-details.use-case.port.ts";
+import type { IGetStaffOrdersListUseCase } from "@application/ports/use-cases/orders/get-staff-orders.use-case.port.ts";
 import type { IUpdateOrderStatusUseCase } from "@application/ports/use-cases/orders/update-order-status.use-case.port.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { StaffOrderController } from "@presentation/http/controllers/staff-order.controller.ts";
@@ -44,6 +49,13 @@ function createMockResponse() {
 }
 
 describe("StaffOrderController", () => {
+	const defaultMockGetStaffOrdersListUseCase: IGetStaffOrdersListUseCase = {
+		execute: async () => ({
+			orders: [],
+			pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+		}),
+	};
+
 	const defaultMockGetStaffOrderDetailsUseCase: IGetStaffOrderDetailsUseCase = {
 		execute: async (
 			_dto: GetStaffOrderDetailsInputDTO,
@@ -98,6 +110,7 @@ describe("StaffOrderController", () => {
 		const controller = new StaffOrderController(
 			mockUpdateOrderStatusUseCase,
 			defaultMockGetStaffOrderDetailsUseCase,
+			defaultMockGetStaffOrdersListUseCase,
 		);
 
 		const { res, getStatus, getBody } = createMockResponse();
@@ -169,6 +182,7 @@ describe("StaffOrderController", () => {
 		const controller = new StaffOrderController(
 			mockUpdateOrderStatusUseCase,
 			defaultMockGetStaffOrderDetailsUseCase,
+			defaultMockGetStaffOrdersListUseCase,
 		);
 
 		const { res, getStatus, getBody } = createMockResponse();
@@ -233,6 +247,7 @@ describe("StaffOrderController", () => {
 		const controller = new StaffOrderController(
 			mockUpdateOrderStatusUseCase,
 			mockGetStaffOrderDetailsUseCase,
+			defaultMockGetStaffOrdersListUseCase,
 		);
 
 		const { res, getStatus, getBody } = createMockResponse();
@@ -260,6 +275,76 @@ describe("StaffOrderController", () => {
 		assert.deepEqual(capturedInputDto, {
 			restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
 			orderId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+		});
+	});
+
+	it("should retrieve active staff orders list successfully with 200 OK", async () => {
+		let capturedInputDto: GetStaffOrdersListInputDTO | null = null;
+		const expectedResult: GetStaffOrdersListResponseDTO = {
+			orders: [],
+			pagination: {
+				page: 1,
+				limit: 20,
+				total: 0,
+				totalPages: 0,
+			},
+		};
+
+		const mockGetStaffOrdersListUseCase: IGetStaffOrdersListUseCase = {
+			execute: async (dto: GetStaffOrdersListInputDTO) => {
+				capturedInputDto = dto;
+				return expectedResult;
+			},
+		};
+
+		const mockUpdateOrderStatusUseCase: IUpdateOrderStatusUseCase = {
+			execute: async () => {
+				throw new Error("Not implemented");
+			},
+		};
+
+		const controller = new StaffOrderController(
+			mockUpdateOrderStatusUseCase,
+			defaultMockGetStaffOrderDetailsUseCase,
+			mockGetStaffOrdersListUseCase,
+		);
+
+		const { res, getStatus, getBody } = createMockResponse();
+		const req = {
+			params: {
+				restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+			},
+			query: {
+				search: "ORD",
+				status: [OrderStatus.PLACED],
+				page: 1,
+				limit: 20,
+				sortOrder: "asc",
+			},
+			user: {
+				userId: "staff-1",
+				restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+				role: AUTH_ROLES.STAFF,
+			},
+		} as unknown as Request;
+
+		await controller.getStaffOrderList(req, res);
+
+		assert.equal(getStatus(), HttpStatus.OK);
+		assert.equal(getBody().success, true);
+		assert.equal(
+			getBody().message,
+			ORDER_MESSAGES.STAFF_ORDERS_LIST_FETCHED_SUCCESS,
+		);
+		assert.deepEqual(getBody().data, expectedResult);
+		assert.deepEqual(capturedInputDto, {
+			restaurantId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+			search: "ORD",
+			status: [OrderStatus.PLACED],
+			page: 1,
+			limit: 20,
+			sortOrder: "asc",
+			orderType: undefined,
 		});
 	});
 });

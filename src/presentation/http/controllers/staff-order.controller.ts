@@ -1,4 +1,5 @@
 import type { IGetStaffOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-staff-order-details.use-case.port.ts";
+import type { IGetStaffOrdersListUseCase } from "@application/ports/use-cases/orders/get-staff-orders.use-case.port.ts";
 import type { IUpdateOrderStatusUseCase } from "@application/ports/use-cases/orders/update-order-status.use-case.port.ts";
 import { TYPES } from "@config/di/types.ts";
 import { StaffOrderRequestMapper } from "@presentation/http/mappers/staff-order-request.mapper.ts";
@@ -15,6 +16,8 @@ export class StaffOrderController {
 		private readonly updateOrderStatusUseCase: IUpdateOrderStatusUseCase,
 		@inject(TYPES.GetStaffOrderDetailsUseCase)
 		private readonly getStaffOrderDetailsUseCase: IGetStaffOrderDetailsUseCase,
+		@inject(TYPES.GetStaffOrdersListUseCase)
+		private readonly getStaffOrdersListUseCase: IGetStaffOrdersListUseCase,
 	) {}
 
 	public updateOrderStatus = async (
@@ -47,6 +50,19 @@ export class StaffOrderController {
 			HttpStatus.OK,
 		);
 	};
-}
 
-export default StaffOrderController;
+	public getStaffOrderList = async (
+		req: Request,
+		res: Response,
+	): Promise<void> => {
+		const inputDto = StaffOrderRequestMapper.toGetStaffOrdersListInputDto(req);
+		const result = await this.getStaffOrdersListUseCase.execute(inputDto);
+
+		sendSuccessResponse(
+			res,
+			result,
+			ORDER_MESSAGES.STAFF_ORDERS_LIST_FETCHED_SUCCESS,
+			HttpStatus.OK,
+		);
+	};
+}

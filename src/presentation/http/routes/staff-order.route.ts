@@ -5,12 +5,15 @@ import { restaurantStaffAuthMiddleware } from "@presentation/http/middleware/res
 import {
 	validateRequestBody,
 	validateRequestParams,
+	validateRequestQuery,
 } from "@presentation/http/middleware/validation.middleware.ts";
 import { orderDetailsParamSchema } from "@presentation/http/validators/orders/order-details-param.schema.ts";
+import { staffOrdersListQuerySchema } from "@presentation/http/validators/orders/staff-orders-list-query.schema.ts";
 import {
 	updateOrderStatusBodySchema,
 	updateOrderStatusParamSchema,
 } from "@presentation/http/validators/orders/update-order-status.schema.ts";
+import { restaurantIdParamSchema } from "@presentation/http/validators/restaurant-id-param.schema.ts";
 import { STAFF_ORDER_ROUTES } from "@shared/constants/routes.constants.ts";
 import { Router } from "express";
 
@@ -74,7 +77,7 @@ staffOrderRouter.patch(
 
 /**
  * @openapi
- * /staff/{restaurantId}/orders/{orderId}:
+ * /staff/restaurants/{restaurantId}/orders/{orderId}:
  *   get:
  *     summary: Retrieve complete order details for kitchen staff
  *     tags:
@@ -113,6 +116,81 @@ staffOrderRouter.get(
 	restaurantStaffAuthMiddleware,
 	validateRequestParams(orderDetailsParamSchema),
 	staffOrderController.getOrderDetails,
+);
+
+/**
+ * @openapi
+ * /staff/restaurants/{restaurantId}/orders:
+ *   get:
+ *     summary: Retrieve Queue Pro and Self Pro orders for restaurant staff
+ *     tags:
+ *       - Staff Orders
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: restaurantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: query
+ *         name: search
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Search by order number
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Comma-separated statuses (PLACED, CONFIRMED, PREPARING, READY, COMPLETED)
+ *       - in: query
+ *         name: orderType
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [QUEUE_PRO, SELF_PRO]
+ *       - in: query
+ *         name: sortOrder
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: asc
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Orders retrieved successfully
+ *       400:
+ *         description: Invalid query or parameter format
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden access to this restaurant
+ *       404:
+ *         description: Restaurant not found
+ *       500:
+ *         description: Internal server error
+ */
+staffOrderRouter.get(
+	STAFF_ORDER_ROUTES.RESTAURANT_ORDERS,
+	restaurantStaffAuthMiddleware,
+	validateRequestParams(restaurantIdParamSchema),
+	validateRequestQuery(staffOrdersListQuerySchema),
+	staffOrderController.getStaffOrderList,
 );
 
 export default staffOrderRouter;

@@ -86,6 +86,9 @@ function createMockOrderRepo(overrides: {
 		getRestaurantOrders: async () => {
 			throw new Error("Not implemented");
 		},
+		getStaffOrders: async () => {
+			throw new Error("Not implemented");
+		},
 		findByRestaurantAndOrderId: async () => {
 			throw new Error("Not implemented");
 		},

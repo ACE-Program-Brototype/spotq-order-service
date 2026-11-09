@@ -51,6 +51,7 @@ import type {
 	GetOrdersOverviewRepoParams,
 	GetOrdersOverviewRepoResult,
 	GetRestaurantOrdersRepoResult,
+	GetStaffOrdersRepoResult,
 } from "@domain/types/order-repository.types.ts";
 
 class MockCartRepository implements ICartRepository {
@@ -214,6 +215,17 @@ class MockOrderRepository implements IOrderRepository {
 			totalOrders: 0,
 			totalPages: 0,
 			currentPage: 1,
+			hasNext: false,
+		};
+	}
+
+	public async getStaffOrders(): Promise<GetStaffOrdersRepoResult> {
+		return {
+			orders: [],
+			totalOrders: 0,
+			totalPages: 0,
+			currentPage: 1,
+			limit: 20,
 			hasNext: false,
 		};
 	}

@@ -28,6 +28,7 @@ export const TYPES = {
 		"GetRestaurantOrderDetailsUseCase",
 	),
 	GetStaffOrderDetailsUseCase: Symbol.for("GetStaffOrderDetailsUseCase"),
+	GetStaffOrdersListUseCase: Symbol.for("GetStaffOrdersListUseCase"),
 	UpdateOrderStatusUseCase: Symbol.for("UpdateOrderStatusUseCase"),
 	StaffOrderController: Symbol.for("StaffOrderController"),
 };
