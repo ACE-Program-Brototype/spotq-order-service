@@ -1,12 +1,13 @@
 import type {
 	CustomerOrderDetailsDTO,
 	CustomerOrderItemDTO,
+	CustomerOrderStatusHistoryDTO,
 	GetCustomerOrderDetailsOutputDTO,
 } from "@application/dtos/orders/get-customer-order-details.dto.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 
 export const CustomerOrderDetailsMapper = {
-	toDTO(order: Order): GetCustomerOrderDetailsOutputDTO {
+	toResponseDTO(order: Order): GetCustomerOrderDetailsOutputDTO {
 		const items: CustomerOrderItemDTO[] = order.items.map((item) => ({
 			menu_item_id: item.menuItemId,
 			name: item.itemName,
@@ -24,6 +25,18 @@ export const CustomerOrderDetailsMapper = {
 				price: addon.price,
 			})),
 			line_total: item.totalPrice,
+		}));
+
+		const statusHistory: CustomerOrderStatusHistoryDTO[] = (
+			order.statusHistory ?? []
+		).map((history) => ({
+			previous_status: history.previousStatus,
+			current_status: history.currentStatus,
+			notes: history.notes,
+			created_at:
+				history.createdAt instanceof Date
+					? history.createdAt.toISOString()
+					: new Date(history.createdAt).toISOString(),
 		}));
 
 		const orderDetails: CustomerOrderDetailsDTO = {
@@ -49,6 +62,7 @@ export const CustomerOrderDetailsMapper = {
 				grand_total: order.grandTotal,
 				currency: "INR",
 			},
+			status_history: statusHistory,
 		};
 
 		return {

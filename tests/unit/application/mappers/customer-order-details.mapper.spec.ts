@@ -66,9 +66,29 @@ describe("CustomerOrderDetailsMapper", () => {
 					addons: [],
 				},
 			],
+			statusHistory: [
+				{
+					id: "sh-1",
+					orderId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+					previousStatus: null,
+					currentStatus: OrderStatus.PLACED,
+					changedBy: "cust-owner",
+					notes: "Order placed",
+					createdAt: orderDate,
+				},
+				{
+					id: "sh-2",
+					orderId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+					previousStatus: OrderStatus.PLACED,
+					currentStatus: OrderStatus.COMPLETED,
+					changedBy: "staff-1",
+					notes: null,
+					createdAt: updateDate,
+				},
+			],
 		});
 
-		const result = CustomerOrderDetailsMapper.toDTO(order);
+		const result = CustomerOrderDetailsMapper.toResponseDTO(order);
 
 		assert.equal(result.order.order_id, "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 		assert.equal(result.order.order_number, "SQ-101");
@@ -124,5 +144,21 @@ describe("CustomerOrderDetailsMapper", () => {
 		assert.equal(secondItem?.variant, null);
 		assert.deepEqual(secondItem?.addons, []);
 		assert.equal(secondItem?.line_total, 50);
+
+		// Status history verification
+		assert.deepEqual(result.order.status_history, [
+			{
+				previous_status: null,
+				current_status: OrderStatus.PLACED,
+				notes: "Order placed",
+				created_at: orderDate.toISOString(),
+			},
+			{
+				previous_status: OrderStatus.PLACED,
+				current_status: OrderStatus.COMPLETED,
+				notes: null,
+				created_at: updateDate.toISOString(),
+			},
+		]);
 	});
 });

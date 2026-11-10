@@ -42,12 +42,6 @@ export const OrderRequestMapper = {
 	},
 
 	// Backwards-compatible aliases for caller migration
-	toGetCustomerOrderDetailsInputDto(
-		req: Request,
-	): GetCustomerOrderDetailsInputDTO {
-		return this.toGetCustomerOrderDetailsInputDTO(req);
-	},
-
 	toOrderHistoryInputDto(req: Request): GetOrderHistoryInputDTO {
 		return this.toOrderHistoryInputDTO(req);
 	},

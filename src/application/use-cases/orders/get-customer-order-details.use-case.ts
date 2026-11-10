@@ -31,6 +31,6 @@ export class GetCustomerOrderDetailsUseCase
 			throw new OrderNotFoundError(ORDER_MESSAGES.ORDER_NOT_FOUND);
 		}
 
-		return CustomerOrderDetailsMapper.toDTO(order);
+		return CustomerOrderDetailsMapper.toResponseDTO(order);
 	}
 }

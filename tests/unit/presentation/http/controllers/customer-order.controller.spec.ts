@@ -461,6 +461,7 @@ describe("CustomerOrderController", () => {
 						grand_total: 632,
 						currency: "INR",
 					},
+					status_history: [],
 				},
 			};
 

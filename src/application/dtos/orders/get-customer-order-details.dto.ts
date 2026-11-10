@@ -1,3 +1,6 @@
+import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
+import type { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
+
 export interface GetCustomerOrderDetailsInputDTO {
 	customerId: string;
 	orderId: string;
@@ -38,12 +41,19 @@ export interface CustomerOrderPricingDTO {
 	currency: string;
 }
 
+export interface CustomerOrderStatusHistoryDTO {
+	previous_status: OrderStatus | null;
+	current_status: OrderStatus;
+	notes: string | null;
+	created_at: string;
+}
+
 export interface CustomerOrderDetailsDTO {
 	order_id: string;
 	order_number: string;
 	restaurant: CustomerOrderRestaurantDTO;
-	order_type: string;
-	status: string;
+	order_type: OrderingMode;
+	status: OrderStatus;
 	created_at: string;
 	updated_at: string;
 	table_number?: number | null;
@@ -51,6 +61,7 @@ export interface CustomerOrderDetailsDTO {
 	special_instructions?: string | null;
 	items: CustomerOrderItemDTO[];
 	pricing: CustomerOrderPricingDTO;
+	status_history: CustomerOrderStatusHistoryDTO[];
 }
 
 export interface GetCustomerOrderDetailsOutputDTO {

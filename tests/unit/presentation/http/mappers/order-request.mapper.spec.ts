@@ -74,13 +74,13 @@ describe("OrderRequestMapper", () => {
 		});
 	});
 
-	it("should map params and customerId to GetCustomerOrderDetailsInputDto", () => {
+	it("should map params and customerId to GetCustomerOrderDetailsInputDTO", () => {
 		const req = {
 			user: { userId: "cust-owner-789" },
 			params: { orderId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11" },
 		} as unknown as Request;
 
-		const dto = OrderRequestMapper.toGetCustomerOrderDetailsInputDto(req);
+		const dto = OrderRequestMapper.toGetCustomerOrderDetailsInputDTO(req);
 
 		assert.deepEqual(dto, {
 			orderId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",

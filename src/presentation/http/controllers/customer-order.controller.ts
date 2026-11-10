@@ -120,7 +120,7 @@ export class CustomerOrderController {
 		req: Request,
 		res: Response,
 	): Promise<void> => {
-		const inputDto = OrderRequestMapper.toGetCustomerOrderDetailsInputDto(req);
+		const inputDto = OrderRequestMapper.toGetCustomerOrderDetailsInputDTO(req);
 		const result = await this.getCustomerOrderDetailsUseCase.execute(inputDto);
 
 		sendSuccessResponse(
@@ -131,5 +131,3 @@ export class CustomerOrderController {
 		);
 	};
 }
-
-export default CustomerOrderController;

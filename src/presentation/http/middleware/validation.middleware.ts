@@ -7,7 +7,7 @@ import { type ZodType, z } from "zod";
 
 export function validateRequestParams(
 	schema: ZodType,
-	statusCode: HttpStatus = HttpStatus.BAD_REQUEST,
+	statusCode: HttpStatus = HttpStatus.UNPROCESSABLE_ENTITY,
 ) {
 	return async (
 		req: Request,

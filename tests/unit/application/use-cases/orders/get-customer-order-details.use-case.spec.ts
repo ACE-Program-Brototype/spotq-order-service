@@ -128,6 +128,7 @@ describe("GetCustomerOrderDetailsUseCase", () => {
 		assert.equal(result.order.pricing.grand_total, 317);
 		assert.equal(result.order.items.length, 1);
 		assert.equal(result.order.items[0]?.name, "Paneer Biryani");
+		assert.ok(Array.isArray(result.order.status_history));
 	});
 
 	it("should throw OrderNotFoundError when order is not found", async () => {
