@@ -57,13 +57,20 @@ export function getZonedDate(
 		}
 	}
 
+	const zonedYear = partMap.year ?? year;
+	const zonedMonth = partMap.month ?? month;
+	const zonedDay = partMap.day ?? day;
+	const zonedHour = (partMap.hour ?? 0) === 24 ? 0 : (partMap.hour ?? 0);
+	const zonedMinute = partMap.minute ?? 0;
+	const zonedSecond = partMap.second ?? 0;
+
 	const zonedAsUtc = Date.UTC(
-		partMap.year,
-		partMap.month - 1,
-		partMap.day,
-		partMap.hour === 24 ? 0 : partMap.hour,
-		partMap.minute,
-		partMap.second,
+		zonedYear,
+		zonedMonth - 1,
+		zonedDay,
+		zonedHour,
+		zonedMinute,
+		zonedSecond,
 	);
 
 	const offsetMs = zonedAsUtc - utcGuess.getTime();
@@ -92,9 +99,13 @@ export function resolveAnalyticsDateRange(
 		}
 	}
 
-	const year = input.year ?? currentParts.year;
-	const month = input.month ?? currentParts.month;
-	const day = input.day ?? currentParts.day;
+	const fallbackYear = currentParts.year ?? now.getUTCFullYear();
+	const fallbackMonth = currentParts.month ?? (now.getUTCMonth() + 1);
+	const fallbackDay = currentParts.day ?? now.getUTCDate();
+
+	const year = input.year ?? fallbackYear;
+	const month = input.month ?? fallbackMonth;
+	const day = input.day ?? fallbackDay;
 
 	let startDate: Date;
 	let nextPeriodStart: Date;
