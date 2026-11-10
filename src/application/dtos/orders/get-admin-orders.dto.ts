@@ -33,7 +33,6 @@ export interface AdminOrderSummaryDTO {
 	paymentStatus: PaymentStatus;
 	totalAmount: number;
 	platformFeeAssessed: number;
-	platformFeeCollected: number | null;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -51,7 +50,6 @@ export interface AdminOrdersMetricsDTO {
 	totalOrders: number;
 	ordersByStatus: Partial<Record<OrderStatus, number>>;
 	totalOrderValue: number;
-	platformFeesCollected: number | null;
 }
 
 export interface GetAdminOrdersResponseDTO {

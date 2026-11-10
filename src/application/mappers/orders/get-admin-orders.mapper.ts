@@ -15,7 +15,6 @@ export const GetAdminOrdersMapper = {
 					order.paymentStatus as GetAdminOrdersResponseDTO["orders"][number]["paymentStatus"],
 				totalAmount: order.totalAmount,
 				platformFeeAssessed: order.platformFeeAssessed,
-				platformFeeCollected: null,
 				createdAt: order.createdAt.toISOString(),
 				updatedAt: order.updatedAt.toISOString(),
 			})),
@@ -31,7 +30,6 @@ export const GetAdminOrdersMapper = {
 				totalOrders: repoResult.metricsTotalOrders,
 				ordersByStatus: repoResult.ordersByStatus,
 				totalOrderValue: repoResult.totalOrderValue,
-				platformFeesCollected: null,
 			},
 		};
 	},
