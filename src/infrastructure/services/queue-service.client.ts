@@ -5,6 +5,7 @@ import logger from "@infrastructure/observability/logger.ts";
 import { createServiceCircuitBreaker } from "@infrastructure/services/circuit-breaker.factory.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
 import { HTTP_STATUS } from "@shared/constants/http.constants.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { QUEUE_SERVICE_ROUTES } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";
 import {
@@ -51,7 +52,6 @@ export class QueueServiceClient implements IQueueServiceClient {
 				checkIsFailure: (error: unknown) => {
 					if (isAxiosError(error) && error.response) {
 						const status = error.response.status;
-						// 404 (user not in queue) and other 4xx client errors do not count toward circuit failure
 						if (status < 500) {
 							return false;
 						}
@@ -81,7 +81,7 @@ export class QueueServiceClient implements IQueueServiceClient {
 				);
 				throw new DownstreamServiceUnavailableError(
 					SERVICES.QUEUE_SERVICE,
-					"Downstream queue service is currently unavailable",
+					ORDER_MESSAGES.QUEUE_SERVICE_UNAVAILABLE,
 				);
 			}
 
@@ -97,7 +97,7 @@ export class QueueServiceClient implements IQueueServiceClient {
 				);
 				throw new DownstreamServiceTimeoutError(
 					SERVICES.QUEUE_SERVICE,
-					"Downstream queue service timed out",
+					ORDER_MESSAGES.QUEUE_SERVICE_TIMEOUT,
 				);
 			}
 
@@ -155,7 +155,7 @@ export class QueueServiceClient implements IQueueServiceClient {
 				);
 				throw new DownstreamServiceUnavailableError(
 					SERVICES.QUEUE_SERVICE,
-					`Queue service error: HTTP ${error.response.status}`,
+					ORDER_MESSAGES.QUEUE_SERVICE_UNAVAILABLE,
 				);
 			}
 

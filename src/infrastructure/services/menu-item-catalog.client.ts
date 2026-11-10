@@ -10,6 +10,7 @@ import env from "@config/env.ts";
 import logger from "@infrastructure/observability/logger.ts";
 import { createServiceCircuitBreaker } from "@infrastructure/services/circuit-breaker.factory.ts";
 import { HTTP_STATUS } from "@shared/constants/http.constants.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { RESTAURANT_SERVICE_ENDPOINTS } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";
 import {
@@ -52,7 +53,6 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				checkIsFailure: (error: unknown) => {
 					if (isAxiosError(error) && error.response) {
 						const status = error.response.status;
-						// HTTP 404 (Item not found) or other 4xx errors do not count toward circuit failure
 						if (status < 500) {
 							return false;
 						}
@@ -89,7 +89,7 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				);
 				throw new DownstreamServiceUnavailableError(
 					SERVICES.RESTAURANT_SERVICE,
-					"Downstream restaurant catalog service is currently unavailable",
+					ORDER_MESSAGES.RESTAURANT_CATALOG_UNAVAILABLE,
 				);
 			}
 
@@ -105,7 +105,7 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				);
 				throw new DownstreamServiceTimeoutError(
 					SERVICES.RESTAURANT_SERVICE,
-					"Downstream restaurant catalog service timed out",
+					ORDER_MESSAGES.RESTAURANT_CATALOG_TIMEOUT,
 				);
 			}
 
@@ -198,7 +198,7 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				);
 				throw new DownstreamServiceUnavailableError(
 					SERVICES.RESTAURANT_SERVICE,
-					"Downstream restaurant catalog service is currently unavailable",
+					ORDER_MESSAGES.RESTAURANT_CATALOG_UNAVAILABLE,
 				);
 			}
 

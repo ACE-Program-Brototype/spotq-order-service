@@ -117,7 +117,24 @@ export const ORDER_MESSAGES = {
 	PAYMENT_GATEWAY_DRAFT_FAILED:
 		"Failed to initiate payment gateway order draft",
 	IDEMPOTENCY_KEY_REQUIRED: "X-Idempotency-Key header is required",
+	RESTAURANT_CATALOG_UNAVAILABLE:
+		"Downstream restaurant catalog service is currently unavailable",
+	RESTAURANT_CATALOG_TIMEOUT: "Downstream restaurant catalog service timed out",
+	PAYMENT_SERVICE_UNAVAILABLE:
+		"Payment service is currently unavailable. Please try again shortly.",
+	PAYMENT_SERVICE_TIMEOUT:
+		"Payment service timed out while creating gateway order",
+	QUEUE_SERVICE_UNAVAILABLE:
+		"Downstream queue service is currently unavailable",
+	QUEUE_SERVICE_TIMEOUT: "Downstream queue service timed out",
 };
+
+export const DOWNSTREAM_MESSAGES = {
+	SERVICE_UNAVAILABLE: (serviceName: string) =>
+		`Downstream service '${serviceName}' is currently unavailable`,
+	SERVICE_TIMEOUT: (serviceName: string) =>
+		`Downstream service '${serviceName}' timed out`,
+} as const;
 
 export const ORDER_DEFAULTS = {
 	ITEM_NAME: "Item",

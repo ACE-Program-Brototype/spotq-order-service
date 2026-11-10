@@ -1,6 +1,9 @@
 import { COMMON_ERROR_CODES } from "@shared/constants/error-code.constants.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
-import { messages } from "@shared/constants/message.constants.ts";
+import {
+	DOWNSTREAM_MESSAGES,
+	messages,
+} from "@shared/constants/message.constants.ts";
 
 export abstract class AppError extends Error {
 	public readonly statusCode: number;
@@ -40,7 +43,7 @@ export class ForbiddenError extends AppError {
 export class DownstreamServiceUnavailableError extends AppError {
 	constructor(
 		serviceName: string,
-		message: string = `Downstream service '${serviceName}' is currently unavailable`,
+		message: string = DOWNSTREAM_MESSAGES.SERVICE_UNAVAILABLE(serviceName),
 		errorCode: string = COMMON_ERROR_CODES.DOWNSTREAM_SERVICE_UNAVAILABLE,
 	) {
 		super(message, HttpStatus.SERVICE_UNAVAILABLE, errorCode);
@@ -50,7 +53,7 @@ export class DownstreamServiceUnavailableError extends AppError {
 export class DownstreamServiceTimeoutError extends AppError {
 	constructor(
 		serviceName: string,
-		message: string = `Downstream service '${serviceName}' timed out`,
+		message: string = DOWNSTREAM_MESSAGES.SERVICE_TIMEOUT(serviceName),
 		errorCode: string = COMMON_ERROR_CODES.DOWNSTREAM_SERVICE_TIMEOUT,
 	) {
 		super(message, HttpStatus.GATEWAY_TIMEOUT, errorCode);

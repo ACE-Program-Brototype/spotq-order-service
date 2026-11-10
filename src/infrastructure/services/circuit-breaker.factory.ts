@@ -19,9 +19,18 @@ export function createServiceCircuitBreaker<
 	action: (...args: TArgs) => Promise<TReturn> | TReturn,
 	config: ServiceCircuitBreakerConfig<TArgs, TReturn>,
 ): CircuitBreaker<TArgs, TReturn> {
-	const { serviceName, endpointTag, name, ...restOptions } = config;
+	const {
+		serviceName,
+		endpointTag,
+		name,
+		onOpen,
+		onClose,
+		onHalfOpen,
+		...restOptions
+	} = config;
 
 	return new CircuitBreaker(action, {
+		...restOptions,
 		name,
 		timeoutMs: restOptions.timeoutMs ?? env.CIRCUIT_BREAKER_TIMEOUT_MS,
 		resetTimeoutMs:
@@ -43,7 +52,7 @@ export function createServiceCircuitBreaker<
 				},
 				`Circuit breaker [${name}] for service '${serviceName}' tripped to OPEN`,
 			);
-			restOptions.onOpen?.();
+			onOpen?.();
 		},
 		onClose: () => {
 			logger.info(
@@ -55,7 +64,7 @@ export function createServiceCircuitBreaker<
 				},
 				`Circuit breaker [${name}] for service '${serviceName}' recovered to CLOSED`,
 			);
-			restOptions.onClose?.();
+			onClose?.();
 		},
 		onHalfOpen: () => {
 			logger.info(
@@ -67,8 +76,7 @@ export function createServiceCircuitBreaker<
 				},
 				`Circuit breaker [${name}] for service '${serviceName}' entered HALF_OPEN (trial probe)`,
 			);
-			restOptions.onHalfOpen?.();
+			onHalfOpen?.();
 		},
-		...restOptions,
 	});
 }

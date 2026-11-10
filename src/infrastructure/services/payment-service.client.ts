@@ -8,6 +8,7 @@ import { PaymentGatewayDraftFailedError } from "@domain/errors/payment-gateway-d
 import logger from "@infrastructure/observability/logger.ts";
 import { createServiceCircuitBreaker } from "@infrastructure/services/circuit-breaker.factory.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { PAYMENT_SERVICE_ROUTES } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";
 import type { ApiResponseSuccess } from "@shared/responses/api-response.ts";
@@ -42,7 +43,6 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 			checkIsFailure: (error: unknown) => {
 				if (isAxiosError(error) && error.response) {
 					const status = error.response.status;
-					// 4xx client errors (bad request, validation) do not count toward circuit failure
 					if (status < 500) {
 						return false;
 					}
@@ -68,7 +68,7 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 					"Circuit breaker is OPEN. Fast-failing createGatewayOrder request.",
 				);
 				throw new PaymentGatewayDraftFailedError(
-					"Payment service is currently unavailable. Please try again shortly.",
+					ORDER_MESSAGES.PAYMENT_SERVICE_UNAVAILABLE,
 				);
 			}
 
@@ -82,7 +82,7 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 					"Circuit breaker timed out for createGatewayOrder request.",
 				);
 				throw new PaymentGatewayDraftFailedError(
-					"Payment service timed out while creating gateway order",
+					ORDER_MESSAGES.PAYMENT_SERVICE_TIMEOUT,
 				);
 			}
 

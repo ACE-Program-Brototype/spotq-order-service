@@ -53,7 +53,6 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 			endpointTag: "GET /api/internal/v1/restaurants/:id/validation",
 			timeoutMs: this.requestTimeoutMs,
 			checkIsFailure: (error: unknown) => {
-				// Exclude business / domain errors from breaker failure statistics
 				if (
 					error instanceof RestaurantNotFoundError ||
 					error instanceof ForbiddenRestaurantAccessError ||
@@ -64,7 +63,6 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 
 				if (isAxiosError(error) && error.response) {
 					const status = error.response.status;
-					// 4xx errors (client domain rejections) must not trip the circuit
 					if (status < 500) {
 						return false;
 					}
