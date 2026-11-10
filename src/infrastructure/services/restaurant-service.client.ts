@@ -51,7 +51,6 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 			name: "restaurant-validation",
 			serviceName: SERVICES.RESTAURANT_SERVICE,
 			endpointTag: "GET /api/internal/v1/restaurants/:id/validation",
-			timeoutMs: this.requestTimeoutMs,
 			checkIsFailure: (error: unknown) => {
 				if (
 					error instanceof RestaurantNotFoundError ||
@@ -62,10 +61,7 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 				}
 
 				if (isAxiosError(error) && error.response) {
-					const status = error.response.status;
-					if (status < 500) {
-						return false;
-					}
+					return error.response.status >= 500;
 				}
 
 				return true;
@@ -105,6 +101,30 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 				throw new DownstreamServiceTimeoutError(SERVICES.RESTAURANT_SERVICE);
 			}
 
+			if (error instanceof DomainError) {
+				throw error;
+			}
+
+			if (isAxiosError(error) && error.response) {
+				const status = error.response.status;
+
+				logger.error(
+					{
+						restaurantId,
+						status,
+						data: error.response.data,
+					},
+					"Unexpected error response from restaurant validation endpoint",
+				);
+				throw new Error(
+					`${ORDER_MESSAGES.RESTAURANT_VALIDATION_FAILED}: HTTP ${status}`,
+				);
+			}
+
+			logger.error(
+				{ err: error, restaurantId },
+				"Error while communicating with restaurant-service",
+			);
 			throw error;
 		}
 	}
@@ -185,29 +205,9 @@ export class RestaurantServiceClient implements IRestaurantServiceClient {
 						ORDER_MESSAGES.FORBIDDEN_RESTAURANT_ACCESS,
 					);
 				}
-
-				logger.error(
-					{
-						restaurantId,
-						status,
-						data: error.response.data,
-					},
-					"Unexpected error response from restaurant validation endpoint",
-				);
-				throw new Error(
-					`${ORDER_MESSAGES.RESTAURANT_VALIDATION_FAILED}: HTTP ${status}`,
-				);
 			}
 
-			logger.error(
-				{ err: error, restaurantId },
-				"Error while communicating with restaurant-service",
-			);
 			throw error;
 		}
-	}
-
-	public shutdown(): void {
-		this.breaker.shutdown();
 	}
 }

@@ -11,6 +11,10 @@ import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { PAYMENT_SERVICE_ROUTES } from "@shared/constants/routes.constants.ts";
 import { SERVICES } from "@shared/constants/services.constants.ts";
+import {
+	DownstreamServiceTimeoutError,
+	DownstreamServiceUnavailableError,
+} from "@shared/errors/index.ts";
 import type { ApiResponseSuccess } from "@shared/responses/api-response.ts";
 import {
 	type CircuitBreaker,
@@ -39,13 +43,9 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 			name: "payment-service-gateway-order",
 			serviceName: SERVICES.PAYMENT_SERVICE,
 			endpointTag: "POST /api/internal/v1/payments/gateway-order",
-			timeoutMs: this.requestTimeoutMs,
 			checkIsFailure: (error: unknown) => {
 				if (isAxiosError(error) && error.response) {
-					const status = error.response.status;
-					if (status < 500) {
-						return false;
-					}
+					return error.response.status >= 500;
 				}
 				return true;
 			},
@@ -67,7 +67,8 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 					},
 					"Circuit breaker is OPEN. Fast-failing createGatewayOrder request.",
 				);
-				throw new PaymentGatewayDraftFailedError(
+				throw new DownstreamServiceUnavailableError(
+					SERVICES.PAYMENT_SERVICE,
 					ORDER_MESSAGES.PAYMENT_SERVICE_UNAVAILABLE,
 				);
 			}
@@ -81,47 +82,12 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 					},
 					"Circuit breaker timed out for createGatewayOrder request.",
 				);
-				throw new PaymentGatewayDraftFailedError(
+				throw new DownstreamServiceTimeoutError(
+					SERVICES.PAYMENT_SERVICE,
 					ORDER_MESSAGES.PAYMENT_SERVICE_TIMEOUT,
 				);
 			}
 
-			throw error;
-		}
-	}
-
-	private async fetchCreateGatewayOrder(
-		data: CreateOrderPaymentInputDTO,
-	): Promise<CreateOrderPaymentResponseDTO> {
-		const targetUrl = `${this.baseUrl}${PAYMENT_SERVICE_ROUTES.CREATE_GATEWAY_ORDER}`;
-
-		try {
-			const response = await axios.post<
-				ApiResponseSuccess<CreateOrderPaymentResponseDTO>
-			>(targetUrl, data, {
-				headers: getS2SInternalHeaders(
-					SERVICES.PAYMENT_SERVICE,
-					this.s2sPrivateKey,
-					this.s2sServiceName,
-				),
-				timeout: this.requestTimeoutMs,
-			});
-
-			const responseBody = response.data;
-
-			if (responseBody?.success !== true || !responseBody.data) {
-				logger.error(
-					{ orderId: data.orderId, response: responseBody },
-					"Payment service returned unsuccessful response during gateway draft creation",
-				);
-				throw new PaymentGatewayDraftFailedError(
-					responseBody?.message ||
-						"Payment service gateway draft creation failed",
-				);
-			}
-
-			return responseBody.data;
-		} catch (error) {
 			if (error instanceof PaymentGatewayDraftFailedError) {
 				throw error;
 			}
@@ -151,7 +117,35 @@ export class PaymentServiceClient implements IPaymentServiceClient {
 		}
 	}
 
-	public shutdown(): void {
-		this.breaker.shutdown();
+	private async fetchCreateGatewayOrder(
+		data: CreateOrderPaymentInputDTO,
+	): Promise<CreateOrderPaymentResponseDTO> {
+		const targetUrl = `${this.baseUrl}${PAYMENT_SERVICE_ROUTES.CREATE_GATEWAY_ORDER}`;
+
+		const response = await axios.post<
+			ApiResponseSuccess<CreateOrderPaymentResponseDTO>
+		>(targetUrl, data, {
+			headers: getS2SInternalHeaders(
+				SERVICES.PAYMENT_SERVICE,
+				this.s2sPrivateKey,
+				this.s2sServiceName,
+			),
+			timeout: this.requestTimeoutMs,
+		});
+
+		const responseBody = response.data;
+
+		if (responseBody?.success !== true || !responseBody.data) {
+			logger.error(
+				{ orderId: data.orderId, response: responseBody },
+				"Payment service returned unsuccessful response during gateway draft creation",
+			);
+			throw new PaymentGatewayDraftFailedError(
+				responseBody?.message ||
+					"Payment service gateway draft creation failed",
+			);
+		}
+
+		return responseBody.data;
 	}
 }

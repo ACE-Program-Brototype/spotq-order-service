@@ -48,13 +48,9 @@ export class QueueServiceClient implements IQueueServiceClient {
 				serviceName: SERVICES.QUEUE_SERVICE,
 				endpointTag:
 					"GET /api/internal/v1/restaurants/:id/queue/users/:userId/active",
-				timeoutMs: this.requestTimeoutMs,
 				checkIsFailure: (error: unknown) => {
 					if (isAxiosError(error) && error.response) {
-						const status = error.response.status;
-						if (status < 500) {
-							return false;
-						}
+						return error.response.status >= 500;
 					}
 					return true;
 				},
@@ -101,6 +97,26 @@ export class QueueServiceClient implements IQueueServiceClient {
 				);
 			}
 
+			if (isAxiosError(error)) {
+				logger.error(
+					{
+						restaurantId,
+						userId,
+						status: error.response?.status,
+						data: error.response?.data,
+					},
+					"Queue service returned error response during active queue check",
+				);
+				throw new DownstreamServiceUnavailableError(
+					SERVICES.QUEUE_SERVICE,
+					ORDER_MESSAGES.QUEUE_SERVICE_UNAVAILABLE,
+				);
+			}
+
+			logger.error(
+				{ err: error, restaurantId, userId },
+				"Error while communicating with queue-service",
+			);
 			throw error;
 		}
 	}
@@ -140,34 +156,13 @@ export class QueueServiceClient implements IQueueServiceClient {
 
 			return responseBody.data ?? null;
 		} catch (error) {
-			if (isAxiosError(error) && error.response) {
-				if (error.response.status === HTTP_STATUS.NOT_FOUND) {
-					return null;
-				}
-				logger.error(
-					{
-						restaurantId,
-						userId,
-						status: error.response.status,
-						data: error.response.data,
-					},
-					"Queue service returned error response during active queue check",
-				);
-				throw new DownstreamServiceUnavailableError(
-					SERVICES.QUEUE_SERVICE,
-					ORDER_MESSAGES.QUEUE_SERVICE_UNAVAILABLE,
-				);
+			if (
+				isAxiosError(error) &&
+				error.response?.status === HTTP_STATUS.NOT_FOUND
+			) {
+				return null;
 			}
-
-			logger.error(
-				{ err: error, restaurantId, userId },
-				"Error while communicating with queue-service",
-			);
 			throw error;
 		}
-	}
-
-	public shutdown(): void {
-		this.breaker.shutdown();
 	}
 }

@@ -49,13 +49,9 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				serviceName: SERVICES.RESTAURANT_SERVICE,
 				endpointTag:
 					"GET /api/internal/v1/restaurants/:id/menu-items/:itemId/internal",
-				timeoutMs: this.requestTimeoutMs,
 				checkIsFailure: (error: unknown) => {
 					if (isAxiosError(error) && error.response) {
-						const status = error.response.status;
-						if (status < 500) {
-							return false;
-						}
+						return error.response.status >= 500;
 					}
 					return true;
 				},
@@ -109,7 +105,29 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				);
 			}
 
-			throw error;
+			if (isAxiosError(error)) {
+				logger.error(
+					{
+						status: error.response?.status,
+						restaurantId,
+						menuItemId,
+						data: error.response?.data,
+					},
+					"Restaurant catalog service returned non-OK response",
+				);
+				throw new DownstreamServiceUnavailableError(
+					SERVICES.RESTAURANT_SERVICE,
+					ORDER_MESSAGES.RESTAURANT_CATALOG_UNAVAILABLE,
+				);
+			}
+
+			logger.error(
+				{ error, restaurantId, menuItemId },
+				"Failed to fetch menu item details from restaurant catalog service",
+			);
+			throw error instanceof Error
+				? error
+				: new Error("Failed to communicate with restaurant catalog service");
 		}
 	}
 
@@ -183,36 +201,13 @@ export class MenuItemCatalogClient implements IMenuItemCatalogPort {
 				addons,
 			};
 		} catch (error) {
-			if (isAxiosError(error) && error.response) {
-				if (error.response.status === HTTP_STATUS.NOT_FOUND) {
-					return null;
-				}
-				logger.error(
-					{
-						status: error.response.status,
-						restaurantId,
-						menuItemId,
-						data: error.response.data,
-					},
-					"Restaurant catalog service returned non-OK response",
-				);
-				throw new DownstreamServiceUnavailableError(
-					SERVICES.RESTAURANT_SERVICE,
-					ORDER_MESSAGES.RESTAURANT_CATALOG_UNAVAILABLE,
-				);
+			if (
+				isAxiosError(error) &&
+				error.response?.status === HTTP_STATUS.NOT_FOUND
+			) {
+				return null;
 			}
-
-			logger.error(
-				{ error, restaurantId, menuItemId },
-				"Failed to fetch menu item details from restaurant catalog service",
-			);
-			throw error instanceof Error
-				? error
-				: new Error("Failed to communicate with restaurant catalog service");
+			throw error;
 		}
-	}
-
-	public shutdown(): void {
-		this.breaker.shutdown();
 	}
 }
