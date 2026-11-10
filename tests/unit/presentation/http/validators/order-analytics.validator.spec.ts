@@ -11,7 +11,6 @@ describe("Order Analytics Validators", () => {
 		it("should validate and apply defaults for empty query", () => {
 			const parsed = orderAnalyticsSummaryQuerySchema.parse({});
 			assert.strictEqual(parsed.interval, "DAY");
-			assert.strictEqual(parsed.status, "COMPLETED");
 			assert.strictEqual(parsed.timezone, DEFAULT_TIMEZONE);
 		});
 
@@ -21,15 +20,23 @@ describe("Order Analytics Validators", () => {
 				day: "15",
 				month: "11",
 				year: "2026",
-				status: "ALL",
 				timezone: "UTC",
 			});
 			assert.strictEqual(parsed.interval, "MONTH");
 			assert.strictEqual(parsed.day, 15);
 			assert.strictEqual(parsed.month, 11);
 			assert.strictEqual(parsed.year, 2026);
-			assert.strictEqual(parsed.status, "ALL");
 			assert.strictEqual(parsed.timezone, "UTC");
+		});
+
+		it("should reject invalid calendar date (e.g., February 31)", () => {
+			assert.throws(() => {
+				orderAnalyticsSummaryQuerySchema.parse({
+					year: "2026",
+					month: "2",
+					day: "31",
+				});
+			});
 		});
 
 		it("should reject invalid interval", () => {

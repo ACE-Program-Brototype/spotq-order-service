@@ -64,7 +64,6 @@ describe("GetRestaurantOrderAnalyticsUseCase", () => {
 			month: 11,
 			day: 9,
 			timezone: DEFAULT_TIMEZONE,
-			status: "COMPLETED",
 		});
 
 		assert.ok(capturedParams);
@@ -82,25 +81,6 @@ describe("GetRestaurantOrderAnalyticsUseCase", () => {
 			result.orderStatusBreakdown,
 			mockResult.orderStatusBreakdown,
 		);
-		assert.strictEqual(result.filters.status, "COMPLETED");
 		assert.ok(result.generatedAt);
-	});
-
-	it("should throw error if repository does not implement analytics", async () => {
-		const emptyRepo: Partial<IOrderRepository> = {};
-		const useCase = new GetRestaurantOrderAnalyticsUseCase(
-			emptyRepo as IOrderRepository,
-		);
-
-		await assert.rejects(
-			async () =>
-				useCase.execute({
-					restaurantId: "2b6f0cc9-8d13-4f2e-a123-9e8ab12cd345",
-				}),
-			{
-				name: "Error",
-				message: "Order repository does not support analytics",
-			},
-		);
 	});
 });

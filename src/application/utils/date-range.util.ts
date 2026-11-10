@@ -46,7 +46,7 @@ export function getZonedDate(
 		hour: "2-digit",
 		minute: "2-digit",
 		second: "2-digit",
-		hour12: false,
+		hourCycle: "h23",
 	});
 
 	const parts = formatter.formatToParts(utcGuess);
@@ -100,7 +100,7 @@ export function resolveAnalyticsDateRange(
 	}
 
 	const fallbackYear = currentParts.year ?? now.getUTCFullYear();
-	const fallbackMonth = currentParts.month ?? (now.getUTCMonth() + 1);
+	const fallbackMonth = currentParts.month ?? now.getUTCMonth() + 1;
 	const fallbackDay = currentParts.day ?? now.getUTCDate();
 
 	const year = input.year ?? fallbackYear;

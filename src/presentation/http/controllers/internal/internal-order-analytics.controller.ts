@@ -37,7 +37,6 @@ export class InternalOrderAnalyticsController
 				day: query.day,
 				month: query.month,
 				year: query.year,
-				status: query.status,
 				timezone: query.timezone,
 			});
 

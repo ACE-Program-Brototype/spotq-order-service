@@ -1,17 +1,16 @@
 import type { AnalyticsInterval } from "@application/utils/date-range.util.ts";
 import type { OrderStatusDistributionData } from "@domain/types/order-repository.types.ts";
 
-export interface GetRestaurantOrderAnalyticsInputDto {
+export interface GetRestaurantOrderAnalyticsInputDTO {
 	restaurantId: string;
 	interval?: AnalyticsInterval | undefined;
 	day?: number | undefined;
 	month?: number | undefined;
 	year?: number | undefined;
-	status?: string | undefined;
 	timezone?: string | undefined;
 }
 
-export interface RestaurantOrderAnalyticsSummaryResponseDto {
+export interface RestaurantOrderAnalyticsSummaryResponseDTO {
 	restaurantId: string;
 	timezone: string;
 	overview: {
@@ -43,7 +42,6 @@ export interface RestaurantOrderAnalyticsSummaryResponseDto {
 		day: number;
 		month: number;
 		year: number;
-		status: string;
 		timezone: string;
 	};
 	generatedAt: string;

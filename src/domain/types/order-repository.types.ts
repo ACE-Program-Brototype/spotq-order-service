@@ -151,7 +151,6 @@ export interface GetRestaurantOrderAnalyticsRepoParams {
 	startDate: Date;
 	nextPeriodStart: Date;
 	prevStartDate: Date;
-	status?: string | undefined;
 }
 
 export interface OrderStatusDistributionData {
@@ -202,7 +201,7 @@ export interface ProductPerformanceItemData {
 	quantitySold: number;
 	grossSalesRupees: number;
 	percentageOfTotalSales: number;
-	classification?: "LOW_VOLUME" | "NORMAL" | "ZERO_SALES";
+	classification?: "LOW_VOLUME" | "NORMAL";
 }
 
 export interface ProductAnalyticsPaginationData {

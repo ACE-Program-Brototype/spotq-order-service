@@ -173,6 +173,14 @@ class MockOrderRepository implements IOrderRepository {
 	): Promise<Order> {
 		return order;
 	}
+
+	public async getRestaurantOrderAnalytics(): Promise<never> {
+		throw new Error("Not implemented in test");
+	}
+
+	public async getRestaurantProductAnalytics(): Promise<never> {
+		throw new Error("Not implemented in test");
+	}
 }
 
 describe("OrderPaymentEventsConsumer", () => {

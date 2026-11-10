@@ -59,10 +59,10 @@ export interface IOrderRepository {
 		actorId: string,
 		notes?: string | null,
 	): Promise<Order>;
-	getRestaurantOrderAnalytics?(
+	getRestaurantOrderAnalytics(
 		params: GetRestaurantOrderAnalyticsRepoParams,
 	): Promise<RestaurantOrderAnalyticsRepoResult>;
-	getRestaurantProductAnalytics?(
+	getRestaurantProductAnalytics(
 		params: GetRestaurantProductAnalyticsRepoParams,
 	): Promise<RestaurantProductAnalyticsRepoResult>;
 }

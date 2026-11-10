@@ -104,6 +104,12 @@ function createMockOrderRepo(overrides: {
 			}
 			return order;
 		},
+		getRestaurantOrderAnalytics: async () => {
+			throw new Error("Not implemented");
+		},
+		getRestaurantProductAnalytics: async () => {
+			throw new Error("Not implemented");
+		},
 	};
 }
 

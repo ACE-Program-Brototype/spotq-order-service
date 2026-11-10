@@ -14,6 +14,24 @@ function isValidTimezone(tz: string): boolean {
 	}
 }
 
+function isValidCalendarDate(
+	year?: number | undefined,
+	month?: number | undefined,
+	day?: number | undefined,
+): boolean {
+	if (day === undefined) {
+		return true;
+	}
+	const targetMonth = month ?? new Date().getUTCMonth() + 1;
+	const targetYear = year ?? new Date().getUTCFullYear();
+	const date = new Date(Date.UTC(targetYear, targetMonth - 1, day));
+	return (
+		date.getUTCFullYear() === targetYear &&
+		date.getUTCMonth() === targetMonth - 1 &&
+		date.getUTCDate() === day
+	);
+}
+
 export const orderAnalyticsSummaryQuerySchema = z
 	.object({
 		interval: z
@@ -28,14 +46,22 @@ export const orderAnalyticsSummaryQuerySchema = z
 		day: z.coerce.number().int().min(1).max(31).optional(),
 		month: z.coerce.number().int().min(1).max(12).optional(),
 		year: z.coerce.number().int().min(2000).max(2100).optional(),
-		status: z.enum(["COMPLETED", "ALL"]).optional().default("COMPLETED"),
 		timezone: z
 			.string()
 			.refine(isValidTimezone, { message: "Invalid IANA timezone string" })
 			.optional()
 			.default(DEFAULT_TIMEZONE),
 	})
-	.strict();
+	.strict()
+	.superRefine((data, ctx) => {
+		if (!isValidCalendarDate(data.year, data.month, data.day)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Invalid calendar date for the specified month and year",
+				path: ["day"],
+			});
+		}
+	});
 
 export type OrderAnalyticsSummaryQuery = z.infer<
 	typeof orderAnalyticsSummaryQuerySchema
@@ -74,7 +100,16 @@ export const orderProductAnalyticsQuerySchema = z
 			.optional()
 			.default(ANALYTICS_PAGINATION.DEFAULT_LIMIT),
 	})
-	.strict();
+	.strict()
+	.superRefine((data, ctx) => {
+		if (!isValidCalendarDate(data.year, data.month, data.day)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Invalid calendar date for the specified month and year",
+				path: ["day"],
+			});
+		}
+	});
 
 export type OrderProductAnalyticsQuery = z.infer<
 	typeof orderProductAnalyticsQuerySchema

@@ -11,7 +11,6 @@ export type AnalyticsInterval =
 	(typeof ANALYTICS_INTERVALS)[keyof typeof ANALYTICS_INTERVALS];
 
 export const PRODUCT_CLASSIFICATIONS = {
-	ZERO_SALES: "ZERO_SALES",
 	LOW_VOLUME: "LOW_VOLUME",
 	NORMAL: "NORMAL",
 } as const;

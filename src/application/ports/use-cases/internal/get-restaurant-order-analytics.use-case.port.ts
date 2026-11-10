@@ -1,10 +1,10 @@
 import type {
-	GetRestaurantOrderAnalyticsInputDto,
-	RestaurantOrderAnalyticsSummaryResponseDto,
+	GetRestaurantOrderAnalyticsInputDTO,
+	RestaurantOrderAnalyticsSummaryResponseDTO,
 } from "@application/dtos/internal/restaurant-order-analytics.dto.ts";
 
 export interface IGetRestaurantOrderAnalyticsUseCase {
 	execute(
-		input: GetRestaurantOrderAnalyticsInputDto,
-	): Promise<RestaurantOrderAnalyticsSummaryResponseDto>;
+		input: GetRestaurantOrderAnalyticsInputDTO,
+	): Promise<RestaurantOrderAnalyticsSummaryResponseDTO>;
 }

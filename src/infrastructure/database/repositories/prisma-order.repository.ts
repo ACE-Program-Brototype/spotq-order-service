@@ -31,6 +31,11 @@ import {
 } from "@infrastructure/database/mappers/order.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/database/repositories/prisma-base.repository.ts";
 import {
+	ANALYTICS_CONSTANTS,
+	PRODUCT_CLASSIFICATIONS,
+	type ProductClassification,
+} from "@shared/constants/analytics.constants.ts";
+import {
 	ORDER_DEFAULTS,
 	ORDER_MESSAGES,
 } from "@shared/constants/message.constants.ts";
@@ -787,15 +792,8 @@ export class PrismaOrderRepository
 		});
 		const takeawayCount = totalOrderCount - dineInCount;
 
-		// 5. Operations: Diners Served (Distinct Parties/Tables with Completed Orders)
-		const dinersServedCount = await this.prisma.order.count({
-			where: {
-				restaurantId,
-				createdAt: { gte: startDate, lt: nextPeriodStart },
-				tableNumber: { not: null },
-				orderStatus: OrderStatus.COMPLETED,
-			},
-		});
+		// 5. Operations: Diners count is not tracked in Spotq (no guest count field); returned as 0 per SCRUM-1275 AC 7
+		const dinersServedCount = 0;
 
 		// Unique Customers (Database-level COUNT DISTINCT user_id)
 		const customerCountResult = await this.prisma.$queryRaw<
@@ -876,7 +874,7 @@ export class PrismaOrderRepository
 	): Promise<RestaurantProductAnalyticsRepoResult> {
 		const { restaurantId, startDate, nextPeriodStart, page, limit } = params;
 
-		// 1. Group order items for completed orders in window
+		// 1. Group order items for completed orders in window with DB-level ordering
 		const itemAggregates = await this.prisma.orderItem.groupBy({
 			by: ["menuItemId", "itemName"],
 			where: {
@@ -891,6 +889,11 @@ export class PrismaOrderRepository
 				quantity: true,
 				totalPrice: true,
 			},
+			orderBy: {
+				_sum: {
+					quantity: "desc",
+				},
+			},
 		});
 
 		// Total sales across all products for percentageOfTotalSales
@@ -902,7 +905,7 @@ export class PrismaOrderRepository
 
 		const totalProductsSold = itemAggregates.length;
 
-		// Map to ProductPerformanceItemData
+		// Map to ProductPerformanceItemData using constants
 		const allItems = itemAggregates.map((item) => {
 			const quantitySold = item._sum.quantity ?? 0;
 			const grossSalesRupees = item._sum.totalPrice
@@ -913,8 +916,10 @@ export class PrismaOrderRepository
 					? 0
 					: Number(((grossSalesRupees / totalPeriodSales) * 100).toFixed(1));
 
-			const classification: "LOW_VOLUME" | "NORMAL" =
-				quantitySold <= 3 ? "LOW_VOLUME" : "NORMAL";
+			const classification: ProductClassification =
+				quantitySold <= ANALYTICS_CONSTANTS.LOW_VOLUME_THRESHOLD
+					? PRODUCT_CLASSIFICATIONS.LOW_VOLUME
+					: PRODUCT_CLASSIFICATIONS.NORMAL;
 
 			return {
 				menuItemId: item.menuItemId,
@@ -937,9 +942,9 @@ export class PrismaOrderRepository
 			return a.name.localeCompare(b.name);
 		});
 
-		// 3. Slow Moving: Filtered items with quantity <= 3, sorted primarily by quantitySold ASC, secondarily by grossSalesRupees ASC, tertiarily by name ASC
+		// 3. Slow Moving: Filtered items with quantity <= LOW_VOLUME_THRESHOLD, sorted primarily by quantitySold ASC, secondarily by grossSalesRupees ASC, tertiarily by name ASC
 		const slowMovingItems = allItems.filter(
-			(item) => item.classification === "LOW_VOLUME",
+			(item) => item.classification === PRODUCT_CLASSIFICATIONS.LOW_VOLUME,
 		);
 		const slowMovingSorted = [...slowMovingItems].sort((a, b) => {
 			if (a.quantitySold !== b.quantitySold) {
@@ -951,22 +956,22 @@ export class PrismaOrderRepository
 			return a.name.localeCompare(b.name);
 		});
 
-		// 4. Pagination Helper
+		// 4. Pagination Helper with safe boundary checks
 		const totalTopItems = topSellingSorted.length;
 		const totalTopPages = Math.max(1, Math.ceil(totalTopItems / limit));
 		const topStartIndex = (page - 1) * limit;
-		const topPagedItems = topSellingSorted.slice(
-			topStartIndex,
-			topStartIndex + limit,
-		);
+		const topPagedItems =
+			topStartIndex < totalTopItems
+				? topSellingSorted.slice(topStartIndex, topStartIndex + limit)
+				: [];
 
 		const totalSlowItems = slowMovingSorted.length;
 		const totalSlowPages = Math.max(1, Math.ceil(totalSlowItems / limit));
 		const slowStartIndex = (page - 1) * limit;
-		const slowPagedItems = slowMovingSorted.slice(
-			slowStartIndex,
-			slowStartIndex + limit,
-		);
+		const slowPagedItems =
+			slowStartIndex < totalSlowItems
+				? slowMovingSorted.slice(slowStartIndex, slowStartIndex + limit)
+				: [];
 
 		return {
 			totalProductsSold,
@@ -975,10 +980,10 @@ export class PrismaOrderRepository
 				pagination: {
 					totalItems: totalTopItems,
 					totalPages: totalTopPages,
-					currentPage: page,
+					currentPage: totalTopItems === 0 ? 1 : page,
 					limit,
 					hasNextPage: page < totalTopPages,
-					hasPrevPage: page > 1,
+					hasPrevPage: page > 1 && page <= totalTopPages,
 				},
 			},
 			slowMoving: {
@@ -986,10 +991,10 @@ export class PrismaOrderRepository
 				pagination: {
 					totalItems: totalSlowItems,
 					totalPages: totalSlowPages,
-					currentPage: page,
+					currentPage: totalSlowItems === 0 ? 1 : page,
 					limit,
 					hasNextPage: page < totalSlowPages,
-					hasPrevPage: page > 1,
+					hasPrevPage: page > 1 && page <= totalSlowPages,
 				},
 			},
 		};

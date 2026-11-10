@@ -43,7 +43,6 @@ describe("PrismaOrderRepository - Analytics", () => {
 						if (countCalls === 1) return 100; // totalOrderCount
 						if (countCalls === 2) return 80; // prevOrderCount
 						if (countCalls === 3) return 60; // dineInCount
-						if (countCalls === 4) return 60; // dinersServedCount
 						return 0;
 					},
 					groupBy: async () => [
@@ -81,8 +80,8 @@ describe("PrismaOrderRepository - Analytics", () => {
 			assert.strictEqual(result.overview.orders.dineInCount, 60);
 			assert.strictEqual(result.overview.orders.takeawayCount, 40);
 
-			// Operations
-			assert.strictEqual(result.overview.operations.dinersServedCount, 60);
+			// Operations: dinersServedCount is 0 per SCRUM-1275 AC 7
+			assert.strictEqual(result.overview.operations.dinersServedCount, 0);
 			assert.strictEqual(result.overview.operations.uniqueCustomersCount, 75);
 
 			// Order Status Breakdown

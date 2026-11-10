@@ -62,7 +62,6 @@ describe("InternalOrderAnalyticsController", () => {
 				day: 9,
 				month: 11,
 				year: 2026,
-				status: "COMPLETED",
 				timezone: "Asia/Kolkata",
 			},
 			generatedAt: new Date().toISOString(),

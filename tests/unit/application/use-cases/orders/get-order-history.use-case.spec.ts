@@ -73,6 +73,12 @@ describe("GetOrderHistoryUseCase", () => {
 			updateOrderStatus: async () => {
 				throw new Error("Not implemented");
 			},
+			getRestaurantOrderAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantProductAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
 		};
 
 		const useCase = new GetOrderHistoryUseCase(mockOrderRepo);
@@ -139,6 +145,12 @@ describe("GetOrderHistoryUseCase", () => {
 				throw new Error("Not implemented");
 			},
 			updateOrderStatus: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantOrderAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantProductAnalytics: async () => {
 				throw new Error("Not implemented");
 			},
 		};

@@ -4,7 +4,7 @@ import type {
 	ProductPerformanceItemData,
 } from "@domain/types/order-repository.types.ts";
 
-export interface GetRestaurantProductAnalyticsInputDto {
+export interface GetRestaurantProductAnalyticsInputDTO {
 	restaurantId: string;
 	interval?: AnalyticsInterval | undefined;
 	day?: number | undefined;
@@ -15,7 +15,7 @@ export interface GetRestaurantProductAnalyticsInputDto {
 	limit?: number | undefined;
 }
 
-export interface RestaurantProductAnalyticsResponseDto {
+export interface RestaurantProductAnalyticsResponseDTO {
 	restaurantId: string;
 	timezone: string;
 	totalProductsSold: number;
