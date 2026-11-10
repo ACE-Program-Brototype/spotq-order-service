@@ -156,12 +156,7 @@ export interface GetAdminOrdersRepoParams {
 	endDate?: Date | undefined;
 	minAmount?: number | undefined;
 	maxAmount?: number | undefined;
-	sortBy?:
-		| "createdAt"
-		| "updatedAt"
-		| "totalAmount"
-		| "status"
-		| undefined;
+	sortBy?: "createdAt" | "updatedAt" | "totalAmount" | "status" | undefined;
 	sortOrder?: "asc" | "desc" | undefined;
 	page: number;
 	limit: number;

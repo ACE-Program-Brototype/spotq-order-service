@@ -123,8 +123,12 @@ export const OrderPersistenceMapper = {
 		};
 	},
 
-	toAdminOrderItemList(records: PrismaAdminOrderRecord[]): AdminOrderListItemData[] {
-		return records.map((record) => OrderPersistenceMapper.toAdminOrderItem(record));
+	toAdminOrderItemList(
+		records: PrismaAdminOrderRecord[],
+	): AdminOrderListItemData[] {
+		return records.map((record) =>
+			OrderPersistenceMapper.toAdminOrderItem(record),
+		);
 	},
 	toOverviewItem(record: PrismaOrderOverviewRecord): OrderOverviewItemData {
 		return {

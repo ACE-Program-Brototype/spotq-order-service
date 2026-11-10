@@ -54,7 +54,9 @@ export class PrismaOrderRepository
 		try {
 			const search = params.search?.trim();
 			const where: Prisma.OrderWhereInput = {
-				...(params.status?.length ? { orderStatus: { in: params.status } } : {}),
+				...(params.status?.length
+					? { orderStatus: { in: params.status } }
+					: {}),
 				...(params.restaurantId ? { restaurantId: params.restaurantId } : {}),
 				...(params.customerId ? { userId: params.customerId } : {}),
 				...(params.paymentStatus
@@ -102,45 +104,40 @@ export class PrismaOrderRepository
 			const sortOrder = params.sortOrder ?? "desc";
 			const skip = (params.page - 1) * params.limit;
 
-			const [
-				records,
-				totalOrders,
-				statusGroups,
-				totals,
-				metricsTotalOrders,
-			] = await this.prisma.$transaction([
-				this.prisma.order.findMany({
-					where,
-					skip,
-					take: params.limit,
-					orderBy: [{ [sortField]: sortOrder }, { id: "asc" }],
-					select: {
-						id: true,
-						orderNumber: true,
-						restaurantId: true,
-						restaurantName: true,
-						userId: true,
-						orderStatus: true,
-						paymentStatus: true,
-						grandTotal: true,
-						platformFee: true,
-						createdAt: true,
-						updatedAt: true,
-					},
-				}),
-				this.prisma.order.count({ where }),
-				this.prisma.order.groupBy({
-					by: ["orderStatus"],
-					_count: { _all: true },
-				}),
-				this.prisma.order.aggregate({
-					_sum: { grandTotal: true },
-				}),
-				this.prisma.order.count(),
-			]);
+			const [records, totalOrders, statusGroups, totals, metricsTotalOrders] =
+				await this.prisma.$transaction([
+					this.prisma.order.findMany({
+						where,
+						skip,
+						take: params.limit,
+						orderBy: [{ [sortField]: sortOrder }, { id: "asc" }],
+						select: {
+							id: true,
+							orderNumber: true,
+							restaurantId: true,
+							restaurantName: true,
+							userId: true,
+							orderStatus: true,
+							paymentStatus: true,
+							grandTotal: true,
+							platformFee: true,
+							createdAt: true,
+							updatedAt: true,
+						},
+					}),
+					this.prisma.order.count({ where }),
+					this.prisma.order.groupBy({
+						by: ["orderStatus"],
+						_count: { _all: true },
+					}),
+					this.prisma.order.aggregate({
+						_sum: { grandTotal: true },
+					}),
+					this.prisma.order.count(),
+				]);
 
 			const totalPages = Math.ceil(totalOrders / params.limit);
-			
+
 			const ordersByStatus = statusGroups.reduce<
 				Partial<Record<OrderStatus, number>>
 			>((result, group) => {

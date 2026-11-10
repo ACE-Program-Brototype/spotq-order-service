@@ -11,7 +11,8 @@ const dateQuerySchema = (inclusiveDateOnly = false) =>
 			if (REGEX.DATE_ONLY.test(value)) {
 				const parsed = new Date(`${value}T00:00:00.000Z`);
 				return (
-					!Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value)
+					!Number.isNaN(parsed.getTime()) &&
+					parsed.toISOString().startsWith(value)
 				);
 			}
 			return (
@@ -47,9 +48,7 @@ export const adminOrdersListQuerySchema = z
 					.map((status) => status.trim())
 					.filter(Boolean),
 			)
-			.pipe(
-				z.array(z.nativeEnum(OrderStatus)).min(1).optional(),
-			),
+			.pipe(z.array(z.nativeEnum(OrderStatus)).min(1).optional()),
 		restaurantId: z.string().trim().min(1).optional(),
 		customerId: z.string().trim().min(1).optional(),
 		paymentStatus: z.nativeEnum(PaymentStatus).optional(),
