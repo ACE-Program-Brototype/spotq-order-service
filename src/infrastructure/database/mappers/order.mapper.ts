@@ -5,6 +5,7 @@ import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import type {
+	AdminOrderListItemData,
 	CancelledOrderData,
 	CustomerOrderHistoryItemData,
 	OrderOverviewItemData,
@@ -35,6 +36,20 @@ export interface PrismaCustomerOrderRecord {
 		items: number;
 	};
 	createdAt: Date;
+}
+
+export interface PrismaAdminOrderRecord {
+	id: string;
+	orderNumber: string;
+	restaurantId: string;
+	restaurantName: string | null;
+	userId: string | null;
+	orderStatus: string;
+	paymentStatus: string;
+	grandTotal: Prisma.Decimal;
+	platformFee: Prisma.Decimal;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface PrismaCancelledOrderRecord {
@@ -92,6 +107,25 @@ export interface PrismaStaffOrderRecord {
 }
 
 export const OrderPersistenceMapper = {
+	toAdminOrderItem(record: PrismaAdminOrderRecord): AdminOrderListItemData {
+		return {
+			orderId: record.id,
+			orderNumber: record.orderNumber,
+			restaurantId: record.restaurantId,
+			restaurantName: record.restaurantName,
+			customerId: record.userId,
+			status: record.orderStatus as OrderStatus,
+			paymentStatus: record.paymentStatus,
+			totalAmount: Number(record.grandTotal.toFixed(2)),
+			platformFeeAssessed: Number(record.platformFee.toFixed(2)),
+			createdAt: record.createdAt,
+			updatedAt: record.updatedAt,
+		};
+	},
+
+	toAdminOrderItemList(records: PrismaAdminOrderRecord[]): AdminOrderListItemData[] {
+		return records.map((record) => OrderPersistenceMapper.toAdminOrderItem(record));
+	},
 	toOverviewItem(record: PrismaOrderOverviewRecord): OrderOverviewItemData {
 		return {
 			orderId: record.id,

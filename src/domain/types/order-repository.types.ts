@@ -145,3 +145,51 @@ export interface GetStaffOrdersRepoResult {
 	limit: number;
 	hasNext: boolean;
 }
+
+export interface GetAdminOrdersRepoParams {
+	search?: string | undefined;
+	status?: OrderStatus[] | undefined;
+	restaurantId?: string | undefined;
+	customerId?: string | undefined;
+	paymentStatus?: string | undefined;
+	startDate?: Date | undefined;
+	endDate?: Date | undefined;
+	minAmount?: number | undefined;
+	maxAmount?: number | undefined;
+	sortBy?:
+		| "createdAt"
+		| "updatedAt"
+		| "totalAmount"
+		| "status"
+		| undefined;
+	sortOrder?: "asc" | "desc" | undefined;
+	page: number;
+	limit: number;
+}
+
+export interface AdminOrderListItemData {
+	orderId: string;
+	orderNumber: string;
+	restaurantId: string;
+	restaurantName: string | null;
+	customerId: string | null;
+	status: OrderStatus;
+	paymentStatus: string;
+	totalAmount: number;
+	platformFeeAssessed: number;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface GetAdminOrdersRepoResult {
+	orders: AdminOrderListItemData[];
+	totalOrders: number;
+	totalPages: number;
+	currentPage: number;
+	limit: number;
+	hasNextPage: boolean;
+	hasPreviousPage: boolean;
+	ordersByStatus: Partial<Record<OrderStatus, number>>;
+	metricsTotalOrders: number;
+	totalOrderValue: number;
+}

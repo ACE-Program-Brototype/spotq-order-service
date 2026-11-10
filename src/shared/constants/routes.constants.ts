@@ -6,6 +6,11 @@ export const ROUTES = {
 	RESTAURANTS: "/restaurants",
 	ORDERS: "/orders",
 	STAFF: "/staff",
+	ADMIN: "/admin",
+} as const;
+
+export const ADMIN_ORDER_ROUTES = {
+	LIST: "/",
 } as const;
 
 export const STAFF_ORDER_ROUTES = {

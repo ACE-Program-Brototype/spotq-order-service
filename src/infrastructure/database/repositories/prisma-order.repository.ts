@@ -9,8 +9,11 @@ import {
 	OrderStatusConflictError,
 } from "@domain/errors/index.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
+
 import type {
 	CancelledOrderData,
+	GetAdminOrdersRepoParams,
+	GetAdminOrdersRepoResult,
 	GetCustomerOrderHistoryRepoParams,
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
@@ -23,6 +26,7 @@ import type {
 import type { Prisma, PrismaClient } from "@generated/prisma/client.ts";
 import {
 	OrderPersistenceMapper,
+	type PrismaAdminOrderRecord,
 	type PrismaOrderWithRelations,
 } from "@infrastructure/database/mappers/order.mapper.ts";
 import { PrismaBaseRepository } from "@infrastructure/database/repositories/prisma-base.repository.ts";
@@ -42,6 +46,127 @@ export class PrismaOrderRepository
 		private readonly prisma: PrismaClient,
 	) {
 		super(prisma.order, OrderPersistenceMapper);
+	}
+
+	public async getAdminOrders(
+		params: GetAdminOrdersRepoParams,
+	): Promise<GetAdminOrdersRepoResult> {
+		try {
+			const search = params.search?.trim();
+			const where: Prisma.OrderWhereInput = {
+				...(params.status?.length ? { orderStatus: { in: params.status } } : {}),
+				...(params.restaurantId ? { restaurantId: params.restaurantId } : {}),
+				...(params.customerId ? { userId: params.customerId } : {}),
+				...(params.paymentStatus
+					? { paymentStatus: params.paymentStatus as PaymentStatus }
+					: {}),
+				...(params.startDate || params.endDate
+					? {
+							createdAt: {
+								...(params.startDate ? { gte: params.startDate } : {}),
+								...(params.endDate ? { lt: params.endDate } : {}),
+							},
+						}
+					: {}),
+				...(params.minAmount !== undefined || params.maxAmount !== undefined
+					? {
+							grandTotal: {
+								...(params.minAmount !== undefined
+									? { gte: params.minAmount }
+									: {}),
+								...(params.maxAmount !== undefined
+									? { lte: params.maxAmount }
+									: {}),
+							},
+						}
+					: {}),
+				...(search
+					? {
+							OR: [
+								{ id: search },
+								{ orderNumber: { contains: search, mode: "insensitive" } },
+								{ restaurantId: search },
+								{ userId: search },
+							],
+						}
+					: {}),
+			};
+
+			const sortFields = {
+				createdAt: "createdAt",
+				updatedAt: "updatedAt",
+				totalAmount: "grandTotal",
+				status: "orderStatus",
+			} as const;
+			const sortField = sortFields[params.sortBy ?? "createdAt"];
+			const sortOrder = params.sortOrder ?? "desc";
+			const skip = (params.page - 1) * params.limit;
+
+			const [
+				records,
+				totalOrders,
+				statusGroups,
+				totals,
+				metricsTotalOrders,
+			] = await this.prisma.$transaction([
+				this.prisma.order.findMany({
+					where,
+					skip,
+					take: params.limit,
+					orderBy: [{ [sortField]: sortOrder }, { id: "asc" }],
+					select: {
+						id: true,
+						orderNumber: true,
+						restaurantId: true,
+						restaurantName: true,
+						userId: true,
+						orderStatus: true,
+						paymentStatus: true,
+						grandTotal: true,
+						platformFee: true,
+						createdAt: true,
+						updatedAt: true,
+					},
+				}),
+				this.prisma.order.count({ where }),
+				this.prisma.order.groupBy({
+					by: ["orderStatus"],
+					_count: { _all: true },
+				}),
+				this.prisma.order.aggregate({
+					_sum: { grandTotal: true },
+				}),
+				this.prisma.order.count(),
+			]);
+
+			const totalPages = Math.ceil(totalOrders / params.limit);
+			
+			const ordersByStatus = statusGroups.reduce<
+				Partial<Record<OrderStatus, number>>
+			>((result, group) => {
+				result[group.orderStatus] = group._count._all;
+				return result;
+			}, {});
+			const adminOrders = OrderPersistenceMapper.toAdminOrderItemList(
+				records as PrismaAdminOrderRecord[],
+			);
+
+			return {
+				orders: adminOrders,
+				totalOrders,
+				totalPages,
+				currentPage: params.page,
+				limit: params.limit,
+				hasNextPage: params.page < totalPages,
+				hasPreviousPage: params.page > 1,
+				ordersByStatus,
+				metricsTotalOrders,
+				totalOrderValue: Number((totals._sum.grandTotal ?? 0).toString()),
+			};
+		} catch (error) {
+			this.handlePrismaError(error, params);
+			throw error;
+		}
 	}
 
 	public async create(order: Order, cartIdToClear?: string): Promise<Order> {

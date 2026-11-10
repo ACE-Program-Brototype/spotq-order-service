@@ -27,6 +27,7 @@ import { GetCartUseCase } from "@application/use-cases/cart/get-cart.use-case.ts
 import { RemoveCartItemUseCase } from "@application/use-cases/cart/remove-cart-item.use-case.ts";
 import { UpdateCartItemQuantityUseCase } from "@application/use-cases/cart/update-cart-item-quantity.use-case.ts";
 import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.use-case.ts";
+import { GetAdminOrdersUseCase } from "@application/use-cases/orders/get-admin-orders.use-case.ts";
 import { GetCheckoutDetailsUseCase } from "@application/use-cases/orders/get-checkout-details.use-case.ts";
 import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-history.use-case.ts";
 import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orders-overview.use-case.ts";
@@ -48,6 +49,7 @@ import { MenuItemCatalogClient } from "@infrastructure/services/menu-item-catalo
 import { PaymentServiceClient } from "@infrastructure/services/payment-service.client.ts";
 import { QueueServiceClient } from "@infrastructure/services/queue-service.client.ts";
 import { RestaurantServiceClient } from "@infrastructure/services/restaurant-service.client.ts";
+import { AdminOrderController } from "@presentation/http/controllers/admin-order.controller.ts";
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
 import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
 import { RestaurantOrderController } from "@presentation/http/controllers/restaurant-order.controller.ts";
@@ -188,6 +190,16 @@ container
 container
 	.bind<IGetStaffOrdersListUseCase>(TYPES.GetStaffOrdersListUseCase)
 	.to(GetStaffOrdersListUseCase)
+	.inSingletonScope();
+
+container
+	.bind(TYPES.GetAdminOrdersUseCase)
+	.to(GetAdminOrdersUseCase)
+	.inSingletonScope();
+
+container
+	.bind<AdminOrderController>(TYPES.AdminOrderController)
+	.to(AdminOrderController)
 	.inSingletonScope();
 
 container

@@ -10,6 +10,8 @@ export const messages = {
 	VALIDATION_ERROR: "Validation error occurred",
 	UNAUTHORIZED: "Access token is missing, malformed, or expired",
 	FORBIDDEN: "Forbidden access to this resource",
+	GATEWAY_UNAUTHORIZED: "Authentication is required to access this resource",
+	ADMIN_FORBIDDEN: "Only Platform Admin users can access this resource",
 };
 
 export const CART_MESSAGES = {
