@@ -461,6 +461,12 @@ describe("CustomerOrderController", () => {
 						grand_total: 632,
 						currency: "INR",
 					},
+					payment: {
+						status: PaymentStatus.PAID,
+						method: PaymentMode.ONLINE,
+						payment_id: "pay_123",
+						amount_paid: 632,
+					},
 					status_history: [],
 				},
 			};

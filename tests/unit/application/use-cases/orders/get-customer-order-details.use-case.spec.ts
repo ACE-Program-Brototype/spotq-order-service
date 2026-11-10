@@ -128,6 +128,9 @@ describe("GetCustomerOrderDetailsUseCase", () => {
 		assert.equal(result.order.pricing.grand_total, 317);
 		assert.equal(result.order.items.length, 1);
 		assert.equal(result.order.items[0]?.name, "Paneer Biryani");
+		assert.equal(result.order.payment.status, PaymentStatus.PAID);
+		assert.equal(result.order.payment.method, PaymentMode.ONLINE);
+		assert.equal(result.order.payment.amount_paid, 317);
 		assert.ok(Array.isArray(result.order.status_history));
 	});
 

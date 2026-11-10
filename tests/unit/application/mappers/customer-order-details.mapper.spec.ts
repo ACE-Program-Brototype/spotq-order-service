@@ -115,6 +115,14 @@ describe("CustomerOrderDetailsMapper", () => {
 			currency: "INR",
 		});
 
+		// Payment verification
+		assert.deepEqual(result.order.payment, {
+			status: PaymentStatus.PAID,
+			method: PaymentMode.ONLINE,
+			payment_id: null,
+			amount_paid: 632,
+		});
+
 		// Items verification with addons and variants
 		assert.equal(result.order.items.length, 2);
 

@@ -1,10 +1,12 @@
 import type {
 	CustomerOrderDetailsDTO,
 	CustomerOrderItemDTO,
+	CustomerOrderPaymentDTO,
 	CustomerOrderStatusHistoryDTO,
 	GetCustomerOrderDetailsOutputDTO,
 } from "@application/dtos/orders/get-customer-order-details.dto.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
+import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 
 export const CustomerOrderDetailsMapper = {
 	toResponseDTO(order: Order): GetCustomerOrderDetailsOutputDTO {
@@ -39,6 +41,14 @@ export const CustomerOrderDetailsMapper = {
 					: new Date(history.createdAt).toISOString(),
 		}));
 
+		const isPaid = order.paymentStatus === PaymentStatus.PAID;
+		const payment: CustomerOrderPaymentDTO = {
+			status: order.paymentStatus,
+			method: order.paymentMode,
+			payment_id: order.paymentId ?? null,
+			amount_paid: isPaid ? order.grandTotal : 0,
+		};
+
 		const orderDetails: CustomerOrderDetailsDTO = {
 			order_id: order.id,
 			order_number: order.orderNumber,
@@ -62,6 +72,7 @@ export const CustomerOrderDetailsMapper = {
 				grand_total: order.grandTotal,
 				currency: "INR",
 			},
+			payment,
 			status_history: statusHistory,
 		};
 

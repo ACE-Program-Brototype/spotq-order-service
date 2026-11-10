@@ -1,5 +1,7 @@
 import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
+import type { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
+import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 
 export interface GetCustomerOrderDetailsInputDTO {
 	customerId: string;
@@ -41,6 +43,13 @@ export interface CustomerOrderPricingDTO {
 	currency: string;
 }
 
+export interface CustomerOrderPaymentDTO {
+	status: PaymentStatus;
+	method: PaymentMode;
+	payment_id: string | null;
+	amount_paid: number;
+}
+
 export interface CustomerOrderStatusHistoryDTO {
 	previous_status: OrderStatus | null;
 	current_status: OrderStatus;
@@ -61,6 +70,7 @@ export interface CustomerOrderDetailsDTO {
 	special_instructions?: string | null;
 	items: CustomerOrderItemDTO[];
 	pricing: CustomerOrderPricingDTO;
+	payment: CustomerOrderPaymentDTO;
 	status_history: CustomerOrderStatusHistoryDTO[];
 }
 
