@@ -36,3 +36,23 @@ export class ForbiddenError extends AppError {
 		super(message, HttpStatus.FORBIDDEN, errorCode);
 	}
 }
+
+export class DownstreamServiceUnavailableError extends AppError {
+	constructor(
+		serviceName: string,
+		message: string = `Downstream service '${serviceName}' is currently unavailable`,
+		errorCode: string = COMMON_ERROR_CODES.DOWNSTREAM_SERVICE_UNAVAILABLE,
+	) {
+		super(message, HttpStatus.SERVICE_UNAVAILABLE, errorCode);
+	}
+}
+
+export class DownstreamServiceTimeoutError extends AppError {
+	constructor(
+		serviceName: string,
+		message: string = `Downstream service '${serviceName}' timed out`,
+		errorCode: string = COMMON_ERROR_CODES.DOWNSTREAM_SERVICE_TIMEOUT,
+	) {
+		super(message, HttpStatus.GATEWAY_TIMEOUT, errorCode);
+	}
+}
