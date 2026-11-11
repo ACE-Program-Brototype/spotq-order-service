@@ -35,6 +35,7 @@ export interface AdminOrderSummaryDTO {
 	taxAmount: number;
 	totalAmount: number;
 	platformFeeAssessed: number;
+	paymentReference: string | null;
 	createdAt: string;
 	updatedAt: string;
 }

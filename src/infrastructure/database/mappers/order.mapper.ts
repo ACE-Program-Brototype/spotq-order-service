@@ -50,6 +50,7 @@ export interface PrismaAdminOrderRecord {
 	taxAmount: Prisma.Decimal;
 	grandTotal: Prisma.Decimal;
 	platformFee: Prisma.Decimal;
+	paymentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -122,6 +123,7 @@ export const OrderPersistenceMapper = {
 			taxAmount: Number(record.taxAmount.toFixed(2)),
 			totalAmount: Number(record.grandTotal.toFixed(2)),
 			platformFeeAssessed: Number(record.platformFee.toFixed(2)),
+			paymentId: record.paymentId ?? null,
 			createdAt: record.createdAt,
 			updatedAt: record.updatedAt,
 		};

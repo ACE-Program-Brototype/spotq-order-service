@@ -52,6 +52,9 @@ describe("GetStaffOrdersListUseCase", () => {
 			getCustomerOrderHistory: async () => {
 				throw new Error("Not implemented");
 			},
+			getAdminOrders: async () => {
+				throw new Error("Not implemented");
+			},
 			cancelOrder: async () => {
 				throw new Error("Not implemented");
 			},

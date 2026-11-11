@@ -174,6 +174,7 @@ export interface AdminOrderListItemData {
 	taxAmount: number;
 	totalAmount: number;
 	platformFeeAssessed: number;
+	paymentId?: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }

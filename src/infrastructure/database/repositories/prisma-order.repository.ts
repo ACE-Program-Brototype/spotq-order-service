@@ -119,6 +119,7 @@ export class PrismaOrderRepository
 							userId: true,
 							orderStatus: true,
 							paymentStatus: true,
+							paymentId: true,
 							subtotal: true,
 							taxAmount: true,
 							grandTotal: true,

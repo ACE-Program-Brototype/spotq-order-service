@@ -46,6 +46,7 @@ import type {
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
 	CancelledOrderData,
+	GetAdminOrdersRepoResult,
 	GetCustomerOrderHistoryRepoParams,
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
@@ -228,6 +229,10 @@ class MockOrderRepository implements IOrderRepository {
 			limit: 20,
 			hasNext: false,
 		};
+	}
+
+	public async getAdminOrders(): Promise<GetAdminOrdersRepoResult> {
+		throw new Error("Not implemented in test");
 	}
 
 	public async updateOrderStatus(

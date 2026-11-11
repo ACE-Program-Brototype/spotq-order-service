@@ -19,6 +19,7 @@ export const GetAdminOrdersMapper = {
 				taxAmount: order.taxAmount,
 				totalAmount: order.totalAmount,
 				platformFeeAssessed: order.platformFeeAssessed,
+				paymentReference: order.paymentId ?? null,
 				createdAt: order.createdAt.toISOString(),
 				updatedAt: order.updatedAt.toISOString(),
 			})),
