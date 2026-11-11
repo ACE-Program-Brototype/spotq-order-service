@@ -62,6 +62,7 @@ function createMockOrderRepo(options: {
 		updatePaymentReference: async () => {},
 		updatePaymentAndOrderStatus: async () => {},
 		findByRestaurantAndOrderId: async () => options.order ?? null,
+		findByCustomerAndOrderId: async () => options.order ?? null,
 		getRestaurantOrders: async () => ({
 			orders: [],
 			totalOrders: 0,

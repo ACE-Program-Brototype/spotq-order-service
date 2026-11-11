@@ -49,6 +49,18 @@ const envSchema = z.object({
 	RABBITMQ_URL: z.string().default("amqp://guest:guest@rabbitmq:5672"),
 	RABBITMQ_QUEUE_ORDER_EVENTS: z.string().default("order-events"),
 	TAX_PERCENT: z.coerce.number().min(0).max(100).default(5),
+	CIRCUIT_BREAKER_TIMEOUT_MS: z.coerce.number().positive().default(5000),
+	CIRCUIT_BREAKER_RESET_TIMEOUT_MS: z.coerce.number().positive().default(10000),
+	CIRCUIT_BREAKER_ERROR_THRESHOLD_PERCENTAGE: z.coerce
+		.number()
+		.min(1)
+		.max(100)
+		.default(50),
+	CIRCUIT_BREAKER_VOLUME_THRESHOLD: z.coerce.number().min(1).default(5),
+	CIRCUIT_BREAKER_ROLLING_WINDOW_MS: z.coerce
+		.number()
+		.positive()
+		.default(10000),
 });
 
 const env = envSchema.parse(process.env);

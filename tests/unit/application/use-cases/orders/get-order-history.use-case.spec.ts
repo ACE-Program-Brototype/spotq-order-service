@@ -52,6 +52,7 @@ describe("GetOrderHistoryUseCase", () => {
 			updatePaymentReference: async () => {},
 			updatePaymentAndOrderStatus: async () => {},
 			findByRestaurantAndOrderId: async () => null,
+			findByCustomerAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],
 				totalOrders: 0,
@@ -126,6 +127,7 @@ describe("GetOrderHistoryUseCase", () => {
 			updatePaymentReference: async () => {},
 			updatePaymentAndOrderStatus: async () => {},
 			findByRestaurantAndOrderId: async () => null,
+			findByCustomerAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],
 				totalOrders: 0,
