@@ -46,6 +46,8 @@ export interface PrismaAdminOrderRecord {
 	userId: string | null;
 	orderStatus: string;
 	paymentStatus: string;
+	subtotal: Prisma.Decimal;
+	taxAmount: Prisma.Decimal;
 	grandTotal: Prisma.Decimal;
 	platformFee: Prisma.Decimal;
 	createdAt: Date;
@@ -116,6 +118,8 @@ export const OrderPersistenceMapper = {
 			customerId: record.userId,
 			status: record.orderStatus as OrderStatus,
 			paymentStatus: record.paymentStatus,
+			subtotal: Number(record.subtotal.toFixed(2)),
+			taxAmount: Number(record.taxAmount.toFixed(2)),
 			totalAmount: Number(record.grandTotal.toFixed(2)),
 			platformFeeAssessed: Number(record.platformFee.toFixed(2)),
 			createdAt: record.createdAt,

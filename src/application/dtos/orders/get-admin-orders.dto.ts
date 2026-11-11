@@ -31,6 +31,8 @@ export interface AdminOrderSummaryDTO {
 	customerId: string | null;
 	status: OrderStatus;
 	paymentStatus: PaymentStatus;
+	subtotal: number;
+	taxAmount: number;
 	totalAmount: number;
 	platformFeeAssessed: number;
 	createdAt: string;

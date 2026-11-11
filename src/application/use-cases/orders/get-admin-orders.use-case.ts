@@ -19,6 +19,6 @@ export class GetAdminOrdersUseCase implements IGetAdminOrdersUseCase {
 		dto: GetAdminOrdersInputDTO,
 	): Promise<GetAdminOrdersResponseDTO> {
 		const ordersData = await this.orderRepository.getAdminOrders(dto);
-		return GetAdminOrdersMapper.toDTO(ordersData);
+		return GetAdminOrdersMapper.toResponseDTO(ordersData);
 	}
 }

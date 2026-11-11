@@ -2,7 +2,9 @@ import type { GetAdminOrdersResponseDTO } from "@application/dtos/orders/get-adm
 import type { GetAdminOrdersRepoResult } from "@domain/types/order-repository.types.ts";
 
 export const GetAdminOrdersMapper = {
-	toDTO(repoResult: GetAdminOrdersRepoResult): GetAdminOrdersResponseDTO {
+	toResponseDTO(
+		repoResult: GetAdminOrdersRepoResult,
+	): GetAdminOrdersResponseDTO {
 		return {
 			orders: repoResult.orders.map((order) => ({
 				orderId: order.orderId,
@@ -13,6 +15,8 @@ export const GetAdminOrdersMapper = {
 				status: order.status,
 				paymentStatus:
 					order.paymentStatus as GetAdminOrdersResponseDTO["orders"][number]["paymentStatus"],
+				subtotal: order.subtotal,
+				taxAmount: order.taxAmount,
 				totalAmount: order.totalAmount,
 				platformFeeAssessed: order.platformFeeAssessed,
 				createdAt: order.createdAt.toISOString(),

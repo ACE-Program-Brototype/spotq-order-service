@@ -170,6 +170,8 @@ export interface AdminOrderListItemData {
 	customerId: string | null;
 	status: OrderStatus;
 	paymentStatus: string;
+	subtotal: number;
+	taxAmount: number;
 	totalAmount: number;
 	platformFeeAssessed: number;
 	createdAt: Date;
