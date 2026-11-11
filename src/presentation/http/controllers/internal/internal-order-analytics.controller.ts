@@ -7,8 +7,9 @@ import type {
 	OrderProductAnalyticsQuery,
 } from "@presentation/http/validators/internal/order-analytics.validator.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";
+import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 import { sendSuccessResponse } from "@shared/responses/api-response.ts";
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -25,60 +26,50 @@ export class InternalOrderAnalyticsController
 	public getRestaurantOrderSummary = async (
 		req: Request,
 		res: Response,
-		next: NextFunction,
 	): Promise<void> => {
-		try {
-			const { restaurantId } = req.params as { restaurantId: string };
-			const query = req.query as unknown as OrderAnalyticsSummaryQuery;
+		const { restaurantId } = req.params as { restaurantId: string };
+		const query = req.query as unknown as OrderAnalyticsSummaryQuery;
 
-			const result = await this.getRestaurantOrderAnalyticsUseCase.execute({
-				restaurantId,
-				interval: query.interval,
-				day: query.day,
-				month: query.month,
-				year: query.year,
-				timezone: query.timezone,
-			});
+		const result = await this.getRestaurantOrderAnalyticsUseCase.execute({
+			restaurantId,
+			interval: query.interval,
+			day: query.day,
+			month: query.month,
+			year: query.year,
+			timezone: query.timezone,
+		});
 
-			sendSuccessResponse(
-				res,
-				result,
-				"Restaurant order summary analytics fetched successfully",
-				HttpStatus.OK,
-			);
-		} catch (error) {
-			next(error);
-		}
+		sendSuccessResponse(
+			res,
+			result,
+			ORDER_MESSAGES.ORDER_ANALYTICS_SUMMARY_FETCHED_SUCCESS,
+			HttpStatus.OK,
+		);
 	};
 
 	public getRestaurantProductAnalytics = async (
 		req: Request,
 		res: Response,
-		next: NextFunction,
 	): Promise<void> => {
-		try {
-			const { restaurantId } = req.params as { restaurantId: string };
-			const query = req.query as unknown as OrderProductAnalyticsQuery;
+		const { restaurantId } = req.params as { restaurantId: string };
+		const query = req.query as unknown as OrderProductAnalyticsQuery;
 
-			const result = await this.getRestaurantProductAnalyticsUseCase.execute({
-				restaurantId,
-				interval: query.interval,
-				day: query.day,
-				month: query.month,
-				year: query.year,
-				timezone: query.timezone,
-				page: query.page,
-				limit: query.limit,
-			});
+		const result = await this.getRestaurantProductAnalyticsUseCase.execute({
+			restaurantId,
+			interval: query.interval,
+			day: query.day,
+			month: query.month,
+			year: query.year,
+			timezone: query.timezone,
+			page: query.page,
+			limit: query.limit,
+		});
 
-			sendSuccessResponse(
-				res,
-				result,
-				"Restaurant product analytics fetched successfully",
-				HttpStatus.OK,
-			);
-		} catch (error) {
-			next(error);
-		}
+		sendSuccessResponse(
+			res,
+			result,
+			ORDER_MESSAGES.PRODUCT_ANALYTICS_FETCHED_SUCCESS,
+			HttpStatus.OK,
+		);
 	};
 }

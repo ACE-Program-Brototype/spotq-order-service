@@ -3,7 +3,7 @@ import type { ResolvedDateRange } from "@application/utils/date-range.util.ts";
 import type { RestaurantOrderAnalyticsRepoResult } from "@domain/types/order-repository.types.ts";
 
 export const RestaurantOrderAnalyticsMapper = {
-	toDTO(
+	toResponseDTO(
 		restaurantId: string,
 		range: ResolvedDateRange,
 		result: RestaurantOrderAnalyticsRepoResult,
@@ -22,5 +22,12 @@ export const RestaurantOrderAnalyticsMapper = {
 			},
 			generatedAt: new Date().toISOString(),
 		};
+	},
+	toDTO(
+		restaurantId: string,
+		range: ResolvedDateRange,
+		result: RestaurantOrderAnalyticsRepoResult,
+	): RestaurantOrderAnalyticsSummaryResponseDTO {
+		return this.toResponseDTO(restaurantId, range, result);
 	},
 };

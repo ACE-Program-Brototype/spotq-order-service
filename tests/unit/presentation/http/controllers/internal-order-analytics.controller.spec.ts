@@ -85,18 +85,14 @@ describe("InternalOrderAnalyticsController", () => {
 		} as unknown as Request;
 
 		const { res, getStatus, getBody } = createMockResponse();
-		let nextCalled = false;
 
-		await controller.getRestaurantOrderSummary(req, res, () => {
-			nextCalled = true;
-		});
+		await controller.getRestaurantOrderSummary(req, res);
 
-		assert.strictEqual(nextCalled, false);
 		assert.strictEqual(getStatus(), HttpStatus.OK);
 		assert.deepStrictEqual((getBody() as { data: unknown }).data, mockSummary);
 	});
 
-	it("should call next with error when use case throws", async () => {
+	it("should reject when use case throws", async () => {
 		const expectedError = new Error("Database failure");
 		const failingSummaryUseCase: IGetRestaurantOrderAnalyticsUseCase = {
 			execute: async () => {
@@ -118,13 +114,11 @@ describe("InternalOrderAnalyticsController", () => {
 		} as unknown as Request;
 
 		const { res } = createMockResponse();
-		let capturedError: unknown = null;
 
-		await controller.getRestaurantOrderSummary(req, res, (err) => {
-			capturedError = err;
-		});
-
-		assert.strictEqual(capturedError, expectedError);
+		await assert.rejects(
+			async () => controller.getRestaurantOrderSummary(req, res),
+			expectedError,
+		);
 	});
 
 	it("should return 200 with product analytics data", async () => {
@@ -183,13 +177,9 @@ describe("InternalOrderAnalyticsController", () => {
 		} as unknown as Request;
 
 		const { res, getStatus, getBody } = createMockResponse();
-		let nextCalled = false;
 
-		await controller.getRestaurantProductAnalytics(req, res, () => {
-			nextCalled = true;
-		});
+		await controller.getRestaurantProductAnalytics(req, res);
 
-		assert.strictEqual(nextCalled, false);
 		assert.strictEqual(getStatus(), HttpStatus.OK);
 		assert.deepStrictEqual((getBody() as { data: unknown }).data, mockProducts);
 	});

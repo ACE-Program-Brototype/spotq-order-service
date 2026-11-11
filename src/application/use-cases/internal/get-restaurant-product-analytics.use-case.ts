@@ -41,7 +41,7 @@ export class GetRestaurantProductAnalyticsUseCase
 			limit,
 		});
 
-		return RestaurantProductAnalyticsMapper.toDTO(
+		return RestaurantProductAnalyticsMapper.toResponseDTO(
 			input.restaurantId,
 			range,
 			page,

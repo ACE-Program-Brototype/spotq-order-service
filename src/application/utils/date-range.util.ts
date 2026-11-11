@@ -83,7 +83,9 @@ export function resolveAnalyticsDateRange(
 	const timezone = input.timezone || DEFAULT_TIMEZONE;
 	const interval: AnalyticsInterval = input.interval || ANALYTICS_INTERVALS.DAY;
 
-	// Default to current date in the target timezone if not specified
+	/**
+	 * Default to current date in the target timezone if not specified.
+	 */
 	const now = new Date();
 	const formatter = new Intl.DateTimeFormat("en-US", {
 		timeZone: timezone,

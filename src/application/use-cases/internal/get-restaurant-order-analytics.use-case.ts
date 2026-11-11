@@ -36,7 +36,7 @@ export class GetRestaurantOrderAnalyticsUseCase
 			prevStartDate: range.prevStartDate,
 		});
 
-		return RestaurantOrderAnalyticsMapper.toDTO(
+		return RestaurantOrderAnalyticsMapper.toResponseDTO(
 			input.restaurantId,
 			range,
 			result,

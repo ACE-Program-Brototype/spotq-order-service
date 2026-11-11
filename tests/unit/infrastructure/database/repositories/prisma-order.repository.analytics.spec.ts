@@ -12,39 +12,11 @@ describe("PrismaOrderRepository - Analytics", () => {
 	};
 
 	describe("getRestaurantOrderAnalytics", () => {
-		it("should execute aggregate, count, queryRaw, and groupBy queries and return formatted metrics", async () => {
-			let aggregateCalls = 0;
-			let countCalls = 0;
+		it("should execute aggregated SQL and groupBy queries and return formatted metrics", async () => {
+			let queryRawCalls = 0;
 
 			const mockPrisma = {
 				order: {
-					aggregate: async () => {
-						aggregateCalls++;
-						if (aggregateCalls === 1) {
-							// Current period revenue
-							return {
-								_sum: {
-									subtotal: 30000,
-									discountAmount: 2000,
-									taxAmount: 1400,
-									grandTotal: 29400,
-								},
-							};
-						}
-						// Previous period revenue
-						return {
-							_sum: {
-								grandTotal: 20000,
-							},
-						};
-					},
-					count: async () => {
-						countCalls++;
-						if (countCalls === 1) return 100; // totalOrderCount
-						if (countCalls === 2) return 80; // prevOrderCount
-						if (countCalls === 3) return 60; // dineInCount
-						return 0;
-					},
 					groupBy: async () => [
 						{
 							orderStatus: "COMPLETED",
@@ -58,7 +30,30 @@ describe("PrismaOrderRepository - Analytics", () => {
 						},
 					],
 				},
-				$queryRaw: async () => [{ count: 75 }],
+				$queryRaw: async () => {
+					queryRawCalls++;
+					if (queryRawCalls === 1) {
+						// Current period overview aggregation
+						return [
+							{
+								gross_sales: 30000,
+								discount_amount: 2000,
+								tax_amount: 1400,
+								total_bill_amount: 29400,
+								total_order_count: 100,
+								dine_in_count: 60,
+								unique_customers_count: 75,
+							},
+						];
+					}
+					// Previous period aggregation
+					return [
+						{
+							prev_sales: 20000,
+							prev_order_count: 80,
+						},
+					];
+				},
 			} as unknown as PrismaClient;
 
 			const repo = new PrismaOrderRepository(mockPrisma);
@@ -103,26 +98,57 @@ describe("PrismaOrderRepository - Analytics", () => {
 	});
 
 	describe("getRestaurantProductAnalytics", () => {
-		it("should group order items and return topSelling and slowMoving with correct classifications", async () => {
+		it("should query DB for topSelling and slowMoving with correct ordering and classifications", async () => {
+			let queryRawCalls = 0;
+
 			const mockPrisma = {
-				orderItem: {
-					groupBy: async () => [
+				$queryRaw: async () => {
+					queryRawCalls++;
+					if (queryRawCalls === 1) {
+						// 1. Totals
+						return [
+							{
+								total_products_sold: 3,
+								total_period_sales: 20100,
+							},
+						];
+					}
+					if (queryRawCalls === 2) {
+						// 2. Top Selling (sorted by DB: Naan, Biryani, Green Tea)
+						return [
+							{
+								menu_item_id: "item-2",
+								item_name: "Butter Naan",
+								quantity_sold: 100,
+								gross_sales_rupees: 5000,
+								full_count: 3,
+							},
+							{
+								menu_item_id: "item-1",
+								item_name: "Chicken Biryani",
+								quantity_sold: 50,
+								gross_sales_rupees: 15000,
+								full_count: 3,
+							},
+							{
+								menu_item_id: "item-3",
+								item_name: "Green Tea",
+								quantity_sold: 2,
+								gross_sales_rupees: 100,
+								full_count: 3,
+							},
+						];
+					}
+					// 3. Slow Moving (only Green Tea <= 3)
+					return [
 						{
-							menuItemId: "item-1",
-							itemName: "Chicken Biryani",
-							_sum: { quantity: 50, totalPrice: 15000 },
+							menu_item_id: "item-3",
+							item_name: "Green Tea",
+							quantity_sold: 2,
+							gross_sales_rupees: 100,
+							full_count: 1,
 						},
-						{
-							menuItemId: "item-2",
-							itemName: "Butter Naan",
-							_sum: { quantity: 100, totalPrice: 5000 },
-						},
-						{
-							menuItemId: "item-3",
-							itemName: "Green Tea",
-							_sum: { quantity: 2, totalPrice: 100 },
-						},
-					],
+					];
 				},
 			} as unknown as PrismaClient;
 

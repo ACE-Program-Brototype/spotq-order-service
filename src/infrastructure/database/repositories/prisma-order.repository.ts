@@ -1,7 +1,7 @@
 import { TYPES } from "@config/di/types.ts";
 import type { Order } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
-import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import { RestaurantPlan } from "@domain/enums/restaurant-plan.enum.ts";
 import {
 	DomainError,
@@ -21,6 +21,7 @@ import type {
 	GetRestaurantProductAnalyticsRepoParams,
 	GetStaffOrdersRepoParams,
 	GetStaffOrdersRepoResult,
+	ProductPerformanceItemData,
 	RestaurantOrderAnalyticsRepoResult,
 	RestaurantProductAnalyticsRepoResult,
 } from "@domain/types/order-repository.types";
@@ -725,54 +726,91 @@ export class PrismaOrderRepository
 	): Promise<RestaurantOrderAnalyticsRepoResult> {
 		const { restaurantId, startDate, nextPeriodStart, prevStartDate } = params;
 
-		// 1. Current Settled Revenue (COMPLETED & PAID)
-		const currentRevenueAgg = await this.prisma.order.aggregate({
-			where: {
-				restaurantId,
-				createdAt: { gte: startDate, lt: nextPeriodStart },
-				orderStatus: OrderStatus.COMPLETED,
-				paymentStatus: PaymentStatus.PAID,
-			},
-			_sum: {
-				subtotal: true,
-				discountAmount: true,
-				taxAmount: true,
-				grandTotal: true,
-			},
-		});
+		// 1. Current and Previous Period Aggregations + Order Status Breakdown executed in parallel
+		const [currentAggResult, prevAggResult, statusGroups] = await Promise.all([
+			// Consolidated aggregation: Gross, Discount, Tax, Total Bill, Order Counts, Dine-In, and Unique Customers in 1 query
+			this.prisma.$queryRaw<
+				Array<{
+					gross_sales: string | number;
+					discount_amount: string | number;
+					tax_amount: string | number;
+					total_bill_amount: string | number;
+					total_order_count: number;
+					dine_in_count: number;
+					unique_customers_count: number;
+				}>
+			>`
+				SELECT
+					COALESCE(SUM(CASE WHEN order_status = 'COMPLETED' AND payment_status = 'PAID' THEN subtotal ELSE 0 END), 0)::numeric AS gross_sales,
+					COALESCE(SUM(CASE WHEN order_status = 'COMPLETED' AND payment_status = 'PAID' THEN discount_amount ELSE 0 END), 0)::numeric AS discount_amount,
+					COALESCE(SUM(CASE WHEN order_status = 'COMPLETED' AND payment_status = 'PAID' THEN tax_amount ELSE 0 END), 0)::numeric AS tax_amount,
+					COALESCE(SUM(CASE WHEN order_status = 'COMPLETED' AND payment_status = 'PAID' THEN grand_total ELSE 0 END), 0)::numeric AS total_bill_amount,
+					COUNT(*)::int AS total_order_count,
+					COUNT(CASE WHEN table_number IS NOT NULL THEN 1 END)::int AS dine_in_count,
+					COUNT(DISTINCT user_id)::int AS unique_customers_count
+				FROM orders
+				WHERE restaurant_id = ${restaurantId}::uuid
+					AND created_at >= ${startDate}
+					AND created_at < ${nextPeriodStart}
+			`,
 
-		const grossSalesRupees = currentRevenueAgg._sum.subtotal
-			? Number(currentRevenueAgg._sum.subtotal.toFixed(2))
-			: 0;
-		const discountRupees = currentRevenueAgg._sum.discountAmount
-			? Number(currentRevenueAgg._sum.discountAmount.toFixed(2))
-			: 0;
+			// Consolidated previous period aggregation: Previous Revenue & Previous Order Count in 1 query
+			this.prisma.$queryRaw<
+				Array<{
+					prev_sales: string | number;
+					prev_order_count: number;
+				}>
+			>`
+				SELECT
+					COALESCE(SUM(CASE WHEN order_status = 'COMPLETED' AND payment_status = 'PAID' THEN grand_total ELSE 0 END), 0)::numeric AS prev_sales,
+					COUNT(*)::int AS prev_order_count
+				FROM orders
+				WHERE restaurant_id = ${restaurantId}::uuid
+					AND created_at >= ${prevStartDate}
+					AND created_at < ${startDate}
+			`,
+
+			// Order status breakdown
+			this.prisma.order.groupBy({
+				by: ["orderStatus"],
+				where: {
+					restaurantId,
+					createdAt: { gte: startDate, lt: nextPeriodStart },
+				},
+				_count: {
+					id: true,
+				},
+				_sum: {
+					grandTotal: true,
+				},
+			}),
+		]);
+
+		const current = currentAggResult[0];
+		const grossSalesRupees = Number(
+			Number(current?.gross_sales ?? 0).toFixed(2),
+		);
+		const discountRupees = Number(
+			Number(current?.discount_amount ?? 0).toFixed(2),
+		);
 		const netSalesRupees = Number(
 			(grossSalesRupees - discountRupees).toFixed(2),
 		);
-		const taxCollectedRupees = currentRevenueAgg._sum.taxAmount
-			? Number(currentRevenueAgg._sum.taxAmount.toFixed(2))
-			: 0;
-		const totalBillAmountRupees = currentRevenueAgg._sum.grandTotal
-			? Number(currentRevenueAgg._sum.grandTotal.toFixed(2))
-			: 0;
+		const taxCollectedRupees = Number(
+			Number(current?.tax_amount ?? 0).toFixed(2),
+		);
+		const totalBillAmountRupees = Number(
+			Number(current?.total_bill_amount ?? 0).toFixed(2),
+		);
+		const totalOrderCount = Number(current?.total_order_count ?? 0);
+		const dineInCount = Number(current?.dine_in_count ?? 0);
+		const takeawayCount = Math.max(0, totalOrderCount - dineInCount);
+		const uniqueCustomersCount = Number(current?.unique_customers_count ?? 0);
 
-		// 2. Previous Period Revenue for Growth %
-		const prevRevenueAgg = await this.prisma.order.aggregate({
-			where: {
-				restaurantId,
-				createdAt: { gte: prevStartDate, lt: startDate },
-				orderStatus: OrderStatus.COMPLETED,
-				paymentStatus: PaymentStatus.PAID,
-			},
-			_sum: {
-				grandTotal: true,
-			},
-		});
+		const prev = prevAggResult[0];
+		const prevSales = Number(Number(prev?.prev_sales ?? 0).toFixed(2));
+		const prevOrderCount = Number(prev?.prev_order_count ?? 0);
 
-		const prevSales = prevRevenueAgg._sum.grandTotal
-			? Number(prevRevenueAgg._sum.grandTotal.toFixed(2))
-			: 0;
 		const revenueGrowth =
 			prevSales === 0
 				? totalBillAmountRupees > 0
@@ -783,22 +821,6 @@ export class PrismaOrderRepository
 							1,
 						),
 					);
-
-		// 3. Current Order Counts (100% of orders created in window)
-		const totalOrderCount = await this.prisma.order.count({
-			where: {
-				restaurantId,
-				createdAt: { gte: startDate, lt: nextPeriodStart },
-			},
-		});
-
-		// Previous Order Count for Order Growth %
-		const prevOrderCount = await this.prisma.order.count({
-			where: {
-				restaurantId,
-				createdAt: { gte: prevStartDate, lt: startDate },
-			},
-		});
 
 		const orderGrowth =
 			prevOrderCount === 0
@@ -812,47 +834,11 @@ export class PrismaOrderRepository
 						).toFixed(1),
 					);
 
-		// 4. Dine-In vs Takeaway Counts
-		// Orders with tableNumber are DINE_IN; orders without tableNumber are TAKEAWAY
-		const dineInCount = await this.prisma.order.count({
-			where: {
-				restaurantId,
-				createdAt: { gte: startDate, lt: nextPeriodStart },
-				tableNumber: { not: null },
-			},
-		});
-		const takeawayCount = totalOrderCount - dineInCount;
-
-		// 5. Operations: Diners count is not tracked in Spotq (no guest count field); returned as 0 per SCRUM-1275 AC 7
+		/**
+		 * Operations: Diners count is not tracked in Spotq (no guest count field);
+		 * returned as 0 per SCRUM-1275 AC 7.
+		 */
 		const dinersServedCount = 0;
-
-		// Unique Customers (Database-level COUNT DISTINCT user_id)
-		const customerCountResult = await this.prisma.$queryRaw<
-			Array<{ count: bigint | number }>
-		>`
-			SELECT COUNT(DISTINCT user_id)::int as count 
-			FROM orders 
-			WHERE restaurant_id = ${restaurantId}::uuid
-				AND created_at >= ${startDate}
-				AND created_at < ${nextPeriodStart}
-				AND user_id IS NOT NULL
-		`;
-		const uniqueCustomersCount = Number(customerCountResult[0]?.count ?? 0);
-
-		// 6. Order Status Breakdown (100% of orders created in window)
-		const statusGroups = await this.prisma.order.groupBy({
-			by: ["orderStatus"],
-			where: {
-				restaurantId,
-				createdAt: { gte: startDate, lt: nextPeriodStart },
-			},
-			_count: {
-				id: true,
-			},
-			_sum: {
-				grandTotal: true,
-			},
-		});
 
 		const distribution = statusGroups.map((group) => {
 			const count = group._count.id;
@@ -904,44 +890,102 @@ export class PrismaOrderRepository
 		params: GetRestaurantProductAnalyticsRepoParams,
 	): Promise<RestaurantProductAnalyticsRepoResult> {
 		const { restaurantId, startDate, nextPeriodStart, page, limit } = params;
+		const offset = (page - 1) * limit;
 
-		// 1. Group order items for completed orders in window with DB-level ordering
-		const itemAggregates = await this.prisma.orderItem.groupBy({
-			by: ["menuItemId", "itemName"],
-			where: {
-				order: {
-					restaurantId,
-					createdAt: { gte: startDate, lt: nextPeriodStart },
-					orderStatus: OrderStatus.COMPLETED,
-					paymentStatus: PaymentStatus.PAID,
-				},
-			},
-			_sum: {
-				quantity: true,
-				totalPrice: true,
-			},
-			orderBy: {
-				_sum: {
-					quantity: "desc",
-				},
-			},
-		});
+		// Execute Totals, Top Selling, and Slow Moving queries in parallel using database-level sorting, grouping & pagination
+		const [totalsResult, topSellingRows, slowMovingRows] = await Promise.all([
+			// 1. Overall Totals across the period
+			this.prisma.$queryRaw<
+				Array<{
+					total_products_sold: number;
+					total_period_sales: string | number;
+				}>
+			>`
+				SELECT
+					COUNT(DISTINCT oi.menu_item_id)::int AS total_products_sold,
+					COALESCE(SUM(oi.total_price), 0)::numeric AS total_period_sales
+				FROM order_items oi
+				JOIN orders o ON oi.order_id = o.id
+				WHERE o.restaurant_id = ${restaurantId}::uuid
+					AND o.created_at >= ${startDate}
+					AND o.created_at < ${nextPeriodStart}
+					AND o.order_status = 'COMPLETED'
+					AND o.payment_status = 'PAID'
+			`,
 
-		// Total sales across all products for percentageOfTotalSales
-		const totalPeriodSales = itemAggregates.reduce(
-			(acc, item) =>
-				acc + (item._sum.totalPrice ? Number(item._sum.totalPrice) : 0),
-			0,
+			// 2. Top Selling: Sorted in DB primarily by quantitySold DESC, secondarily by grossSalesRupees DESC, tertiarily by itemName ASC
+			this.prisma.$queryRaw<
+				Array<{
+					menu_item_id: string;
+					item_name: string;
+					quantity_sold: number;
+					gross_sales_rupees: string | number;
+					full_count: number;
+				}>
+			>`
+				SELECT
+					oi.menu_item_id,
+					oi.item_name,
+					SUM(oi.quantity)::int AS quantity_sold,
+					COALESCE(SUM(oi.total_price), 0)::numeric AS gross_sales_rupees,
+					COUNT(*) OVER()::int AS full_count
+				FROM order_items oi
+				JOIN orders o ON oi.order_id = o.id
+				WHERE o.restaurant_id = ${restaurantId}::uuid
+					AND o.created_at >= ${startDate}
+					AND o.created_at < ${nextPeriodStart}
+					AND o.order_status = 'COMPLETED'
+					AND o.payment_status = 'PAID'
+				GROUP BY oi.menu_item_id, oi.item_name
+				ORDER BY quantity_sold DESC, gross_sales_rupees DESC, oi.item_name ASC
+				LIMIT ${limit} OFFSET ${offset}
+			`,
+
+			// 3. Slow Moving: Filtered in DB with quantity <= LOW_VOLUME_THRESHOLD, sorted primarily by quantitySold ASC, secondarily by grossSalesRupees ASC, tertiarily by itemName ASC
+			this.prisma.$queryRaw<
+				Array<{
+					menu_item_id: string;
+					item_name: string;
+					quantity_sold: number;
+					gross_sales_rupees: string | number;
+					full_count: number;
+				}>
+			>`
+				SELECT
+					oi.menu_item_id,
+					oi.item_name,
+					SUM(oi.quantity)::int AS quantity_sold,
+					COALESCE(SUM(oi.total_price), 0)::numeric AS gross_sales_rupees,
+					COUNT(*) OVER()::int AS full_count
+				FROM order_items oi
+				JOIN orders o ON oi.order_id = o.id
+				WHERE o.restaurant_id = ${restaurantId}::uuid
+					AND o.created_at >= ${startDate}
+					AND o.created_at < ${nextPeriodStart}
+					AND o.order_status = 'COMPLETED'
+					AND o.payment_status = 'PAID'
+				GROUP BY oi.menu_item_id, oi.item_name
+				HAVING SUM(oi.quantity) <= ${ANALYTICS_CONSTANTS.LOW_VOLUME_THRESHOLD}
+				ORDER BY quantity_sold ASC, gross_sales_rupees ASC, oi.item_name ASC
+				LIMIT ${limit} OFFSET ${offset}
+			`,
+		]);
+
+		const totalPeriodSales = Number(
+			Number(totalsResult[0]?.total_period_sales ?? 0).toFixed(2),
 		);
+		const totalProductsSold = Number(totalsResult[0]?.total_products_sold ?? 0);
 
-		const totalProductsSold = itemAggregates.length;
-
-		// Map to ProductPerformanceItemData using constants
-		const allItems = itemAggregates.map((item) => {
-			const quantitySold = item._sum.quantity ?? 0;
-			const grossSalesRupees = item._sum.totalPrice
-				? Number(item._sum.totalPrice.toFixed(2))
-				: 0;
+		const mapProductRow = (row: {
+			menu_item_id: string;
+			item_name: string;
+			quantity_sold: number;
+			gross_sales_rupees: string | number;
+		}): ProductPerformanceItemData => {
+			const quantitySold = Number(row.quantity_sold ?? 0);
+			const grossSalesRupees = Number(
+				Number(row.gross_sales_rupees ?? 0).toFixed(2),
+			);
 			const percentageOfTotalSales =
 				totalPeriodSales === 0
 					? 0
@@ -953,61 +997,27 @@ export class PrismaOrderRepository
 					: PRODUCT_CLASSIFICATIONS.NORMAL;
 
 			return {
-				menuItemId: item.menuItemId,
-				name: item.itemName,
+				menuItemId: row.menu_item_id,
+				name: row.item_name,
 				quantitySold,
 				grossSalesRupees,
 				percentageOfTotalSales,
 				classification,
 			};
-		});
+		};
 
-		// 2. Top Selling: Sorted primarily by quantitySold DESC, secondarily by grossSalesRupees DESC, tertiarily by name ASC
-		const topSellingSorted = [...allItems].sort((a, b) => {
-			if (b.quantitySold !== a.quantitySold) {
-				return b.quantitySold - a.quantitySold;
-			}
-			if (b.grossSalesRupees !== a.grossSalesRupees) {
-				return b.grossSalesRupees - a.grossSalesRupees;
-			}
-			return a.name.localeCompare(b.name);
-		});
-
-		// 3. Slow Moving: Filtered items with quantity <= LOW_VOLUME_THRESHOLD, sorted primarily by quantitySold ASC, secondarily by grossSalesRupees ASC, tertiarily by name ASC
-		const slowMovingItems = allItems.filter(
-			(item) => item.classification === PRODUCT_CLASSIFICATIONS.LOW_VOLUME,
-		);
-		const slowMovingSorted = [...slowMovingItems].sort((a, b) => {
-			if (a.quantitySold !== b.quantitySold) {
-				return a.quantitySold - b.quantitySold;
-			}
-			if (a.grossSalesRupees !== b.grossSalesRupees) {
-				return a.grossSalesRupees - b.grossSalesRupees;
-			}
-			return a.name.localeCompare(b.name);
-		});
-
-		// 4. Pagination Helper with safe boundary checks
-		const totalTopItems = topSellingSorted.length;
+		const totalTopItems = Number(topSellingRows[0]?.full_count ?? 0);
 		const totalTopPages = Math.max(1, Math.ceil(totalTopItems / limit));
-		const topStartIndex = (page - 1) * limit;
-		const topPagedItems =
-			topStartIndex < totalTopItems
-				? topSellingSorted.slice(topStartIndex, topStartIndex + limit)
-				: [];
+		const topItems = topSellingRows.map(mapProductRow);
 
-		const totalSlowItems = slowMovingSorted.length;
+		const totalSlowItems = Number(slowMovingRows[0]?.full_count ?? 0);
 		const totalSlowPages = Math.max(1, Math.ceil(totalSlowItems / limit));
-		const slowStartIndex = (page - 1) * limit;
-		const slowPagedItems =
-			slowStartIndex < totalSlowItems
-				? slowMovingSorted.slice(slowStartIndex, slowStartIndex + limit)
-				: [];
+		const slowItems = slowMovingRows.map(mapProductRow);
 
 		return {
 			totalProductsSold,
 			topSelling: {
-				items: topPagedItems,
+				items: topItems,
 				pagination: {
 					totalItems: totalTopItems,
 					totalPages: totalTopPages,
@@ -1018,7 +1028,7 @@ export class PrismaOrderRepository
 				},
 			},
 			slowMoving: {
-				items: slowPagedItems,
+				items: slowItems,
 				pagination: {
 					totalItems: totalSlowItems,
 					totalPages: totalSlowPages,

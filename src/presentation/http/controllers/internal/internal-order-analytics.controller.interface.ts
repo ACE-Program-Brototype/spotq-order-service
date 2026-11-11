@@ -4,11 +4,11 @@ export interface IInternalOrderAnalyticsController {
 	getRestaurantOrderSummary(
 		req: Request,
 		res: Response,
-		next: NextFunction,
+		next?: NextFunction,
 	): Promise<void>;
 	getRestaurantProductAnalytics(
 		req: Request,
 		res: Response,
-		next: NextFunction,
+		next?: NextFunction,
 	): Promise<void>;
 }
