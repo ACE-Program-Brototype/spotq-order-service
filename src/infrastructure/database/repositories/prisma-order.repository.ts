@@ -336,6 +336,7 @@ export class PrismaOrderRepository
 	public async cancelOrder(
 		order: Order,
 		previousStatus: OrderStatus,
+		auditNote?: string,
 	): Promise<CancelledOrderData> {
 		try {
 			return await this.prisma.$transaction(async (tx) => {
@@ -348,6 +349,7 @@ export class PrismaOrderRepository
 					},
 					data: {
 						orderStatus: order.orderStatus,
+						paymentStatus: order.paymentStatus,
 						cancellationReason: order.cancellationReason,
 						cancelledAt: order.cancelledAt,
 					},
@@ -355,6 +357,7 @@ export class PrismaOrderRepository
 						id: true,
 						orderNumber: true,
 						orderStatus: true,
+						paymentStatus: true,
 						cancellationReason: true,
 						cancelledAt: true,
 					},
@@ -367,8 +370,9 @@ export class PrismaOrderRepository
 						currentStatus: order.orderStatus,
 						changedBy: order.userId ?? ORDER_DEFAULTS.CHANGED_BY_CUSTOMER,
 						notes:
-							order.cancellationReason?.trim() ||
-							ORDER_DEFAULTS.CANCEL_AUDIT_NOTE,
+							auditNote ??
+							(order.cancellationReason?.trim() ||
+								ORDER_DEFAULTS.CANCEL_AUDIT_NOTE),
 					},
 				});
 

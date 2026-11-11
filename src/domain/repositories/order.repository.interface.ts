@@ -30,6 +30,7 @@ export interface IOrderRepository {
 	cancelOrder(
 		order: Order,
 		previousStatus: OrderStatus,
+		auditNote?: string,
 	): Promise<CancelledOrderData>;
 	updatePaymentReference(orderId: string, paymentId: string): Promise<void>;
 	updatePaymentAndOrderStatus(

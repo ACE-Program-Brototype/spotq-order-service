@@ -41,6 +41,7 @@ export interface PrismaCancelledOrderRecord {
 	id: string;
 	orderNumber: string;
 	orderStatus: string;
+	paymentStatus: string;
 	cancellationReason: string | null;
 	cancelledAt: Date | null;
 }
@@ -190,6 +191,7 @@ export const OrderPersistenceMapper = {
 			orderId: record.id,
 			orderNumber: record.orderNumber,
 			status: record.orderStatus,
+			paymentStatus: record.paymentStatus,
 			cancellationReason: record.cancellationReason,
 			cancelledAt: record.cancelledAt,
 		};

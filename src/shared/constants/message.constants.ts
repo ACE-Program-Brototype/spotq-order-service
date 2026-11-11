@@ -116,6 +116,9 @@ export const ORDER_MESSAGES = {
 	INVALID_STATUS_TRANSITION: "Invalid order status transition",
 	PAYMENT_GATEWAY_DRAFT_FAILED:
 		"Failed to initiate payment gateway order draft",
+	PAYMENT_REFUND_FAILED: "Failed to initiate payment refund",
+	PAYMENT_REFUND_TIMEOUT: "Payment service timed out while processing refund",
+	INVALID_PAYMENT_STATUS_TRANSITION: "Invalid payment status transition",
 	IDEMPOTENCY_KEY_REQUIRED: "X-Idempotency-Key header is required",
 	RESTAURANT_CATALOG_UNAVAILABLE:
 		"Downstream restaurant catalog service is currently unavailable",
@@ -145,6 +148,11 @@ export const ORDER_DEFAULTS = {
 	STATUS_UPDATED_AUDIT_NOTE: (from: string, to: string) =>
 		`Order status updated from ${from} to ${to}`,
 	CHANGED_BY_CUSTOMER: AUTH_ROLES.CUSTOMER,
+	DEFAULT_CANCELLATION_REASON: "CUSTOMER_CANCELLED",
+	REFUND_NOTES_TEMPLATE: (orderNumber: string) =>
+		`Customer cancelled order ${orderNumber}`,
+	REFUND_AUDIT_NOTE_TEMPLATE: (refundId: string) =>
+		`Order cancelled by customer. Refund initiated: ${refundId}`,
 } as const;
 
 export const REPOSITORY_MESSAGES = {
@@ -171,6 +179,8 @@ export const ORDER_ERROR_CODES = {
 	INVALID_STATUS_TRANSITION: "INVALID_STATUS_TRANSITION",
 	ORDER_STATUS_CONFLICT: "ORDER_STATUS_CONFLICT",
 	PAYMENT_GATEWAY_DRAFT_FAILED: "PAYMENT_GATEWAY_DRAFT_FAILED",
+	PAYMENT_REFUND_FAILED: "PAYMENT_REFUND_FAILED",
+	INVALID_PAYMENT_STATUS_TRANSITION: "INVALID_PAYMENT_STATUS_TRANSITION",
 	VALIDATION_ERROR: "VALIDATION_ERROR",
 	UNAUTHORIZED: "UNAUTHORIZED",
 	INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",

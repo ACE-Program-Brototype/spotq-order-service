@@ -320,6 +320,7 @@ describe("CustomerOrderController", () => {
 				order_id: "ord-123",
 				order_number: "SQ-101",
 				status: "CANCELLED",
+				payment_status: "REFUNDED",
 				cancellation_reason: "Changed my mind",
 				cancelled_at: "2026-10-06T13:52:00.000Z",
 			};

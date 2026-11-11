@@ -257,6 +257,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 						id: "ord-123",
 						orderNumber: "SQ-101",
 						orderStatus: "CANCELLED",
+						paymentStatus: "PENDING",
 						cancellationReason: "Changed my mind",
 						cancelledAt: fixedDate,
 					};
@@ -298,6 +299,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 			},
 			data: {
 				orderStatus: OrderStatus.CANCELLED,
+				paymentStatus: "PENDING",
 				cancellationReason: "Changed my mind",
 				cancelledAt: fixedDate,
 			},
@@ -305,6 +307,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 				id: true,
 				orderNumber: true,
 				orderStatus: true,
+				paymentStatus: true,
 				cancellationReason: true,
 				cancelledAt: true,
 			},
@@ -324,6 +327,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 			orderId: "ord-123",
 			orderNumber: "SQ-101",
 			status: "CANCELLED",
+			paymentStatus: "PENDING",
 			cancellationReason: "Changed my mind",
 			cancelledAt: fixedDate,
 		});
@@ -339,6 +343,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 					id: "ord-123",
 					orderNumber: "SQ-101",
 					orderStatus: "CANCELLED",
+					paymentStatus: "PENDING",
 					cancellationReason: null,
 					cancelledAt: fixedDate,
 				}),
@@ -383,6 +388,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 					id: "ord-123",
 					orderNumber: "SQ-101",
 					orderStatus: "CANCELLED",
+					paymentStatus: "PENDING",
 					cancellationReason: "   ",
 					cancelledAt: fixedDate,
 				}),
@@ -427,6 +433,7 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 					id: "ord-123",
 					orderNumber: "SQ-101",
 					orderStatus: "CANCELLED",
+					paymentStatus: "PENDING",
 					cancellationReason: null,
 					cancelledAt: fixedDate,
 				}),
@@ -459,6 +466,59 @@ describe("PrismaOrderRepository - cancelOrder", () => {
 		await repository.cancelOrder(order, OrderStatus.PLACED);
 
 		assert.equal(capturedChangedBy, ORDER_DEFAULTS.CHANGED_BY_CUSTOMER);
+	});
+
+	it("should use custom auditNote when provided to cancelOrder", async () => {
+		const fixedDate = new Date("2026-10-06T13:52:00.000Z");
+		let capturedHistoryNotes: string | undefined;
+
+		const mockTx = {
+			order: {
+				update: async () => ({
+					id: "ord-123",
+					orderNumber: "SQ-101",
+					orderStatus: "CANCELLED",
+					paymentStatus: "REFUNDED",
+					cancellationReason: "Changed mind",
+					cancelledAt: fixedDate,
+				}),
+			},
+			orderStatusHistory: {
+				create: async (args: { data?: { notes?: string } }) => {
+					capturedHistoryNotes = args.data?.notes;
+					return { id: "history-1" };
+				},
+			},
+		};
+
+		const mockPrisma = {
+			$transaction: async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
+				return await fn(mockTx);
+			},
+		} as unknown as PrismaClient;
+
+		const order = createSampleOrder({
+			id: "ord-123",
+			orderNumber: "SQ-101",
+			restaurantId: "rest-1",
+			userId: "user-1",
+			orderStatus: OrderStatus.CANCELLED,
+			paymentStatus: PaymentStatus.REFUNDED,
+			cancellationReason: "Changed mind",
+			cancelledAt: fixedDate,
+		});
+
+		const repository = new PrismaOrderRepository(mockPrisma);
+		await repository.cancelOrder(
+			order,
+			OrderStatus.PLACED,
+			"Order cancelled by customer. Refund initiated: ref_123",
+		);
+
+		assert.equal(
+			capturedHistoryNotes,
+			"Order cancelled by customer. Refund initiated: ref_123",
+		);
 	});
 
 	it("should map P2025 error through handlePrismaError when order is not found or condition fails", async () => {
