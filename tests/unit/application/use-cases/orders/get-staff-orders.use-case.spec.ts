@@ -61,6 +61,7 @@ describe("GetStaffOrdersListUseCase", () => {
 				throw new Error("Not implemented");
 			},
 			findByRestaurantAndOrderId: async () => null,
+			findByCustomerAndOrderId: async () => null,
 			updateOrderStatus: async () => {
 				throw new Error("Not implemented");
 			},

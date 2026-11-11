@@ -603,6 +603,37 @@ export class PrismaOrderRepository
 
 		return order ? OrderPersistenceMapper.toDomain(order) : null;
 	}
+
+	public async findByCustomerAndOrderId(
+		customerId: string,
+		orderId: string,
+	): Promise<Order | null> {
+		try {
+			const order = await this.prisma.order.findFirst({
+				where: {
+					id: orderId,
+					userId: customerId,
+				},
+				include: {
+					items: {
+						include: {
+							addons: true,
+						},
+					},
+					statusHistory: true,
+				},
+			});
+
+			if (!order) {
+				return null;
+			}
+
+			return OrderPersistenceMapper.toDomain(order);
+		} catch (error) {
+			this.handlePrismaError(error, { customerId, orderId });
+			throw error;
+		}
+	}
 	public async updateOrderStatus(
 		order: Order,
 		previousStatus: OrderStatus,

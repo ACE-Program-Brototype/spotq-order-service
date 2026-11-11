@@ -49,6 +49,10 @@ export interface IOrderRepository {
 		restaurantId: string,
 		orderId: string,
 	): Promise<Order | null>;
+	findByCustomerAndOrderId(
+		customerId: string,
+		orderId: string,
+	): Promise<Order | null>;
 	updateOrderStatus(
 		order: Order,
 		previousStatus: OrderStatus,

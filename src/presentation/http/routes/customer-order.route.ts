@@ -12,6 +12,7 @@ import {
 	cancelOrderParamSchema,
 } from "@presentation/http/validators/orders/cancel-order.schema.ts";
 import { checkoutQuerySchema } from "@presentation/http/validators/orders/checkout-query.schema.ts";
+import { getCustomerOrderDetailsParamSchema } from "@presentation/http/validators/orders/get-customer-order-details.schema.ts";
 import { orderHistoryQuerySchema } from "@presentation/http/validators/orders/order-history-query.schema.ts";
 import { placeOrderBodySchema } from "@presentation/http/validators/orders/place-order.schema.ts";
 import { ORDER_ROUTES } from "@shared/constants/routes.constants.ts";
@@ -50,6 +51,13 @@ customerOrderRouter.post(
 	validateRequestParams(cancelOrderParamSchema),
 	validateRequestBody(cancelOrderBodySchema),
 	customerOrderController.cancelOrder,
+);
+
+customerOrderRouter.get(
+	ORDER_ROUTES.DETAILS,
+	customerAuthMiddleware,
+	validateRequestParams(getCustomerOrderDetailsParamSchema),
+	customerOrderController.getOrderDetails,
 );
 
 export default customerOrderRouter;

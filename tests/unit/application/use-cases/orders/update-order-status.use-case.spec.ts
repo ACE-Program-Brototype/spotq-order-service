@@ -92,6 +92,9 @@ function createMockOrderRepo(overrides: {
 		findByRestaurantAndOrderId: async () => {
 			throw new Error("Not implemented");
 		},
+		findByCustomerAndOrderId: async () => {
+			throw new Error("Not implemented");
+		},
 		findByIdempotencyKey: async () => null,
 		updatePaymentReference: async () => {},
 		updatePaymentAndOrderStatus: async () => {},

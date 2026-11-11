@@ -12,6 +12,7 @@ import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/r
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
+import type { IGetCustomerOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-customer-order-details.use-case.port.ts";
 import type { IGetOrderHistoryUseCase } from "@application/ports/use-cases/orders/get-order-history.use-case.port.ts";
 import type { IGetOrdersOverviewUseCase } from "@application/ports/use-cases/orders/get-orders-overview.use-case.port";
 import type { IGetRestaurantOrdersDetailsUseCase } from "@application/ports/use-cases/orders/get-restaurant-order-details.use-case.port";
@@ -28,6 +29,7 @@ import { RemoveCartItemUseCase } from "@application/use-cases/cart/remove-cart-i
 import { UpdateCartItemQuantityUseCase } from "@application/use-cases/cart/update-cart-item-quantity.use-case.ts";
 import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.use-case.ts";
 import { GetCheckoutDetailsUseCase } from "@application/use-cases/orders/get-checkout-details.use-case.ts";
+import { GetCustomerOrderDetailsUseCase } from "@application/use-cases/orders/get-customer-order-details.use-case.ts";
 import { GetOrderHistoryUseCase } from "@application/use-cases/orders/get-order-history.use-case.ts";
 import { GetOrdersOverviewUseCase } from "@application/use-cases/orders/get-orders-overview.use-case.ts";
 import { GetRestaurantOrderDetailsUseCase } from "@application/use-cases/orders/get-restaurant-order-details.use-case";
@@ -126,6 +128,11 @@ container
 container
 	.bind<IGetOrderHistoryUseCase>(TYPES.GetOrderHistoryUseCase)
 	.to(GetOrderHistoryUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IGetCustomerOrderDetailsUseCase>(TYPES.GetCustomerOrderDetailsUseCase)
+	.to(GetCustomerOrderDetailsUseCase)
 	.inSingletonScope();
 
 container
