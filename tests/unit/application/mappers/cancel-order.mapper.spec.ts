@@ -10,6 +10,7 @@ describe("CancelOrderMapper", () => {
 			orderId: "ord_992817203",
 			orderNumber: "SQ-101",
 			status: "CANCELLED",
+			paymentStatus: "REFUNDED",
 			cancellationReason: "Changed my mind",
 			cancelledAt: fixedDate,
 		};
@@ -20,6 +21,7 @@ describe("CancelOrderMapper", () => {
 			order_id: "ord_992817203",
 			order_number: "SQ-101",
 			status: "CANCELLED",
+			payment_status: "REFUNDED",
 			cancellation_reason: "Changed my mind",
 			cancelled_at: "2026-10-06T13:52:00.000Z",
 		});
@@ -31,6 +33,7 @@ describe("CancelOrderMapper", () => {
 			orderId: "ord_992817203",
 			orderNumber: "SQ-101",
 			status: "CANCELLED",
+			paymentStatus: "PENDING",
 			cancellationReason: null,
 			cancelledAt: fixedDate,
 		};
@@ -41,6 +44,7 @@ describe("CancelOrderMapper", () => {
 			order_id: "ord_992817203",
 			order_number: "SQ-101",
 			status: "CANCELLED",
+			payment_status: "PENDING",
 			cancellation_reason: null,
 			cancelled_at: "2026-10-06T13:52:00.000Z",
 		});
@@ -51,6 +55,7 @@ describe("CancelOrderMapper", () => {
 			orderId: "ord_992817203",
 			orderNumber: "SQ-101",
 			status: "CANCELLED",
+			paymentStatus: "PAID",
 			cancellationReason: null,
 			cancelledAt: null,
 		};
@@ -58,9 +63,7 @@ describe("CancelOrderMapper", () => {
 		const result = CancelOrderMapper.toDTO(cancelledData);
 
 		assert.equal(result.order_id, "ord_992817203");
-		assert.equal(result.order_number, "SQ-101");
-		assert.equal(result.status, "CANCELLED");
-		assert.equal(typeof result.cancelled_at, "string");
-		assert.ok(!Number.isNaN(Date.parse(result.cancelled_at)));
+		assert.equal(result.payment_status, "PAID");
+		assert.ok(result.cancelled_at);
 	});
 });

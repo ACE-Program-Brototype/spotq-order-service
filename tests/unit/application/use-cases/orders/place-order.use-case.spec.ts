@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
+	ProcessPaymentRefundInputDTO,
+	ProcessPaymentRefundResponseDTO,
+} from "@application/dtos/external/payment-refund.dto.ts";
+import type {
 	CreateOrderPaymentInputDTO,
 	CreateOrderPaymentResponseDTO,
 } from "@application/dtos/external/payment-service.dto.ts";
@@ -308,6 +312,12 @@ class MockPaymentServiceClient implements IPaymentServiceClient {
 			throw this.failureError;
 		}
 		return this.paymentDraft;
+	}
+
+	public async processRefund(
+		_data: ProcessPaymentRefundInputDTO,
+	): Promise<ProcessPaymentRefundResponseDTO> {
+		throw new Error("Not implemented");
 	}
 }
 

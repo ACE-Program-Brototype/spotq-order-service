@@ -7,6 +7,7 @@ export const CancelOrderMapper = {
 			order_id: order.orderId,
 			order_number: order.orderNumber,
 			status: order.status,
+			payment_status: order.paymentStatus,
 			cancellation_reason: order.cancellationReason,
 			cancelled_at: (order.cancelledAt ?? new Date()).toISOString(),
 		};

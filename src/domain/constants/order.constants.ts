@@ -15,6 +15,11 @@ export const ORDER_DEFAULTS = {
 	COMPLETED_AUDIT_NOTE: "Order completed successfully",
 	STATUS_UPDATED_AUDIT_NOTE: (from: string, to: string) =>
 		`Order status updated from ${from} to ${to}`,
+	DEFAULT_CANCELLATION_REASON: "CUSTOMER_CANCELLED",
+	REFUND_NOTES_TEMPLATE: (orderNumber: string) =>
+		`Customer cancelled order ${orderNumber}`,
+	REFUND_AUDIT_NOTE_TEMPLATE: (refundId: string) =>
+		`Order cancelled by customer. Refund initiated: ${refundId}`,
 } as const;
 
 export const ORDER_DOMAIN_MESSAGES = {
@@ -29,6 +34,8 @@ export const ORDER_DOMAIN_MESSAGES = {
 	INVALID_STATUS_TRANSITION: "Invalid order status transition",
 	INVALID_STATUS_TRANSITION_TEMPLATE: (from: string, to: string) =>
 		`Cannot transition order status from ${from} to ${to}`,
+	INVALID_PAYMENT_STATUS_TRANSITION_TEMPLATE: (from: string, to: string) =>
+		`Cannot transition payment status from ${from} to ${to}`,
 	ORDER_STATUS_CONFLICT:
 		"Order was updated concurrently or is no longer in expected status",
 } as const;

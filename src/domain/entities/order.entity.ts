@@ -21,6 +21,7 @@ import {
 	ForbiddenOrderAccessError,
 	ForbiddenRestaurantAccessError,
 	InvalidOrderStatusTransitionError,
+	InvalidPaymentStatusTransitionError,
 	OrderCancellationNotAllowedError,
 } from "@domain/errors/index.ts";
 
@@ -176,6 +177,10 @@ export class Order {
 		return Number(Math.max(0, total).toFixed(2));
 	}
 
+	public calculateGrandTotalInPaise(): number {
+		return Math.round(this.grandTotal * 100);
+	}
+
 	public calculateEstimatedReadyAt(prepTimes?: number[]): Date | null {
 		const validTimes = (prepTimes ?? []).filter((time) => time > 0);
 		if (validTimes.length === 0) {
@@ -209,6 +214,22 @@ export class Order {
 		}
 		this.currentPaymentStatus = PaymentStatus.PAID;
 		this.currentStatus = OrderStatus.CONFIRMED;
+	}
+
+	public isPaid(): boolean {
+		return this.currentPaymentStatus === PaymentStatus.PAID;
+	}
+
+	public markAsRefunded(): void {
+		if (!this.isPaid()) {
+			throw new InvalidPaymentStatusTransitionError(
+				ORDER_DOMAIN_MESSAGES.INVALID_PAYMENT_STATUS_TRANSITION_TEMPLATE(
+					this.currentPaymentStatus,
+					PaymentStatus.REFUNDED,
+				),
+			);
+		}
+		this.currentPaymentStatus = PaymentStatus.REFUNDED;
 	}
 
 	public markPaymentFailed(reason?: string): void {

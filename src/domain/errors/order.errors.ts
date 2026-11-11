@@ -84,3 +84,11 @@ export class OrderStatusConflictError extends DomainError {
 		super(message, ORDER_ERROR_CODES.ORDER_STATUS_CONFLICT);
 	}
 }
+
+export class InvalidPaymentStatusTransitionError extends DomainError {
+	constructor(
+		message: string = ORDER_MESSAGES.INVALID_PAYMENT_STATUS_TRANSITION,
+	) {
+		super(message, ORDER_ERROR_CODES.INVALID_PAYMENT_STATUS_TRANSITION);
+	}
+}

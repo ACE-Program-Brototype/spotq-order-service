@@ -13,6 +13,7 @@ import {
 	ForbiddenOrderAccessError,
 	ForbiddenRestaurantAccessError,
 	InvalidOrderStatusTransitionError,
+	InvalidPaymentStatusTransitionError,
 	OrderCancellationNotAllowedError,
 } from "@domain/errors/order.errors.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
@@ -437,6 +438,93 @@ describe("Order Domain Entity", () => {
 			assert.throws(
 				() => order.validateRestaurantAccess("different-rest"),
 				(err: unknown) => err instanceof ForbiddenRestaurantAccessError,
+			);
+		});
+	});
+
+	describe("Payment State Transitions (isPaid & markAsRefunded)", () => {
+		it("should correctly calculate grand total in paise with rounding", () => {
+			const item = createSampleItem();
+			const order = new Order({
+				id: "order-1",
+				orderNumber: "ORD-001",
+				restaurantId,
+				userId: customerId,
+				orderingMode: OrderingMode.SELF_ORDER,
+				orderStatus: OrderStatus.CONFIRMED,
+				paymentStatus: PaymentStatus.PAID,
+				paymentMode: PaymentMode.ONLINE,
+				grandTotal: 250.5,
+				items: [item],
+			});
+
+			assert.equal(order.calculateGrandTotalInPaise(), 25050);
+		});
+
+		it("should correctly identify whether order is paid", () => {
+			const item = createSampleItem();
+			const paidOrder = new Order({
+				id: "order-1",
+				orderNumber: "ORD-001",
+				restaurantId,
+				userId: customerId,
+				orderingMode: OrderingMode.SELF_ORDER,
+				orderStatus: OrderStatus.CONFIRMED,
+				paymentStatus: PaymentStatus.PAID,
+				paymentMode: PaymentMode.ONLINE,
+				items: [item],
+			});
+			assert.equal(paidOrder.isPaid(), true);
+
+			const pendingOrder = new Order({
+				id: "order-2",
+				orderNumber: "ORD-002",
+				restaurantId,
+				userId: customerId,
+				orderingMode: OrderingMode.SELF_ORDER,
+				orderStatus: OrderStatus.PLACED,
+				paymentStatus: PaymentStatus.PENDING,
+				paymentMode: PaymentMode.ONLINE,
+				items: [item],
+			});
+			assert.equal(pendingOrder.isPaid(), false);
+		});
+
+		it("should mark PAID order as REFUNDED", () => {
+			const item = createSampleItem();
+			const order = new Order({
+				id: "order-1",
+				orderNumber: "ORD-001",
+				restaurantId,
+				userId: customerId,
+				orderingMode: OrderingMode.SELF_ORDER,
+				orderStatus: OrderStatus.CONFIRMED,
+				paymentStatus: PaymentStatus.PAID,
+				paymentMode: PaymentMode.ONLINE,
+				items: [item],
+			});
+
+			order.markAsRefunded();
+			assert.equal(order.paymentStatus, PaymentStatus.REFUNDED);
+		});
+
+		it("should throw InvalidPaymentStatusTransitionError when marking non-PAID order as REFUNDED", () => {
+			const item = createSampleItem();
+			const order = new Order({
+				id: "order-1",
+				orderNumber: "ORD-001",
+				restaurantId,
+				userId: customerId,
+				orderingMode: OrderingMode.SELF_ORDER,
+				orderStatus: OrderStatus.PLACED,
+				paymentStatus: PaymentStatus.PENDING,
+				paymentMode: PaymentMode.ONLINE,
+				items: [item],
+			});
+
+			assert.throws(
+				() => order.markAsRefunded(),
+				(err: unknown) => err instanceof InvalidPaymentStatusTransitionError,
 			);
 		});
 	});

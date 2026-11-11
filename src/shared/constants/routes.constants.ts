@@ -55,6 +55,7 @@ export const QUEUE_SERVICE_ROUTES = {
 
 export const PAYMENT_SERVICE_ROUTES = {
 	CREATE_GATEWAY_ORDER: "/api/internal/v1/payments/orders",
+	PROCESS_REFUND: "/api/internal/v1/payments/refunds",
 	ORDER_STATUS: (orderId: string) =>
 		`/orders/${encodeURIComponent(orderId)}/status`,
 } as const;

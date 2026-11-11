@@ -101,6 +101,7 @@ export interface CancelledOrderData {
 	orderId: string;
 	orderNumber: string;
 	status: string;
+	paymentStatus: string;
 	cancellationReason: string | null;
 	cancelledAt: Date | null;
 }
