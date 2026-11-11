@@ -35,10 +35,7 @@ export const CustomerOrderDetailsMapper = {
 			previous_status: history.previousStatus,
 			current_status: history.currentStatus,
 			notes: history.notes,
-			created_at:
-				history.createdAt instanceof Date
-					? history.createdAt.toISOString()
-					: new Date(history.createdAt).toISOString(),
+			created_at: history.createdAt.toISOString(),
 		}));
 
 		const isPaid = order.paymentStatus === PaymentStatus.PAID;

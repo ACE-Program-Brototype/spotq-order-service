@@ -15,7 +15,6 @@ import { checkoutQuerySchema } from "@presentation/http/validators/orders/checko
 import { getCustomerOrderDetailsParamSchema } from "@presentation/http/validators/orders/get-customer-order-details.schema.ts";
 import { orderHistoryQuerySchema } from "@presentation/http/validators/orders/order-history-query.schema.ts";
 import { placeOrderBodySchema } from "@presentation/http/validators/orders/place-order.schema.ts";
-import { HttpStatus } from "@shared/constants/http.constants.ts";
 import { ORDER_ROUTES } from "@shared/constants/routes.constants.ts";
 import { Router } from "express";
 
@@ -57,10 +56,7 @@ customerOrderRouter.post(
 customerOrderRouter.get(
 	ORDER_ROUTES.DETAILS,
 	customerAuthMiddleware,
-	validateRequestParams(
-		getCustomerOrderDetailsParamSchema,
-		HttpStatus.BAD_REQUEST,
-	),
+	validateRequestParams(getCustomerOrderDetailsParamSchema),
 	customerOrderController.getOrderDetails,
 );
 
