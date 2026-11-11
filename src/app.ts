@@ -4,6 +4,7 @@ import { errorHandler } from "@presentation/http/middleware/error.middleware.ts"
 import { cartRouter } from "@presentation/http/routes/cart.route.ts";
 import customerOrderRouter from "@presentation/http/routes/customer-order.route.ts";
 import healthRouter from "@presentation/http/routes/health.route.ts";
+import internalOrderAnalyticsRouter from "@presentation/http/routes/internal-order-analytics.route.ts";
 import metricsRouter from "@presentation/http/routes/metrics.route.ts";
 import restaurantOrderRouter from "@presentation/http/routes/restaurant-order.route.ts";
 import staffOrderRouter from "@presentation/http/routes/staff-order.route.ts";
@@ -39,6 +40,8 @@ app.use(ROUTES.STAFF, staffOrderRouter);
 app.use(ROUTES.ROOT, customerOrderRouter);
 
 app.use(ROUTES.RESTAURANTS, restaurantOrderRouter);
+
+app.use(ROUTES.INTERNAL, internalOrderAnalyticsRouter);
 
 app.use(errorHandler);
 

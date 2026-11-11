@@ -32,6 +32,15 @@ export const TYPES = {
 	GetStaffOrdersListUseCase: Symbol.for("GetStaffOrdersListUseCase"),
 	UpdateOrderStatusUseCase: Symbol.for("UpdateOrderStatusUseCase"),
 	StaffOrderController: Symbol.for("StaffOrderController"),
+	GetRestaurantOrderAnalyticsUseCase: Symbol.for(
+		"GetRestaurantOrderAnalyticsUseCase",
+	),
+	GetRestaurantProductAnalyticsUseCase: Symbol.for(
+		"GetRestaurantProductAnalyticsUseCase",
+	),
+	InternalOrderAnalyticsController: Symbol.for(
+		"InternalOrderAnalyticsController",
+	),
 };
 
 export default TYPES;

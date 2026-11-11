@@ -130,6 +130,10 @@ export const ORDER_MESSAGES = {
 	QUEUE_SERVICE_UNAVAILABLE:
 		"Downstream queue service is currently unavailable",
 	QUEUE_SERVICE_TIMEOUT: "Downstream queue service timed out",
+	ORDER_ANALYTICS_SUMMARY_FETCHED_SUCCESS:
+		"Restaurant order summary analytics fetched successfully",
+	PRODUCT_ANALYTICS_FETCHED_SUCCESS:
+		"Restaurant product analytics fetched successfully",
 };
 
 export const DOWNSTREAM_MESSAGES = {

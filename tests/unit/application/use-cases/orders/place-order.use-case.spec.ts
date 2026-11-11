@@ -249,6 +249,14 @@ class MockOrderRepository implements IOrderRepository {
 	): Promise<Order> {
 		throw new Error("Not implemented in test");
 	}
+
+	public async getRestaurantOrderAnalytics(): Promise<never> {
+		throw new Error("Not implemented in test");
+	}
+
+	public async getRestaurantProductAnalytics(): Promise<never> {
+		throw new Error("Not implemented in test");
+	}
 }
 
 class MockRestaurantServiceClient implements IRestaurantServiceClient {

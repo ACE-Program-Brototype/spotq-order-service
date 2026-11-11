@@ -10,6 +10,8 @@ import type { IClearCartUseCase } from "@application/ports/use-cases/cart/clear-
 import type { IGetCartUseCase } from "@application/ports/use-cases/cart/get-cart.use-case.port.ts";
 import type { IRemoveCartItemUseCase } from "@application/ports/use-cases/cart/remove-cart-item.use-case.port.ts";
 import type { IUpdateCartItemQuantityUseCase } from "@application/ports/use-cases/cart/update-cart-item-quantity.use-case.port.ts";
+import type { IGetRestaurantOrderAnalyticsUseCase } from "@application/ports/use-cases/internal/get-restaurant-order-analytics.use-case.port.ts";
+import type { IGetRestaurantProductAnalyticsUseCase } from "@application/ports/use-cases/internal/get-restaurant-product-analytics.use-case.port.ts";
 import type { ICancelOrderUseCase } from "@application/ports/use-cases/orders/cancel-order.use-case.port.ts";
 import type { IGetCheckoutDetailsUseCase } from "@application/ports/use-cases/orders/get-checkout-details.use-case.port.ts";
 import type { IGetCustomerOrderDetailsUseCase } from "@application/ports/use-cases/orders/get-customer-order-details.use-case.port.ts";
@@ -27,6 +29,8 @@ import { ClearCartUseCase } from "@application/use-cases/cart/clear-cart.use-cas
 import { GetCartUseCase } from "@application/use-cases/cart/get-cart.use-case.ts";
 import { RemoveCartItemUseCase } from "@application/use-cases/cart/remove-cart-item.use-case.ts";
 import { UpdateCartItemQuantityUseCase } from "@application/use-cases/cart/update-cart-item-quantity.use-case.ts";
+import { GetRestaurantOrderAnalyticsUseCase } from "@application/use-cases/internal/get-restaurant-order-analytics.use-case.ts";
+import { GetRestaurantProductAnalyticsUseCase } from "@application/use-cases/internal/get-restaurant-product-analytics.use-case.ts";
 import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.use-case.ts";
 import { GetCheckoutDetailsUseCase } from "@application/use-cases/orders/get-checkout-details.use-case.ts";
 import { GetCustomerOrderDetailsUseCase } from "@application/use-cases/orders/get-customer-order-details.use-case.ts";
@@ -52,6 +56,8 @@ import { QueueServiceClient } from "@infrastructure/services/queue-service.clien
 import { RestaurantServiceClient } from "@infrastructure/services/restaurant-service.client.ts";
 import { CartController } from "@presentation/http/controllers/cart.controller.ts";
 import { CustomerOrderController } from "@presentation/http/controllers/customer-order.controller.ts";
+import type { IInternalOrderAnalyticsController } from "@presentation/http/controllers/internal/internal-order-analytics.controller.interface.ts";
+import { InternalOrderAnalyticsController } from "@presentation/http/controllers/internal/internal-order-analytics.controller.ts";
 import { RestaurantOrderController } from "@presentation/http/controllers/restaurant-order.controller.ts";
 import { StaffOrderController } from "@presentation/http/controllers/staff-order.controller.ts";
 import { Container } from "inversify";
@@ -205,6 +211,27 @@ container
 container
 	.bind<StaffOrderController>(TYPES.StaffOrderController)
 	.to(StaffOrderController)
+	.inSingletonScope();
+
+container
+	.bind<IGetRestaurantOrderAnalyticsUseCase>(
+		TYPES.GetRestaurantOrderAnalyticsUseCase,
+	)
+	.to(GetRestaurantOrderAnalyticsUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IGetRestaurantProductAnalyticsUseCase>(
+		TYPES.GetRestaurantProductAnalyticsUseCase,
+	)
+	.to(GetRestaurantProductAnalyticsUseCase)
+	.inSingletonScope();
+
+container
+	.bind<IInternalOrderAnalyticsController>(
+		TYPES.InternalOrderAnalyticsController,
+	)
+	.to(InternalOrderAnalyticsController)
 	.inSingletonScope();
 
 export const rabbitMQService = container.get<RabbitMQService>(

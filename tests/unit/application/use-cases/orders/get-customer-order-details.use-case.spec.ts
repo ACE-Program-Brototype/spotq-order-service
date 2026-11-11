@@ -93,6 +93,8 @@ function createMockRepository(options: {
 			}
 			return options.orderToReturn ?? null;
 		},
+		getRestaurantOrderAnalytics: async () => ({}) as never,
+		getRestaurantProductAnalytics: async () => ({}) as never,
 	};
 }
 

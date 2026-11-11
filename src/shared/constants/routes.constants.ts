@@ -6,6 +6,12 @@ export const ROUTES = {
 	RESTAURANTS: "/restaurants",
 	ORDERS: "/orders",
 	STAFF: "/staff",
+	INTERNAL: "/api/internal/v1",
+} as const;
+
+export const INTERNAL_ORDER_ANALYTICS_ROUTES = {
+	SUMMARY: "/restaurants/:restaurantId/analytics/orders/summary",
+	PRODUCTS: "/restaurants/:restaurantId/analytics/orders/products",
 } as const;
 
 export const STAFF_ORDER_ROUTES = {

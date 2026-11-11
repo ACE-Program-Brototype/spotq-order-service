@@ -98,6 +98,12 @@ describe("GetStaffOrdersListUseCase", () => {
 				};
 				return result;
 			},
+			getRestaurantOrderAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantProductAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
 		};
 	}
 
