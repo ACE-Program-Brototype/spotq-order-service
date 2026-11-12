@@ -30,6 +30,8 @@ export const TYPES = {
 	),
 	GetStaffOrderDetailsUseCase: Symbol.for("GetStaffOrderDetailsUseCase"),
 	GetStaffOrdersListUseCase: Symbol.for("GetStaffOrdersListUseCase"),
+	GetAdminOrdersUseCase: Symbol.for("GetAdminOrdersUseCase"),
+	AdminOrderController: Symbol.for("AdminOrderController"),
 	UpdateOrderStatusUseCase: Symbol.for("UpdateOrderStatusUseCase"),
 	StaffOrderController: Symbol.for("StaffOrderController"),
 	GetRestaurantOrderAnalyticsUseCase: Symbol.for(

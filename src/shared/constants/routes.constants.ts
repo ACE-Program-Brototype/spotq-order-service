@@ -6,7 +6,12 @@ export const ROUTES = {
 	RESTAURANTS: "/restaurants",
 	ORDERS: "/orders",
 	STAFF: "/staff",
+	ADMIN: "/admin",
 	INTERNAL: "/api/internal/v1",
+} as const;
+
+export const ADMIN_ORDER_ROUTES = {
+	LIST: "/",
 } as const;
 
 export const INTERNAL_ORDER_ANALYTICS_ROUTES = {

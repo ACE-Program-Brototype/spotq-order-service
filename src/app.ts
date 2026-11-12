@@ -1,6 +1,7 @@
 import swaggerSpec from "@config/swagger.ts";
 import httpLogger from "@infrastructure/observability/pino-http.ts";
 import { errorHandler } from "@presentation/http/middleware/error.middleware.ts";
+import adminOrderRouter from "@presentation/http/routes/admin-order.route.ts";
 import { cartRouter } from "@presentation/http/routes/cart.route.ts";
 import customerOrderRouter from "@presentation/http/routes/customer-order.route.ts";
 import healthRouter from "@presentation/http/routes/health.route.ts";
@@ -37,11 +38,13 @@ app.use(ROUTES.CARTS, cartRouter);
 
 app.use(ROUTES.STAFF, staffOrderRouter);
 
-app.use(ROUTES.ROOT, customerOrderRouter);
-
 app.use(ROUTES.RESTAURANTS, restaurantOrderRouter);
 
+app.use(ROUTES.ADMIN, adminOrderRouter);
+
 app.use(ROUTES.INTERNAL, internalOrderAnalyticsRouter);
+
+app.use(ROUTES.ROOT, customerOrderRouter);
 
 app.use(errorHandler);
 

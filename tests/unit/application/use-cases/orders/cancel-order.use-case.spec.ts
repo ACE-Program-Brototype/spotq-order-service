@@ -68,6 +68,9 @@ function createMockOrderRepo(options: {
 		getCustomerOrderHistory: async () => {
 			throw new Error("Not implemented");
 		},
+		getAdminOrders: async () => {
+			throw new Error("Not implemented");
+		},
 		findById: async () => options.order ?? null,
 		findByIdempotencyKey: async () => options.order ?? null,
 		updatePaymentReference: async () => {},

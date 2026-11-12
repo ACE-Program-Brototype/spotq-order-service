@@ -95,6 +95,7 @@ function createMockRepository(options: {
 		},
 		getRestaurantOrderAnalytics: async () => ({}) as never,
 		getRestaurantProductAnalytics: async () => ({}) as never,
+		getAdminOrders: async () => ({}) as never,
 	};
 }
 

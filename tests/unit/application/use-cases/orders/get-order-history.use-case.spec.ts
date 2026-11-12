@@ -18,6 +18,9 @@ describe("GetOrderHistoryUseCase", () => {
 			getOrdersOverview: async () => {
 				throw new Error("Not implemented");
 			},
+			getAdminOrders: async () => {
+				throw new Error("Not implemented");
+			},
 			getCustomerOrderHistory: async (params) => {
 				capturedRepoParams = params;
 				return {
@@ -113,6 +116,9 @@ describe("GetOrderHistoryUseCase", () => {
 				throw new Error("Not implemented");
 			},
 			getOrdersOverview: async () => {
+				throw new Error("Not implemented");
+			},
+			getAdminOrders: async () => {
 				throw new Error("Not implemented");
 			},
 			getCustomerOrderHistory: async () => ({

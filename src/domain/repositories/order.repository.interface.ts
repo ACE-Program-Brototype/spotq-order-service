@@ -3,6 +3,8 @@ import type { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import type { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type {
 	CancelledOrderData,
+	GetAdminOrdersRepoParams,
+	GetAdminOrdersRepoResult,
 	GetCustomerOrderHistoryRepoParams,
 	GetCustomerOrderHistoryRepoResult,
 	GetOrdersOverviewRepoParams,
@@ -18,6 +20,9 @@ import type {
 } from "@domain/types/order-repository.types.ts";
 
 export interface IOrderRepository {
+	getAdminOrders(
+		params: GetAdminOrdersRepoParams,
+	): Promise<GetAdminOrdersRepoResult>;
 	create(order: Order, cartIdToClear?: string): Promise<Order>;
 	findById(orderId: string): Promise<Order | null>;
 	findByIdempotencyKey(key: string): Promise<Order | null>;
