@@ -55,6 +55,7 @@ describe("GetOrderHistoryUseCase", () => {
 			updatePaymentReference: async () => {},
 			updatePaymentAndOrderStatus: async () => {},
 			findByRestaurantAndOrderId: async () => null,
+			findByCustomerAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],
 				totalOrders: 0,
@@ -74,6 +75,12 @@ describe("GetOrderHistoryUseCase", () => {
 				throw new Error("Not implemented");
 			},
 			updateOrderStatus: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantOrderAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantProductAnalytics: async () => {
 				throw new Error("Not implemented");
 			},
 		};
@@ -126,6 +133,7 @@ describe("GetOrderHistoryUseCase", () => {
 			updatePaymentReference: async () => {},
 			updatePaymentAndOrderStatus: async () => {},
 			findByRestaurantAndOrderId: async () => null,
+			findByCustomerAndOrderId: async () => null,
 			getRestaurantOrders: async () => ({
 				orders: [],
 				totalOrders: 0,
@@ -145,6 +153,12 @@ describe("GetOrderHistoryUseCase", () => {
 				throw new Error("Not implemented");
 			},
 			updateOrderStatus: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantOrderAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantProductAnalytics: async () => {
 				throw new Error("Not implemented");
 			},
 		};

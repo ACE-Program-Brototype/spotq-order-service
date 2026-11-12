@@ -15,6 +15,7 @@ export const TYPES = {
 	GetOrdersOverviewUseCase: Symbol.for("GetOrdersOverviewUseCase"),
 	RestaurantOrderController: Symbol.for("RestaurantOrderController"),
 	GetOrderHistoryUseCase: Symbol.for("GetOrderHistoryUseCase"),
+	GetCustomerOrderDetailsUseCase: Symbol.for("GetCustomerOrderDetailsUseCase"),
 	CancelOrderUseCase: Symbol.for("CancelOrderUseCase"),
 	CustomerOrderController: Symbol.for("CustomerOrderController"),
 	QueueServiceClient: Symbol.for("QueueServiceClient"),
@@ -33,6 +34,15 @@ export const TYPES = {
 	AdminOrderController: Symbol.for("AdminOrderController"),
 	UpdateOrderStatusUseCase: Symbol.for("UpdateOrderStatusUseCase"),
 	StaffOrderController: Symbol.for("StaffOrderController"),
+	GetRestaurantOrderAnalyticsUseCase: Symbol.for(
+		"GetRestaurantOrderAnalyticsUseCase",
+	),
+	GetRestaurantProductAnalyticsUseCase: Symbol.for(
+		"GetRestaurantProductAnalyticsUseCase",
+	),
+	InternalOrderAnalyticsController: Symbol.for(
+		"InternalOrderAnalyticsController",
+	),
 };
 
 export default TYPES;

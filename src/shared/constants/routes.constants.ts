@@ -7,10 +7,16 @@ export const ROUTES = {
 	ORDERS: "/orders",
 	STAFF: "/staff",
 	ADMIN: "/admin",
+	INTERNAL: "/api/internal/v1",
 } as const;
 
 export const ADMIN_ORDER_ROUTES = {
 	LIST: "/",
+} as const;
+
+export const INTERNAL_ORDER_ANALYTICS_ROUTES = {
+	SUMMARY: "/restaurants/:restaurantId/analytics/orders/summary",
+	PRODUCTS: "/restaurants/:restaurantId/analytics/orders/products",
 } as const;
 
 export const STAFF_ORDER_ROUTES = {
@@ -24,6 +30,7 @@ export const ORDER_ROUTES = {
 	HISTORY: "/history",
 	CANCEL: "/:orderId/cancel",
 	CHECKOUT: "/checkout",
+	DETAILS: "/:orderId",
 } as const;
 
 export const CART_ROUTES = {
@@ -59,6 +66,7 @@ export const QUEUE_SERVICE_ROUTES = {
 
 export const PAYMENT_SERVICE_ROUTES = {
 	CREATE_GATEWAY_ORDER: "/api/internal/v1/payments/orders",
+	PROCESS_REFUND: "/api/internal/v1/payments/refunds",
 	ORDER_STATUS: (orderId: string) =>
 		`/orders/${encodeURIComponent(orderId)}/status`,
 } as const;

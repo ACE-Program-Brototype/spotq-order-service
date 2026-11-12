@@ -12,7 +12,12 @@ function getHeaderValue(
 	return header?.trim();
 }
 
-const ALLOWED_ADMIN_ROLES = new Set(["admin"]);
+const ALLOWED_ADMIN_ROLES = new Set([
+	"admin",
+	"platform_admin",
+	"super_admin",
+	"superadmin",
+]);
 
 export function adminAuthMiddleware(
 	req: Request,

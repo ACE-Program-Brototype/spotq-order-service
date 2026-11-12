@@ -64,6 +64,7 @@ describe("GetStaffOrdersListUseCase", () => {
 				throw new Error("Not implemented");
 			},
 			findByRestaurantAndOrderId: async () => null,
+			findByCustomerAndOrderId: async () => null,
 			updateOrderStatus: async () => {
 				throw new Error("Not implemented");
 			},
@@ -99,6 +100,12 @@ describe("GetStaffOrdersListUseCase", () => {
 					hasNext: false,
 				};
 				return result;
+			},
+			getRestaurantOrderAnalytics: async () => {
+				throw new Error("Not implemented");
+			},
+			getRestaurantProductAnalytics: async () => {
+				throw new Error("Not implemented");
 			},
 		};
 	}

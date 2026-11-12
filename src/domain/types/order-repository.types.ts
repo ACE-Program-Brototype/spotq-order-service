@@ -101,6 +101,7 @@ export interface CancelledOrderData {
 	orderId: string;
 	orderNumber: string;
 	status: string;
+	paymentStatus: string;
 	cancellationReason: string | null;
 	cancelledAt: Date | null;
 }
@@ -190,4 +191,83 @@ export interface GetAdminOrdersRepoResult {
 	ordersByStatus: Partial<Record<OrderStatus, number>>;
 	metricsTotalOrders: number;
 	totalOrderValue: number;
+}
+
+export interface GetRestaurantOrderAnalyticsRepoParams {
+	restaurantId: string;
+	startDate: Date;
+	nextPeriodStart: Date;
+	prevStartDate: Date;
+}
+
+export interface OrderStatusDistributionData {
+	status: string;
+	count: number;
+	percentage: number;
+	amountRupees: number;
+}
+
+export interface RestaurantOrderAnalyticsRepoResult {
+	overview: {
+		revenue: {
+			grossSalesRupees: number;
+			discountRupees: number;
+			netSalesRupees: number;
+			taxCollectedRupees: number;
+			totalBillAmountRupees: number;
+			growthPercentage: number;
+		};
+		orders: {
+			totalOrderCount: number;
+			growthPercentage: number;
+			dineInCount: number;
+			takeawayCount: number;
+		};
+		operations: {
+			dinersServedCount: number;
+			uniqueCustomersCount: number;
+		};
+	};
+	orderStatusBreakdown: {
+		totalOrdersTracked: number;
+		distribution: OrderStatusDistributionData[];
+	};
+}
+
+export interface GetRestaurantProductAnalyticsRepoParams {
+	restaurantId: string;
+	startDate: Date;
+	nextPeriodStart: Date;
+	page: number;
+	limit: number;
+}
+
+export interface ProductPerformanceItemData {
+	menuItemId: string;
+	name: string;
+	quantitySold: number;
+	grossSalesRupees: number;
+	percentageOfTotalSales: number;
+	classification?: "LOW_VOLUME" | "NORMAL";
+}
+
+export interface ProductAnalyticsPaginationData {
+	totalItems: number;
+	totalPages: number;
+	currentPage: number;
+	limit: number;
+	hasNextPage: boolean;
+	hasPrevPage: boolean;
+}
+
+export interface RestaurantProductAnalyticsRepoResult {
+	totalProductsSold: number;
+	topSelling: {
+		items: ProductPerformanceItemData[];
+		pagination: ProductAnalyticsPaginationData;
+	};
+	slowMoving: {
+		items: ProductPerformanceItemData[];
+		pagination: ProductAnalyticsPaginationData;
+	};
 }

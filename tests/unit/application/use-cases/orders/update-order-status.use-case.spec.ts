@@ -95,6 +95,9 @@ function createMockOrderRepo(overrides: {
 		findByRestaurantAndOrderId: async () => {
 			throw new Error("Not implemented");
 		},
+		findByCustomerAndOrderId: async () => {
+			throw new Error("Not implemented");
+		},
 		findByIdempotencyKey: async () => null,
 		updatePaymentReference: async () => {},
 		updatePaymentAndOrderStatus: async () => {},
@@ -106,6 +109,12 @@ function createMockOrderRepo(overrides: {
 				overrides.onUpdate(order, previousStatus, actorId, notes);
 			}
 			return order;
+		},
+		getRestaurantOrderAnalytics: async () => {
+			throw new Error("Not implemented");
+		},
+		getRestaurantProductAnalytics: async () => {
+			throw new Error("Not implemented");
 		},
 	};
 }

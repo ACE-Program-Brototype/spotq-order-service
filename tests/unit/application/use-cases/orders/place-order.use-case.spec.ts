@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type {
+	ProcessPaymentRefundInputDTO,
+	ProcessPaymentRefundResponseDTO,
+} from "@application/dtos/external/payment-refund.dto.ts";
+import type {
 	CreateOrderPaymentInputDTO,
 	CreateOrderPaymentResponseDTO,
 } from "@application/dtos/external/payment-service.dto.ts";
@@ -210,6 +214,13 @@ class MockOrderRepository implements IOrderRepository {
 		return null;
 	}
 
+	public async findByCustomerAndOrderId(
+		_customerId: string,
+		_orderId: string,
+	): Promise<Order | null> {
+		return null;
+	}
+
 	public async getRestaurantOrders(): Promise<GetRestaurantOrdersRepoResult> {
 		return {
 			orders: [],
@@ -241,6 +252,14 @@ class MockOrderRepository implements IOrderRepository {
 		_actorId: string,
 		_notes?: string | null,
 	): Promise<Order> {
+		throw new Error("Not implemented in test");
+	}
+
+	public async getRestaurantOrderAnalytics(): Promise<never> {
+		throw new Error("Not implemented in test");
+	}
+
+	public async getRestaurantProductAnalytics(): Promise<never> {
 		throw new Error("Not implemented in test");
 	}
 }
@@ -306,6 +325,12 @@ class MockPaymentServiceClient implements IPaymentServiceClient {
 			throw this.failureError;
 		}
 		return this.paymentDraft;
+	}
+
+	public async processRefund(
+		_data: ProcessPaymentRefundInputDTO,
+	): Promise<ProcessPaymentRefundResponseDTO> {
+		throw new Error("Not implemented");
 	}
 }
 

@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import type {
+	ProcessPaymentRefundInputDTO,
+	ProcessPaymentRefundResponseDTO,
+} from "@application/dtos/external/payment-refund.dto.ts";
+import type { IPaymentServiceClient } from "@application/ports/external/payment-service.client.port.ts";
 import { CancelOrderUseCase } from "@application/use-cases/orders/cancel-order.use-case.ts";
+import { ORDER_DEFAULTS } from "@domain/constants/order.constants.ts";
 import { Order, type OrderProps } from "@domain/entities/order.entity.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
@@ -10,9 +16,10 @@ import {
 	ForbiddenOrderAccessError,
 	OrderCancellationNotAllowedError,
 	OrderNotFoundError,
+	PaymentRefundFailedError,
 } from "@domain/errors/index.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
-import type { CancelledOrderData } from "@domain/types/order-repository.types";
+import type { CancelledOrderData } from "@domain/types/order-repository.types.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";
 
 function createTestOrder(props: Partial<OrderProps> = {}): Order {
@@ -42,7 +49,11 @@ function createTestOrder(props: Partial<OrderProps> = {}): Order {
 function createMockOrderRepo(options: {
 	order?: Order | null;
 	cancelledData?: CancelledOrderData;
-	onCancel?: (order: Order, previousStatus: OrderStatus) => void;
+	onCancel?: (
+		order: Order,
+		previousStatus: OrderStatus,
+		auditNote?: string,
+	) => void;
 }): IOrderRepository {
 	return {
 		create: async () => {
@@ -65,6 +76,7 @@ function createMockOrderRepo(options: {
 		updatePaymentReference: async () => {},
 		updatePaymentAndOrderStatus: async () => {},
 		findByRestaurantAndOrderId: async () => options.order ?? null,
+		findByCustomerAndOrderId: async () => options.order ?? null,
 		getRestaurantOrders: async () => ({
 			orders: [],
 			totalOrders: 0,
@@ -80,15 +92,16 @@ function createMockOrderRepo(options: {
 			limit: 20,
 			hasNext: false,
 		}),
-		cancelOrder: async (order, previousStatus) => {
+		cancelOrder: async (order, previousStatus, auditNote) => {
 			if (options.onCancel) {
-				options.onCancel(order, previousStatus);
+				options.onCancel(order, previousStatus, auditNote);
 			}
 			return (
 				options.cancelledData ?? {
 					orderId: order.id,
-					orderNumber: "SQ-101",
-					status: "CANCELLED",
+					orderNumber: order.orderNumber,
+					status: order.orderStatus,
+					paymentStatus: order.paymentStatus,
 					cancellationReason: order.cancellationReason ?? null,
 					cancelledAt: order.cancelledAt as Date,
 				}
@@ -97,14 +110,45 @@ function createMockOrderRepo(options: {
 		updateOrderStatus: async () => {
 			throw new Error("Not implemented");
 		},
+		getRestaurantOrderAnalytics: async () => {
+			throw new Error("Not implemented");
+		},
+		getRestaurantProductAnalytics: async () => {
+			throw new Error("Not implemented");
+		},
+	};
+}
+
+function createMockPaymentClient(
+	options: {
+		processRefund?: (
+			data: ProcessPaymentRefundInputDTO,
+		) => Promise<ProcessPaymentRefundResponseDTO>;
+	} = {},
+): IPaymentServiceClient {
+	return {
+		createGatewayOrder: async () => {
+			throw new Error("Not implemented");
+		},
+		processRefund:
+			options.processRefund ??
+			(async (data: ProcessPaymentRefundInputDTO) => ({
+				refundId: "ref-mock-123",
+				orderId: data.orderId,
+				amountPaise: data.amountPaise,
+				currency: "INR",
+				status: "PROCESSED",
+				processedAt: new Date().toISOString(),
+			})),
 	};
 }
 
 describe("CancelOrderUseCase", () => {
-	it("should successfully cancel order when status is PLACED", async () => {
+	it("should successfully cancel order when status is PLACED and unpaid", async () => {
 		const fixedCancelledAt = new Date("2026-10-06T13:52:00.000Z");
 		let capturedOrder: Order | undefined;
 		let capturedPreviousStatus: OrderStatus | undefined;
+		let refundCalled = false;
 
 		const mockRepo = createMockOrderRepo({
 			order: createTestOrder({
@@ -113,12 +157,14 @@ describe("CancelOrderUseCase", () => {
 				restaurantId: "rest-1",
 				userId: "cust-owner",
 				orderStatus: OrderStatus.PLACED,
+				paymentStatus: PaymentStatus.PENDING,
 				createdAt: new Date("2026-10-06T13:40:00.000Z"),
 			}),
 			cancelledData: {
 				orderId: "ord-123",
 				orderNumber: "SQ-101",
 				status: "CANCELLED",
+				paymentStatus: "PENDING",
 				cancellationReason: "Changed my mind",
 				cancelledAt: fixedCancelledAt,
 			},
@@ -128,13 +174,21 @@ describe("CancelOrderUseCase", () => {
 			},
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient({
+			processRefund: async () => {
+				refundCalled = true;
+				throw new Error("Should not be called");
+			},
+		});
+
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 		const result = await useCase.execute({
 			orderId: "ord-123",
 			customerId: "cust-owner",
 			cancellationReason: "Changed my mind",
 		});
 
+		assert.equal(refundCalled, false);
 		assert.ok(capturedOrder);
 		assert.equal(capturedOrder.id, "ord-123");
 		assert.equal(capturedOrder.orderStatus, OrderStatus.CANCELLED);
@@ -145,57 +199,185 @@ describe("CancelOrderUseCase", () => {
 			order_id: "ord-123",
 			order_number: "SQ-101",
 			status: "CANCELLED",
+			payment_status: "PENDING",
 			cancellation_reason: "Changed my mind",
 			cancelled_at: "2026-10-06T13:52:00.000Z",
 		});
 	});
 
-	it("should successfully cancel order when status is CONFIRMED", async () => {
+	it("should initiate refund and mark order as REFUNDED when order is PAID", async () => {
 		const fixedCancelledAt = new Date("2026-10-06T13:52:00.000Z");
 		let capturedOrder: Order | undefined;
 		let capturedPreviousStatus: OrderStatus | undefined;
+		let capturedAuditNote: string | undefined;
+		let capturedRefundPayload: ProcessPaymentRefundInputDTO | undefined;
+
+		const order = createTestOrder({
+			id: "ord-777",
+			orderNumber: "SQ-777",
+			restaurantId: "rest-1",
+			userId: "cust-owner",
+			orderStatus: OrderStatus.CONFIRMED,
+			paymentStatus: PaymentStatus.PAID,
+			grandTotal: 250.5,
+			createdAt: new Date("2026-10-06T13:40:00.000Z"),
+		});
 
 		const mockRepo = createMockOrderRepo({
-			order: createTestOrder({
-				id: "ord-456",
-				orderNumber: "SQ-102",
-				restaurantId: "rest-1",
-				userId: "cust-owner",
-				orderStatus: OrderStatus.CONFIRMED,
-				createdAt: new Date("2026-10-06T13:40:00.000Z"),
-			}),
+			order,
 			cancelledData: {
-				orderId: "ord-456",
-				orderNumber: "SQ-102",
+				orderId: "ord-777",
+				orderNumber: "SQ-777",
 				status: "CANCELLED",
-				cancellationReason: null,
+				paymentStatus: "REFUNDED",
+				cancellationReason: "Found cheaper elsewhere",
 				cancelledAt: fixedCancelledAt,
 			},
-			onCancel: (order, previousStatus) => {
-				capturedOrder = order;
+			onCancel: (ord, previousStatus, auditNote) => {
+				capturedOrder = ord;
 				capturedPreviousStatus = previousStatus;
+				capturedAuditNote = auditNote;
 			},
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient({
+			processRefund: async (payload) => {
+				capturedRefundPayload = payload;
+				return {
+					refundId: "ref_rzp_999",
+					orderId: payload.orderId,
+					amountPaise: payload.amountPaise,
+					currency: "INR",
+					status: "PROCESSED",
+					processedAt: new Date().toISOString(),
+				};
+			},
+		});
+
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 		const result = await useCase.execute({
-			orderId: "ord-456",
+			orderId: "ord-777",
+			customerId: "cust-owner",
+			cancellationReason: "Found cheaper elsewhere",
+		});
+
+		assert.ok(capturedRefundPayload);
+		assert.equal(capturedRefundPayload.orderId, "ord-777");
+		assert.equal(capturedRefundPayload.idempotencyKey, "ord-777");
+		assert.equal(capturedRefundPayload.amountPaise, 25050);
+		assert.equal(capturedRefundPayload.reason, "Found cheaper elsewhere");
+		assert.equal(
+			capturedRefundPayload.notes,
+			ORDER_DEFAULTS.REFUND_NOTES_TEMPLATE("SQ-777"),
+		);
+
+		assert.ok(capturedOrder);
+		assert.equal(capturedOrder.orderStatus, OrderStatus.CANCELLED);
+		assert.equal(capturedOrder.paymentStatus, PaymentStatus.REFUNDED);
+		assert.equal(capturedPreviousStatus, OrderStatus.CONFIRMED);
+		assert.equal(
+			capturedAuditNote,
+			ORDER_DEFAULTS.REFUND_AUDIT_NOTE_TEMPLATE("ref_rzp_999"),
+		);
+
+		assert.deepEqual(result, {
+			order_id: "ord-777",
+			order_number: "SQ-777",
+			status: "CANCELLED",
+			payment_status: "REFUNDED",
+			cancellation_reason: "Found cheaper elsewhere",
+			cancelled_at: "2026-10-06T13:52:00.000Z",
+		});
+	});
+
+	it("should default cancellation reason to ORDER_DEFAULTS.DEFAULT_CANCELLATION_REASON when omitted", async () => {
+		let capturedRefundPayload: ProcessPaymentRefundInputDTO | undefined;
+
+		const order = createTestOrder({
+			id: "ord-888",
+			orderNumber: "SQ-888",
+			userId: "cust-owner",
+			orderStatus: OrderStatus.CONFIRMED,
+			paymentStatus: PaymentStatus.PAID,
+			grandTotal: 100,
+		});
+
+		const mockRepo = createMockOrderRepo({ order });
+		const mockPaymentClient = createMockPaymentClient({
+			processRefund: async (payload) => {
+				capturedRefundPayload = payload;
+				return {
+					refundId: "ref_123",
+					orderId: payload.orderId,
+					status: "PROCESSED",
+				};
+			},
+		});
+
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
+		await useCase.execute({
+			orderId: "ord-888",
 			customerId: "cust-owner",
 		});
 
-		assert.ok(capturedOrder);
-		assert.equal(capturedOrder.id, "ord-456");
-		assert.equal(capturedOrder.orderStatus, OrderStatus.CANCELLED);
-		assert.equal(capturedOrder.cancellationReason, null);
-		assert.equal(capturedPreviousStatus, OrderStatus.CONFIRMED);
+		assert.ok(capturedRefundPayload);
+		assert.equal(
+			capturedRefundPayload.reason,
+			ORDER_DEFAULTS.DEFAULT_CANCELLATION_REASON,
+		);
+		assert.equal(
+			capturedRefundPayload.notes,
+			ORDER_DEFAULTS.REFUND_NOTES_TEMPLATE("SQ-888"),
+		);
+	});
 
-		assert.deepEqual(result, {
-			order_id: "ord-456",
-			order_number: "SQ-102",
-			status: "CANCELLED",
-			cancellation_reason: null,
-			cancelled_at: "2026-10-06T13:52:00.000Z",
+	it("should abort cancellation and propagate error when refund fails, without updating repository", async () => {
+		let cancelOrderCalled = false;
+
+		const order = createTestOrder({
+			id: "ord-888",
+			orderNumber: "SQ-888",
+			restaurantId: "rest-1",
+			userId: "cust-owner",
+			orderStatus: OrderStatus.CONFIRMED,
+			paymentStatus: PaymentStatus.PAID,
+			grandTotal: 150,
+			createdAt: new Date("2026-10-06T13:40:00.000Z"),
 		});
+
+		const mockRepo = createMockOrderRepo({
+			order,
+			onCancel: () => {
+				cancelOrderCalled = true;
+			},
+		});
+
+		const mockPaymentClient = createMockPaymentClient({
+			processRefund: async () => {
+				throw new PaymentRefundFailedError(
+					"Payment service gateway unavailable",
+				);
+			},
+		});
+
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
+
+		await assert.rejects(
+			async () => {
+				await useCase.execute({
+					orderId: "ord-888",
+					customerId: "cust-owner",
+					cancellationReason: "Late delivery",
+				});
+			},
+			(err: Error) => {
+				assert.ok(err instanceof PaymentRefundFailedError);
+				assert.equal(err.message, "Payment service gateway unavailable");
+				return true;
+			},
+		);
+
+		assert.equal(cancelOrderCalled, false);
 	});
 
 	it("should preserve null cancellation reason when null is passed", async () => {
@@ -212,7 +394,8 @@ describe("CancelOrderUseCase", () => {
 			},
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient();
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 		await useCase.execute({
 			orderId: "ord-123",
 			customerId: "cust-owner",
@@ -228,7 +411,8 @@ describe("CancelOrderUseCase", () => {
 			order: null,
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient();
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 
 		await assert.rejects(
 			async () => {
@@ -257,7 +441,8 @@ describe("CancelOrderUseCase", () => {
 			}),
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient();
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 
 		await assert.rejects(
 			async () => {
@@ -286,7 +471,8 @@ describe("CancelOrderUseCase", () => {
 			}),
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient();
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 
 		await assert.rejects(
 			async () => {
@@ -315,7 +501,8 @@ describe("CancelOrderUseCase", () => {
 			}),
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient();
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 
 		await assert.rejects(
 			async () => {
@@ -344,7 +531,8 @@ describe("CancelOrderUseCase", () => {
 			}),
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient();
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 
 		await assert.rejects(
 			async () => {
@@ -362,6 +550,7 @@ describe("CancelOrderUseCase", () => {
 	});
 
 	it("should throw OrderCancellationNotAllowedError when status is already CANCELLED", async () => {
+		let refundAttempted = false;
 		const mockRepo = createMockOrderRepo({
 			order: createTestOrder({
 				id: "ord-123",
@@ -369,11 +558,22 @@ describe("CancelOrderUseCase", () => {
 				restaurantId: "rest-1",
 				userId: "cust-owner",
 				orderStatus: OrderStatus.CANCELLED,
+				paymentStatus: PaymentStatus.PENDING,
 				createdAt: new Date(),
 			}),
 		});
 
-		const useCase = new CancelOrderUseCase(mockRepo);
+		const mockPaymentClient = createMockPaymentClient({
+			processRefund: async () => {
+				refundAttempted = true;
+				return {
+					refundId: "ref-1",
+					orderId: "ord-123",
+					status: "PROCESSED",
+				};
+			},
+		});
+		const useCase = new CancelOrderUseCase(mockRepo, mockPaymentClient);
 
 		await assert.rejects(
 			async () => {
@@ -388,5 +588,6 @@ describe("CancelOrderUseCase", () => {
 				return true;
 			},
 		);
+		assert.equal(refundAttempted, false);
 	});
 });

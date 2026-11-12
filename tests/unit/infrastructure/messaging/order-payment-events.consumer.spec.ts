@@ -143,6 +143,13 @@ class MockOrderRepository implements IOrderRepository {
 		return null;
 	}
 
+	public async findByCustomerAndOrderId(
+		_customerId: string,
+		_orderId: string,
+	): Promise<Order | null> {
+		return null;
+	}
+
 	public async getRestaurantOrders(
 		_params: GetRestaurantOrdersRepoParams,
 	): Promise<GetRestaurantOrdersRepoResult> {
@@ -177,6 +184,14 @@ class MockOrderRepository implements IOrderRepository {
 		_notes?: string | null,
 	): Promise<Order> {
 		return order;
+	}
+
+	public async getRestaurantOrderAnalytics(): Promise<never> {
+		throw new Error("Not implemented in test");
+	}
+
+	public async getRestaurantProductAnalytics(): Promise<never> {
+		throw new Error("Not implemented in test");
 	}
 }
 
