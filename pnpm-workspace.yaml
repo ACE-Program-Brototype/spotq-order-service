@@ -6,4 +6,11 @@ allowBuilds:
   prisma: true
 
 overrides:
-  brace-expansion: 2.1.4
+  body-parser: ^2.4.0
+  brace-expansion: ^2.1.6
+  deepmerge-ts: ^8.0.0
+  fast-uri: ^3.1.7
+  follow-redirects: ^1.16.2
+  js-yaml: ^4.3.2
+  mysql2: ^3.22.0
+  proxy-addr: ^2.0.8
