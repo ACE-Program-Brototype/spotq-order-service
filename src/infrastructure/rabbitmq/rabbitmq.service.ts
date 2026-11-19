@@ -1,5 +1,7 @@
 import env from "@config/env.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import logger, {
+	loggerLocalStorage,
+} from "@infrastructure/observability/logger.ts";
 import {
 	type ConsumeOptions,
 	type MessageHandler,
@@ -41,7 +43,20 @@ export class RabbitMQService {
 		message: T,
 		options?: PublishOptions,
 	): Promise<boolean> {
-		return this.client.publishToQueue(queue, message, options);
+		const store = loggerLocalStorage.getStore();
+		const mergedHeaders: Record<string, unknown> = {
+			...(options?.headers || {}),
+			...(store?.correlationId
+				? { "x-correlation-id": store.correlationId }
+				: {}),
+			...(store?.requestId ? { "x-request-id": store.requestId } : {}),
+			...(store?.traceId ? { "x-trace-id": store.traceId } : {}),
+		};
+
+		return this.client.publishToQueue(queue, message, {
+			...options,
+			headers: mergedHeaders,
+		});
 	}
 
 	public async consumeFromQueue<T = unknown>(

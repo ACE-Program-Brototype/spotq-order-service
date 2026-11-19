@@ -15,6 +15,7 @@ const envSchema = z.object({
 		.default("http://restaurant-service:3001"),
 	RESTAURANT_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
 	SERVICE_NAME: z.string().default("order-service"),
+	SERVICE_VERSION: z.string().default("1.0.0"),
 	S2S_SERVICE_NAME: z.string().default("order-service"),
 	S2S_AUDIENCE: z.string().default("order-service"),
 	ORDER_S2S_PRIVATE_KEY: z.preprocess((val) => {

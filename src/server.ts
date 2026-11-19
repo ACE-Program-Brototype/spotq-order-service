@@ -23,7 +23,10 @@ async function startServer() {
 		await startOrderPaymentEventsConsumer();
 
 		const server = app.listen(env.PORT, () => {
-			logger.info(`Order Service running on port ${env.PORT}`);
+			logger.info(
+				{ context: { port: env.PORT } },
+				"Order Service started successfully",
+			);
 		});
 
 		let isShuttingDown = false;
@@ -36,11 +39,14 @@ async function startServer() {
 
 			isShuttingDown = true;
 
-			logger.info(`${signal} received. Starting graceful shutdown...`);
+			logger.info(
+				{ context: { signal } },
+				"Signal received. Starting graceful shutdown",
+			);
 
 			server.close(async (error) => {
 				if (error) {
-					logger.error(error, "Error while closing HTTP server");
+					logger.error({ err: error }, "Error while closing HTTP server");
 					process.exitCode = 1;
 				}
 
@@ -52,7 +58,7 @@ async function startServer() {
 					logger.info("Graceful shutdown completed");
 					process.exit(0);
 				} catch (error) {
-					logger.error(error, "Error during graceful shutdown");
+					logger.error({ err: error }, "Error during graceful shutdown");
 					process.exit(1);
 				}
 			});
@@ -66,7 +72,7 @@ async function startServer() {
 			void shutdown("SIGTERM");
 		});
 	} catch (error) {
-		logger.fatal(error, "Failed to start Order Service");
+		logger.fatal({ err: error }, "Failed to start Order Service");
 		process.exit(1);
 	}
 }

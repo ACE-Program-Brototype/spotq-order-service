@@ -1,5 +1,7 @@
 import env from "@config/env.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import logger, {
+	loggerLocalStorage,
+} from "@infrastructure/observability/logger.ts";
 import { generateToken, type TokenIssuerConfig } from "@spotq-org/s2s-core";
 
 interface CachedToken {
@@ -45,6 +47,18 @@ export function getS2SInternalHeaders(
 		Accept: "application/json",
 		"x-caller-service": callerServiceName,
 	};
+
+	const store = loggerLocalStorage.getStore();
+	if (store?.correlationId) {
+		headers["x-correlation-id"] = store.correlationId;
+		headers["x-request-id"] = store.requestId || store.correlationId;
+	}
+	if (store?.traceId) {
+		headers["x-trace-id"] = store.traceId;
+		if (store.spanId) {
+			headers.traceparent = `00-${store.traceId}-${store.spanId}-01`;
+		}
+	}
 
 	if (privateKey) {
 		try {
