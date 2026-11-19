@@ -249,8 +249,6 @@ export class PlaceOrderUseCase implements IPlaceOrderUseCase {
 				createdOrder.id,
 				paymentDraft.paymentId,
 			);
-
-			await this.cartRepository.clearCart(cart.id);
 		} catch (error) {
 			// SAGA COMPENSATION (C1): Cancel order draft and retain cart items
 			await this.orderRepository.updatePaymentAndOrderStatus(

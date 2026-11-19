@@ -3,6 +3,7 @@ import type { IOrderPaymentEventsConsumer } from "@application/ports/messaging/o
 import { TYPES } from "@config/di/types.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import logger from "@infrastructure/observability/logger.ts";
 import type { RabbitMQService } from "@infrastructure/rabbitmq/rabbitmq.service.ts";
@@ -25,6 +26,8 @@ export class OrderPaymentEventsConsumer implements IOrderPaymentEventsConsumer {
 		private readonly rabbitMQService: RabbitMQService,
 		@inject(TYPES.OrderRepository)
 		private readonly orderRepository: IOrderRepository,
+		@inject(TYPES.CartRepository)
+		private readonly cartRepository: ICartRepository,
 	) {}
 
 	public async start(): Promise<void> {
@@ -126,6 +129,32 @@ export class OrderPaymentEventsConsumer implements IOrderPaymentEventsConsumer {
 				"Payment captured via gateway",
 				event.paymentId,
 			);
+
+			// Clear customer's active cart now that payment is confirmed
+			if (order.userId) {
+				try {
+					const activeCart = await this.cartRepository.findActiveByUserId(
+						order.userId,
+						order.restaurantId,
+					);
+					if (activeCart) {
+						await this.cartRepository.clearCart(activeCart.id);
+						logger.info(
+							{
+								orderId: order.id,
+								cartId: activeCart.id,
+								userId: order.userId,
+							},
+							"Active cart cleared upon payment capture",
+						);
+					}
+				} catch (cartError) {
+					logger.warn(
+						{ err: cartError, orderId: order.id, userId: order.userId },
+						"Failed to clear active cart upon payment capture, continuing",
+					);
+				}
+			}
 
 			// Publish order.payment.invoice event to RabbitMQ with complete orderData object
 			const now = new Date().toISOString();
