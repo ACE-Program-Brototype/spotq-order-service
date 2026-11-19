@@ -130,7 +130,6 @@ export class OrderPaymentEventsConsumer implements IOrderPaymentEventsConsumer {
 				event.paymentId,
 			);
 
-			// Clear customer's active cart now that payment is confirmed
 			if (order.userId) {
 				try {
 					const activeCart = await this.cartRepository.findActiveByUserId(
