@@ -240,5 +240,3 @@ export function createLogger(
 }
 
 export const logger = createLogger();
-
-export default logger;

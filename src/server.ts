@@ -4,7 +4,7 @@ import {
 	disconnectDatabase,
 } from "@infrastructure/database/prisma.connect.ts";
 import { startOrderPaymentEventsConsumer } from "@infrastructure/messaging/index.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 import {
 	connectRabbitMQ,
 	disconnectRabbitMQ,

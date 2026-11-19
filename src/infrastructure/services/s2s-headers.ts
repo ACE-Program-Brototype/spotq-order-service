@@ -1,5 +1,6 @@
 import env from "@config/env.ts";
-import logger, {
+import {
+	logger,
 	loggerLocalStorage,
 } from "@infrastructure/observability/logger.ts";
 import { generateToken, type TokenIssuerConfig } from "@spotq-org/s2s-core";

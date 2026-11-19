@@ -2,7 +2,7 @@ import {
 	orderPaymentEventsConsumer,
 	rabbitMQService,
 } from "@config/di/container.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 
 export const startOrderPaymentEventsConsumer = async (): Promise<void> => {
 	try {

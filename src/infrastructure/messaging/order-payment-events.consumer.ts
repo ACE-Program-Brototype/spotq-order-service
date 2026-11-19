@@ -5,7 +5,8 @@ import { TYPES } from "@config/di/types.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
-import logger, {
+import {
+	logger,
 	loggerLocalStorage,
 } from "@infrastructure/observability/logger.ts";
 import type { RabbitMQService } from "@infrastructure/rabbitmq/rabbitmq.service.ts";

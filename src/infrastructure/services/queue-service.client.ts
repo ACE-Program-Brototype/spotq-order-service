@@ -1,7 +1,7 @@
 import type { ActiveQueueUserResponseDTO } from "@application/dtos/external/queue-active-user.dto.ts";
 import type { IQueueServiceClient } from "@application/ports/external/queue-service.client.port.ts";
 import env from "@config/env.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 import { createServiceCircuitBreaker } from "@infrastructure/services/circuit-breaker.factory.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
 import { HTTP_STATUS } from "@shared/constants/http.constants.ts";

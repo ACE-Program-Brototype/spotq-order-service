@@ -7,7 +7,7 @@ import type {
 	RemoteVariantDTO,
 } from "@application/ports/external/menu-item-catalog.port.ts";
 import env from "@config/env.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 import { createServiceCircuitBreaker } from "@infrastructure/services/circuit-breaker.factory.ts";
 import { HTTP_STATUS } from "@shared/constants/http.constants.ts";
 import { ORDER_MESSAGES } from "@shared/constants/message.constants.ts";

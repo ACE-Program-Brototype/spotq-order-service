@@ -1,5 +1,6 @@
 import env from "@config/env.ts";
-import logger, {
+import {
+	logger,
 	loggerLocalStorage,
 } from "@infrastructure/observability/logger.ts";
 import {

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
-import logger, { loggerLocalStorage } from "./logger.ts";
+import { logger, loggerLocalStorage } from "./logger.ts";
 
 export enum RequestHeader {
 	CORRELATION_ID = "x-correlation-id",
