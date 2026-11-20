@@ -12,7 +12,7 @@ import {
 	PaymentGatewayDraftFailedError,
 	PaymentRefundFailedError,
 } from "@domain/errors/index.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 import { createServiceCircuitBreaker } from "@infrastructure/services/circuit-breaker.factory.ts";
 import { getS2SInternalHeaders } from "@infrastructure/services/s2s-headers.ts";
 import { HttpStatus } from "@shared/constants/http.constants.ts";

@@ -6,6 +6,10 @@ const envSchema = z.object({
 		.enum(["development", "staging", "production", "test"])
 		.default("development"),
 	DATABASE_URL: z.string().default("postgres://localhost:5432/spotq_order_db"),
+	DATABASE_CA_CERT: z.string().optional(),
+	DB_POOL_MAX: z.coerce.number().positive().default(3),
+	DB_IDLE_TIMEOUT_MS: z.coerce.number().positive().default(5000),
+	DB_CONNECTION_TIMEOUT_MS: z.coerce.number().positive().default(5000),
 	REDIS_URL: z.string().default("redis://localhost:6379"),
 	LOG_LEVEL: z.string().default("info"),
 	RESTAURANT_SERVICE_URL: z
@@ -15,6 +19,7 @@ const envSchema = z.object({
 		.default("http://restaurant-service:3001"),
 	RESTAURANT_SERVICE_TIMEOUT_MS: z.coerce.number().default(5000),
 	SERVICE_NAME: z.string().default("order-service"),
+	SERVICE_VERSION: z.string().default("1.0.0"),
 	S2S_SERVICE_NAME: z.string().default("order-service"),
 	S2S_AUDIENCE: z.string().default("order-service"),
 	ORDER_S2S_PRIVATE_KEY: z.preprocess((val) => {
