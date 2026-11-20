@@ -1,0 +1,44 @@
+{
+	"compilerOptions": {
+		"rootDir": "./",
+
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"target": "ES2022",
+
+		"types": ["node"],
+
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+
+		"paths": {
+			"@domain/*": ["./src/domain/*"],
+			"@application/*": ["./src/application/*"],
+			"@infrastructure/*": ["./src/infrastructure/*"],
+			"@presentation/*": ["./src/presentation/*"],
+			"@config/*": ["./src/config/*"],
+			"@shared/*": ["./src/shared/*"],
+			"@generated/*": ["./src/generated/*"],
+			"@types/*": ["./src/types/*"],
+			"@/*": ["./src/*"]
+		},
+
+		"sourceMap": true,
+
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+
+		"strict": true,
+		"verbatimModuleSyntax": false,
+		"isolatedModules": true,
+		"noUncheckedSideEffectImports": false,
+		"moduleDetection": "force",
+		"skipLibCheck": true
+	},
+
+	"include": ["src", "tests"],
+	"exclude": ["node_modules", "dist", "prisma.config.ts"]
+}

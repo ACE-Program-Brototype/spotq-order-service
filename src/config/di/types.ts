@@ -1,0 +1,48 @@
+export const TYPES = {
+	PrismaClient: Symbol.for("PrismaClient"),
+	CartRepository: Symbol.for("CartRepository"),
+	MenuItemCatalogPort: Symbol.for("MenuItemCatalogPort"),
+	GetCartUseCase: Symbol.for("GetCartUseCase"),
+	AddCartItemUseCase: Symbol.for("AddCartItemUseCase"),
+	AddBatchCartItemsUseCase: Symbol.for("AddBatchCartItemsUseCase"),
+	UpdateCartItemQuantityUseCase: Symbol.for("UpdateCartItemQuantityUseCase"),
+	RemoveCartItemUseCase: Symbol.for("RemoveCartItemUseCase"),
+	ClearCartUseCase: Symbol.for("ClearCartUseCase"),
+	CartController: Symbol.for("CartController"),
+	GetCartController: Symbol.for("GetCartController"),
+	RestaurantServiceClient: Symbol.for("RestaurantServiceClient"),
+	OrderRepository: Symbol.for("OrderRepository"),
+	GetOrdersOverviewUseCase: Symbol.for("GetOrdersOverviewUseCase"),
+	RestaurantOrderController: Symbol.for("RestaurantOrderController"),
+	GetOrderHistoryUseCase: Symbol.for("GetOrderHistoryUseCase"),
+	GetCustomerOrderDetailsUseCase: Symbol.for("GetCustomerOrderDetailsUseCase"),
+	CancelOrderUseCase: Symbol.for("CancelOrderUseCase"),
+	CustomerOrderController: Symbol.for("CustomerOrderController"),
+	QueueServiceClient: Symbol.for("QueueServiceClient"),
+	RabbitMQService: Symbol.for("RabbitMQService"),
+	PaymentServiceClient: Symbol.for("PaymentServiceClient"),
+	OrderPaymentEventsConsumer: Symbol.for("OrderPaymentEventsConsumer"),
+	PlaceOrderUseCase: Symbol.for("PlaceOrderUseCase"),
+	GetCheckoutDetailsUseCase: Symbol.for("GetCheckoutDetailsUseCase"),
+	GetRestaurantOrdersListUseCase: Symbol.for("GetRestaurantOrdersListUsecase"),
+	GetRestaurantOrderDetailsUseCase: Symbol.for(
+		"GetRestaurantOrderDetailsUseCase",
+	),
+	GetStaffOrderDetailsUseCase: Symbol.for("GetStaffOrderDetailsUseCase"),
+	GetStaffOrdersListUseCase: Symbol.for("GetStaffOrdersListUseCase"),
+	GetAdminOrdersUseCase: Symbol.for("GetAdminOrdersUseCase"),
+	AdminOrderController: Symbol.for("AdminOrderController"),
+	UpdateOrderStatusUseCase: Symbol.for("UpdateOrderStatusUseCase"),
+	StaffOrderController: Symbol.for("StaffOrderController"),
+	GetRestaurantOrderAnalyticsUseCase: Symbol.for(
+		"GetRestaurantOrderAnalyticsUseCase",
+	),
+	GetRestaurantProductAnalyticsUseCase: Symbol.for(
+		"GetRestaurantProductAnalyticsUseCase",
+	),
+	InternalOrderAnalyticsController: Symbol.for(
+		"InternalOrderAnalyticsController",
+	),
+};
+
+export default TYPES;
