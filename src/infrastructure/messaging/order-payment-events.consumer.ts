@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { OrderPaymentInvoiceEventDTO } from "@application/dtos/events/order-payment-invoice-event.dto.ts";
 import type { IOrderPaymentEventsConsumer } from "@application/ports/messaging/order-payment-events.consumer.port.ts";
 import { TYPES } from "@config/di/types.ts";
@@ -5,7 +6,10 @@ import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
 import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import {
+	logger,
+	loggerLocalStorage,
+} from "@infrastructure/observability/logger.ts";
 import type { RabbitMQService } from "@infrastructure/rabbitmq/rabbitmq.service.ts";
 import {
 	basePaymentEventSchema,
@@ -32,7 +36,12 @@ export class OrderPaymentEventsConsumer implements IOrderPaymentEventsConsumer {
 
 	public async start(): Promise<void> {
 		logger.info(
-			{ queue: QUEUES.ORDER_EVENTS },
+			{
+				job: {
+					queue: QUEUES.ORDER_EVENTS,
+					status: "STARTING",
+				},
+			},
 			"Registering RabbitMQ consumer for order payment events",
 		);
 
@@ -43,31 +52,97 @@ export class OrderPaymentEventsConsumer implements IOrderPaymentEventsConsumer {
 	}
 
 	public async handleMessage(rawMessage: unknown): Promise<void> {
-		const baseResult = basePaymentEventSchema.safeParse(rawMessage);
-		if (!baseResult.success) {
-			logger.warn(
-				{ rawMessage, errors: baseResult.error.format() },
-				"Ignored malformed or unparseable payment event message",
-			);
-			return;
-		}
+		const rawObj =
+			rawMessage && typeof rawMessage === "object"
+				? (rawMessage as Record<string, unknown>)
+				: {};
+		const correlationId = (rawObj.correlationId ||
+			rawObj.correlation_id ||
+			rawObj.eventId ||
+			randomUUID()) as string;
 
-		const { eventType } = baseResult.data;
+		await loggerLocalStorage.run(
+			{ correlationId, requestId: correlationId },
+			async () => {
+				const startTime = process.hrtime.bigint();
+				const baseResult = basePaymentEventSchema.safeParse(rawMessage);
+				if (!baseResult.success) {
+					const endTime = process.hrtime.bigint();
+					const durationMs =
+						Math.round((Number(endTime - startTime) / 1_000_000) * 10) / 10;
+					logger.warn(
+						{
+							job: {
+								queue: QUEUES.ORDER_EVENTS,
+								status: "REJECTED",
+								duration_ms: durationMs,
+							},
+							errors: baseResult.error.format(),
+						},
+						"Ignored malformed or unparseable payment event message",
+					);
+					return;
+				}
 
-		switch (eventType) {
-			case PAYMENT_EVENTS.ORDER_CAPTURED:
-				await this.handleOrderCaptured(rawMessage);
-				break;
-			case PAYMENT_EVENTS.ORDER_FAILED:
-				await this.handleOrderFailed(rawMessage);
-				break;
-			default:
-				logger.debug(
-					{ eventType },
-					"Ignored payment event with unhandled event type",
-				);
-				break;
-		}
+				const { eventType } = baseResult.data;
+
+				try {
+					switch (eventType) {
+						case PAYMENT_EVENTS.ORDER_CAPTURED:
+							await this.handleOrderCaptured(rawMessage);
+							break;
+						case PAYMENT_EVENTS.ORDER_FAILED:
+							await this.handleOrderFailed(rawMessage);
+							break;
+						default:
+							logger.debug(
+								{
+									job: {
+										queue: QUEUES.ORDER_EVENTS,
+										routing_key: eventType,
+										status: "SKIPPED",
+									},
+									context: { eventType },
+								},
+								"Ignored payment event with unhandled event type",
+							);
+							return;
+					}
+
+					const endTime = process.hrtime.bigint();
+					const durationMs =
+						Math.round((Number(endTime - startTime) / 1_000_000) * 10) / 10;
+					logger.info(
+						{
+							job: {
+								queue: QUEUES.ORDER_EVENTS,
+								routing_key: eventType,
+								duration_ms: durationMs,
+								status: "COMPLETED",
+							},
+						},
+						`Processed payment event '${eventType}'`,
+					);
+				} catch (error) {
+					const endTime = process.hrtime.bigint();
+					const durationMs =
+						Math.round((Number(endTime - startTime) / 1_000_000) * 10) / 10;
+					logger.error(
+						{
+							err: error,
+							job: {
+								queue: QUEUES.ORDER_EVENTS,
+								routing_key: eventType,
+								duration_ms: durationMs,
+								status: "FAILED",
+							},
+						},
+						`Failed to process payment event '${eventType}'`,
+					);
+					throw error;
+				}
+			},
+		);
 	}
 
 	private async handleOrderCaptured(rawMessage: unknown): Promise<void> {

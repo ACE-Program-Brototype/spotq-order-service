@@ -1,5 +1,5 @@
 import env from "@config/env.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 import {
 	CircuitBreaker,
 	type CircuitBreakerOptions,

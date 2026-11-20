@@ -11,7 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import env from "@config/env.ts";
 import { PrismaClient } from "@generated/prisma/client.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg, { type PoolConfig } from "pg";
 
@@ -36,7 +36,7 @@ const isSslRequested =
 
 if (isSslRequested) {
 	let caContent: string | undefined;
-	const envCaCert = process.env.DATABASE_CA_CERT;
+	const envCaCert = env.DATABASE_CA_CERT;
 
 	if (envCaCert) {
 		if (envCaCert.includes("BEGIN CERTIFICATE")) {
@@ -77,15 +77,46 @@ poolUrl.searchParams.delete("sslmode");
 const pool = new pg.Pool({
 	connectionString: poolUrl.toString(),
 	ssl,
-	max: Number(process.env.DB_POOL_MAX || 3),
-	idleTimeoutMillis: 5000,
-	connectionTimeoutMillis: 5000,
+	max: env.DB_POOL_MAX,
+	idleTimeoutMillis: env.DB_IDLE_TIMEOUT_MS,
+	connectionTimeoutMillis: env.DB_CONNECTION_TIMEOUT_MS,
 });
 
 const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({
 	adapter,
+	log: [
+		{ emit: "event", level: "error" },
+		{ emit: "event", level: "warn" },
+	],
+});
+
+prisma.$on("error" as never, (e: { message: string; target?: string }) => {
+	logger.error(
+		{
+			error: {
+				name: "PrismaClientError",
+				message: e.message,
+			},
+			context: {
+				target: e.target,
+			},
+		},
+		"Prisma database error",
+	);
+});
+
+prisma.$on("warn" as never, (e: { message: string }) => {
+	logger.warn(
+		{
+			error: {
+				name: "PrismaClientWarning",
+				message: e.message,
+			},
+		},
+		"Prisma database warning",
+	);
 });
 
 export default prisma;

@@ -1,6 +1,6 @@
 import { container } from "@config/di/container.ts";
 import { TYPES } from "@config/di/types.ts";
-import logger from "@infrastructure/observability/logger.ts";
+import { logger } from "@infrastructure/observability/logger.ts";
 import type { RabbitMQService } from "./rabbitmq.service.ts";
 
 export const connectRabbitMQ = async (): Promise<void> => {
