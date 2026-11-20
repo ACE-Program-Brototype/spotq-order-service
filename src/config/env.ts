@@ -6,6 +6,10 @@ const envSchema = z.object({
 		.enum(["development", "staging", "production", "test"])
 		.default("development"),
 	DATABASE_URL: z.string().default("postgres://localhost:5432/spotq_order_db"),
+	DATABASE_CA_CERT: z.string().optional(),
+	DB_POOL_MAX: z.coerce.number().positive().default(3),
+	DB_IDLE_TIMEOUT_MS: z.coerce.number().positive().default(5000),
+	DB_CONNECTION_TIMEOUT_MS: z.coerce.number().positive().default(5000),
 	REDIS_URL: z.string().default("redis://localhost:6379"),
 	LOG_LEVEL: z.string().default("info"),
 	RESTAURANT_SERVICE_URL: z

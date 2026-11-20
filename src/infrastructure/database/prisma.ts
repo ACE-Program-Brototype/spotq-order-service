@@ -36,7 +36,7 @@ const isSslRequested =
 
 if (isSslRequested) {
 	let caContent: string | undefined;
-	const envCaCert = process.env.DATABASE_CA_CERT;
+	const envCaCert = env.DATABASE_CA_CERT;
 
 	if (envCaCert) {
 		if (envCaCert.includes("BEGIN CERTIFICATE")) {
@@ -77,9 +77,9 @@ poolUrl.searchParams.delete("sslmode");
 const pool = new pg.Pool({
 	connectionString: poolUrl.toString(),
 	ssl,
-	max: Number(process.env.DB_POOL_MAX || 3),
-	idleTimeoutMillis: 5000,
-	connectionTimeoutMillis: 5000,
+	max: env.DB_POOL_MAX,
+	idleTimeoutMillis: env.DB_IDLE_TIMEOUT_MS,
+	connectionTimeoutMillis: env.DB_CONNECTION_TIMEOUT_MS,
 });
 
 const adapter = new PrismaPg(pool);
