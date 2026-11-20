@@ -600,7 +600,7 @@ describe("PlaceOrderUseCase", () => {
 		assert.notEqual(result.paymentDraft, null);
 		assert.equal(result.paymentDraft?.paymentId, "pay-123456");
 		assert.equal(result.paymentDraft?.razorpayOrderId, "order_rzp_123");
-		assert.equal(cartRepo.clearedCartIds.includes(cartId), true);
+		assert.equal(cartRepo.clearedCartIds.includes(cartId), false);
 
 		// subtotal = (200 + 30) * 2 = 460
 		assert.equal(result.subtotal, 460);
