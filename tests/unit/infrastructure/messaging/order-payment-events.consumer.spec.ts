@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { Cart } from "@domain/entities/cart.entity.ts";
 import { Order } from "@domain/entities/order.entity.ts";
+import { CartStatus } from "@domain/enums/cart-status.enum.ts";
 import { OrderStatus } from "@domain/enums/order-status.enum.ts";
 import { OrderingMode } from "@domain/enums/ordering-mode.enum.ts";
 import { PaymentMode } from "@domain/enums/payment-mode.enum.ts";
 import { PaymentStatus } from "@domain/enums/payment-status.enum.ts";
+import type { ICartRepository } from "@domain/repositories/cart.repository.interface.ts";
 import type { IOrderRepository } from "@domain/repositories/order.repository.interface.ts";
 import type {
 	CancelledOrderData,
@@ -195,6 +198,69 @@ class MockOrderRepository implements IOrderRepository {
 	}
 }
 
+class MockCartRepository implements ICartRepository {
+	public carts: Map<string, Cart> = new Map();
+	public clearedCartIds: string[] = [];
+
+	public async findById(cartId: string): Promise<Cart | null> {
+		return this.carts.get(cartId) ?? null;
+	}
+
+	public async findActiveByUserId(
+		userId: string,
+		restaurantId?: string,
+	): Promise<Cart | null> {
+		for (const cart of this.carts.values()) {
+			if (
+				cart.userId === userId &&
+				cart.status === CartStatus.ACTIVE &&
+				(!restaurantId || cart.restaurantId === restaurantId)
+			) {
+				return cart;
+			}
+		}
+		return null;
+	}
+
+	public async addItem(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async replaceCartItemsBatch(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async update(): Promise<Cart | null> {
+		throw new Error("Not implemented");
+	}
+
+	public async updateItemQuantity(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async removeItem(): Promise<Cart> {
+		throw new Error("Not implemented");
+	}
+
+	public async clearCart(cartId: string): Promise<Cart> {
+		this.clearedCartIds.push(cartId);
+		const cart = this.carts.get(cartId);
+		if (cart) {
+			return new Cart({
+				id: cart.id,
+				restaurantId: cart.restaurantId,
+				userId: cart.userId,
+				status: CartStatus.ACTIVE,
+				expiresAt: cart.expiresAt,
+				createdAt: cart.createdAt,
+				updatedAt: new Date(),
+				items: [],
+			});
+		}
+		throw new Error("Cart not found");
+	}
+}
+
 describe("OrderPaymentEventsConsumer", () => {
 	const orderId = "00000000-0000-0000-0000-000000000001";
 
@@ -227,12 +293,14 @@ describe("OrderPaymentEventsConsumer", () => {
 	function setupFixture() {
 		const rmqService = new MockRabbitMQService();
 		const orderRepo = new MockOrderRepository();
+		const cartRepo = new MockCartRepository();
 		const consumer = new OrderPaymentEventsConsumer(
 			rmqService as unknown as RabbitMQService,
 			orderRepo,
+			cartRepo,
 		);
 
-		return { rmqService, orderRepo, consumer };
+		return { rmqService, orderRepo, cartRepo, consumer };
 	}
 
 	it("registers consumer for order-events queue on start()", async () => {
@@ -308,6 +376,38 @@ describe("OrderPaymentEventsConsumer", () => {
 		assert.equal(publishedEvent.orderData.items[0]?.itemName, "Burger");
 		assert.equal(publishedEvent.orderData.items[0]?.quantity, 1);
 		assert.equal(publishedEvent.orderData.items[0]?.unitPrice, 150);
+	});
+
+	it("clears customer active cart when payment.order.captured is processed", async () => {
+		const { consumer, orderRepo, cartRepo } = setupFixture();
+		const order = createTestOrder();
+		orderRepo.orders.set(orderId, order);
+
+		const cartId = "00000000-0000-0000-0000-000000000099";
+		const activeCart = new Cart({
+			id: cartId,
+			restaurantId: order.restaurantId,
+			userId: order.userId as string,
+			status: CartStatus.ACTIVE,
+			expiresAt: new Date(Date.now() + 3600000),
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			items: [],
+		});
+		cartRepo.carts.set(cartId, activeCart);
+
+		const eventPayload = {
+			eventId: "evt-cart-clear",
+			eventType: PAYMENT_EVENTS.ORDER_CAPTURED,
+			orderId,
+			paymentId: "pay_rzp_123",
+			amountPaise: 15000,
+			currency: "INR",
+		};
+
+		await consumer.handleMessage(eventPayload);
+
+		assert.equal(cartRepo.clearedCartIds.includes(cartId), true);
 	});
 
 	it("does not capture payment if order is already CANCELLED", async () => {
