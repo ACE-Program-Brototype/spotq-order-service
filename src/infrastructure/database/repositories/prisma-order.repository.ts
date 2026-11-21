@@ -44,6 +44,7 @@ import {
 	ORDER_DEFAULTS,
 	ORDER_MESSAGES,
 } from "@shared/constants/message.constants.ts";
+import { REGEX } from "@shared/constants/regex.constants.ts";
 import { inject, injectable } from "inversify";
 
 @injectable()
@@ -63,6 +64,24 @@ export class PrismaOrderRepository
 	): Promise<GetAdminOrdersRepoResult> {
 		try {
 			const search = params.search?.trim();
+			let searchConditions: Prisma.OrderWhereInput[] | undefined;
+			if (search) {
+				searchConditions = [
+					{ orderNumber: { contains: search, mode: "insensitive" } },
+					{ restaurantName: { contains: search, mode: "insensitive" } },
+					{ userName: { contains: search, mode: "insensitive" } },
+					{ userPhone: { contains: search, mode: "insensitive" } },
+				];
+
+				if (REGEX.UUID.test(search)) {
+					searchConditions.push(
+						{ id: search },
+						{ restaurantId: search },
+						{ userId: search },
+					);
+				}
+			}
+
 			const where: Prisma.OrderWhereInput = {
 				...(params.status?.length
 					? { orderStatus: { in: params.status } }
@@ -92,16 +111,7 @@ export class PrismaOrderRepository
 							},
 						}
 					: {}),
-				...(search
-					? {
-							OR: [
-								{ id: search },
-								{ orderNumber: { contains: search, mode: "insensitive" } },
-								{ restaurantId: search },
-								{ userId: search },
-							],
-						}
-					: {}),
+				...(searchConditions ? { OR: searchConditions } : {}),
 			};
 
 			const sortFields = {
